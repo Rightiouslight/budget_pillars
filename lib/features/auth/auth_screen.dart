@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'auth_controller.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -11,8 +12,8 @@ class AuthScreen extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(text: 'heinrichdut@gmail.com');
+  final _passwordController = TextEditingController(text: 'password');
   bool _isLogin = true;
   bool _obscurePassword = true;
 
@@ -186,12 +187,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Google Sign In Button
-                  OutlinedButton.icon(
-                    onPressed: authState.isLoading ? null : _handleGoogleSignIn,
-                    icon: const Icon(Icons.g_mobiledata, size: 28),
-                    label: const Text('Continue with Google'),
-                  ),
+                  // Google Sign In Button (disabled on web until client ID is configured)
+                  if (!kIsWeb)
+                    OutlinedButton.icon(
+                      onPressed: authState.isLoading
+                          ? null
+                          : _handleGoogleSignIn,
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: const Text('Continue with Google'),
+                    ),
+                  if (kIsWeb)
+                    Tooltip(
+                      message:
+                          'See WEB_GOOGLE_SIGNIN_SETUP.md to enable Google Sign-In on web',
+                      child: OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.g_mobiledata, size: 28),
+                        label: const Text(
+                          'Google Sign-In (Configure in Firebase)',
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 24),
 
                   // Toggle Login/Sign Up

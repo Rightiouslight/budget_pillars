@@ -21,9 +21,12 @@ UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserSettings {
-  String get currency => throw _privateConstructorUsedError;
-  String get locale => throw _privateConstructorUsedError;
-  bool get darkMode => throw _privateConstructorUsedError;
+  Currency? get currency => throw _privateConstructorUsedError;
+  int get monthStartDate =>
+      throw _privateConstructorUsedError; // Day of month when budget period starts (1-28)
+  Theme? get theme => throw _privateConstructorUsedError;
+  bool get isCompactView => throw _privateConstructorUsedError;
+  List<ImportProfile> get importProfiles => throw _privateConstructorUsedError;
 
   /// Serializes this UserSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -42,7 +45,16 @@ abstract class $UserSettingsCopyWith<$Res> {
     $Res Function(UserSettings) then,
   ) = _$UserSettingsCopyWithImpl<$Res, UserSettings>;
   @useResult
-  $Res call({String currency, String locale, bool darkMode});
+  $Res call({
+    Currency? currency,
+    int monthStartDate,
+    Theme? theme,
+    bool isCompactView,
+    List<ImportProfile> importProfiles,
+  });
+
+  $CurrencyCopyWith<$Res>? get currency;
+  $ThemeCopyWith<$Res>? get theme;
 }
 
 /// @nodoc
@@ -60,27 +72,65 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currency = null,
-    Object? locale = null,
-    Object? darkMode = null,
+    Object? currency = freezed,
+    Object? monthStartDate = null,
+    Object? theme = freezed,
+    Object? isCompactView = null,
+    Object? importProfiles = null,
   }) {
     return _then(
       _value.copyWith(
-            currency: null == currency
+            currency: freezed == currency
                 ? _value.currency
                 : currency // ignore: cast_nullable_to_non_nullable
-                      as String,
-            locale: null == locale
-                ? _value.locale
-                : locale // ignore: cast_nullable_to_non_nullable
-                      as String,
-            darkMode: null == darkMode
-                ? _value.darkMode
-                : darkMode // ignore: cast_nullable_to_non_nullable
+                      as Currency?,
+            monthStartDate: null == monthStartDate
+                ? _value.monthStartDate
+                : monthStartDate // ignore: cast_nullable_to_non_nullable
+                      as int,
+            theme: freezed == theme
+                ? _value.theme
+                : theme // ignore: cast_nullable_to_non_nullable
+                      as Theme?,
+            isCompactView: null == isCompactView
+                ? _value.isCompactView
+                : isCompactView // ignore: cast_nullable_to_non_nullable
                       as bool,
+            importProfiles: null == importProfiles
+                ? _value.importProfiles
+                : importProfiles // ignore: cast_nullable_to_non_nullable
+                      as List<ImportProfile>,
           )
           as $Val,
     );
+  }
+
+  /// Create a copy of UserSettings
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CurrencyCopyWith<$Res>? get currency {
+    if (_value.currency == null) {
+      return null;
+    }
+
+    return $CurrencyCopyWith<$Res>(_value.currency!, (value) {
+      return _then(_value.copyWith(currency: value) as $Val);
+    });
+  }
+
+  /// Create a copy of UserSettings
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ThemeCopyWith<$Res>? get theme {
+    if (_value.theme == null) {
+      return null;
+    }
+
+    return $ThemeCopyWith<$Res>(_value.theme!, (value) {
+      return _then(_value.copyWith(theme: value) as $Val);
+    });
   }
 }
 
@@ -93,7 +143,18 @@ abstract class _$$UserSettingsImplCopyWith<$Res>
   ) = __$$UserSettingsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String currency, String locale, bool darkMode});
+  $Res call({
+    Currency? currency,
+    int monthStartDate,
+    Theme? theme,
+    bool isCompactView,
+    List<ImportProfile> importProfiles,
+  });
+
+  @override
+  $CurrencyCopyWith<$Res>? get currency;
+  @override
+  $ThemeCopyWith<$Res>? get theme;
 }
 
 /// @nodoc
@@ -110,24 +171,34 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currency = null,
-    Object? locale = null,
-    Object? darkMode = null,
+    Object? currency = freezed,
+    Object? monthStartDate = null,
+    Object? theme = freezed,
+    Object? isCompactView = null,
+    Object? importProfiles = null,
   }) {
     return _then(
       _$UserSettingsImpl(
-        currency: null == currency
+        currency: freezed == currency
             ? _value.currency
             : currency // ignore: cast_nullable_to_non_nullable
-                  as String,
-        locale: null == locale
-            ? _value.locale
-            : locale // ignore: cast_nullable_to_non_nullable
-                  as String,
-        darkMode: null == darkMode
-            ? _value.darkMode
-            : darkMode // ignore: cast_nullable_to_non_nullable
+                  as Currency?,
+        monthStartDate: null == monthStartDate
+            ? _value.monthStartDate
+            : monthStartDate // ignore: cast_nullable_to_non_nullable
+                  as int,
+        theme: freezed == theme
+            ? _value.theme
+            : theme // ignore: cast_nullable_to_non_nullable
+                  as Theme?,
+        isCompactView: null == isCompactView
+            ? _value.isCompactView
+            : isCompactView // ignore: cast_nullable_to_non_nullable
                   as bool,
+        importProfiles: null == importProfiles
+            ? _value._importProfiles
+            : importProfiles // ignore: cast_nullable_to_non_nullable
+                  as List<ImportProfile>,
       ),
     );
   }
@@ -137,27 +208,39 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserSettingsImpl implements _UserSettings {
   const _$UserSettingsImpl({
-    this.currency = 'USD',
-    this.locale = 'en',
-    this.darkMode = true,
-  });
+    this.currency,
+    this.monthStartDate = 1,
+    this.theme,
+    this.isCompactView = false,
+    final List<ImportProfile> importProfiles = const [],
+  }) : _importProfiles = importProfiles;
 
   factory _$UserSettingsImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserSettingsImplFromJson(json);
 
   @override
-  @JsonKey()
-  final String currency;
+  final Currency? currency;
   @override
   @JsonKey()
-  final String locale;
+  final int monthStartDate;
+  // Day of month when budget period starts (1-28)
+  @override
+  final Theme? theme;
   @override
   @JsonKey()
-  final bool darkMode;
+  final bool isCompactView;
+  final List<ImportProfile> _importProfiles;
+  @override
+  @JsonKey()
+  List<ImportProfile> get importProfiles {
+    if (_importProfiles is EqualUnmodifiableListView) return _importProfiles;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_importProfiles);
+  }
 
   @override
   String toString() {
-    return 'UserSettings(currency: $currency, locale: $locale, darkMode: $darkMode)';
+    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles)';
   }
 
   @override
@@ -167,14 +250,27 @@ class _$UserSettingsImpl implements _UserSettings {
             other is _$UserSettingsImpl &&
             (identical(other.currency, currency) ||
                 other.currency == currency) &&
-            (identical(other.locale, locale) || other.locale == locale) &&
-            (identical(other.darkMode, darkMode) ||
-                other.darkMode == darkMode));
+            (identical(other.monthStartDate, monthStartDate) ||
+                other.monthStartDate == monthStartDate) &&
+            (identical(other.theme, theme) || other.theme == theme) &&
+            (identical(other.isCompactView, isCompactView) ||
+                other.isCompactView == isCompactView) &&
+            const DeepCollectionEquality().equals(
+              other._importProfiles,
+              _importProfiles,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, currency, locale, darkMode);
+  int get hashCode => Object.hash(
+    runtimeType,
+    currency,
+    monthStartDate,
+    theme,
+    isCompactView,
+    const DeepCollectionEquality().hash(_importProfiles),
+  );
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -192,20 +288,26 @@ class _$UserSettingsImpl implements _UserSettings {
 
 abstract class _UserSettings implements UserSettings {
   const factory _UserSettings({
-    final String currency,
-    final String locale,
-    final bool darkMode,
+    final Currency? currency,
+    final int monthStartDate,
+    final Theme? theme,
+    final bool isCompactView,
+    final List<ImportProfile> importProfiles,
   }) = _$UserSettingsImpl;
 
   factory _UserSettings.fromJson(Map<String, dynamic> json) =
       _$UserSettingsImpl.fromJson;
 
   @override
-  String get currency;
+  Currency? get currency;
   @override
-  String get locale;
+  int get monthStartDate; // Day of month when budget period starts (1-28)
   @override
-  bool get darkMode;
+  Theme? get theme;
+  @override
+  bool get isCompactView;
+  @override
+  List<ImportProfile> get importProfiles;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.

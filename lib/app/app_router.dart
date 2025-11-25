@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/firebase/auth_repository.dart';
 import '../features/auth/auth_screen.dart';
+import '../features/dashboard/dashboard_screen.dart';
 
 /// Provider for GoRouter
 final routerProvider = Provider<GoRouter>((ref) {
@@ -35,9 +35,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         name: 'dashboard',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Dashboard - Coming in Phase 2')),
-        ),
+        builder: (context, state) => const DashboardScreen(),
       ),
     ],
   );

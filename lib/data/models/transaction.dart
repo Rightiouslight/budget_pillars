@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../utils/timestamp_converter.dart';
 
 part 'transaction.freezed.dart';
 part 'transaction.g.dart';
@@ -9,7 +10,7 @@ class Transaction with _$Transaction {
     required String id,
     required double amount,
     required String description,
-    required DateTime date,
+    @TimestampConverter() required DateTime date,
     required String accountId,
     required String accountName,
     required String categoryId,

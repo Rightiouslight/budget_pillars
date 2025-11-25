@@ -22,10 +22,12 @@ RecurringIncome _$RecurringIncomeFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$RecurringIncome {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get description =>
+      throw _privateConstructorUsedError; // Firestore uses 'description' instead of 'name'
   double get amount => throw _privateConstructorUsedError;
-  String get accountId => throw _privateConstructorUsedError;
-  String get pocketId => throw _privateConstructorUsedError;
+  String? get accountId => throw _privateConstructorUsedError;
+  String? get pocketId => throw _privateConstructorUsedError;
   int get dayOfMonth => throw _privateConstructorUsedError;
 
   /// Serializes this RecurringIncome to a JSON map.
@@ -47,10 +49,11 @@ abstract class $RecurringIncomeCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String name,
+    String? name,
+    String? description,
     double amount,
-    String accountId,
-    String pocketId,
+    String? accountId,
+    String? pocketId,
     int dayOfMonth,
   });
 }
@@ -71,10 +74,11 @@ class _$RecurringIncomeCopyWithImpl<$Res, $Val extends RecurringIncome>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? name = freezed,
+    Object? description = freezed,
     Object? amount = null,
-    Object? accountId = null,
-    Object? pocketId = null,
+    Object? accountId = freezed,
+    Object? pocketId = freezed,
     Object? dayOfMonth = null,
   }) {
     return _then(
@@ -83,22 +87,26 @@ class _$RecurringIncomeCopyWithImpl<$Res, $Val extends RecurringIncome>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as String,
-            name: null == name
+            name: freezed == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
+            description: freezed == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
             amount: null == amount
                 ? _value.amount
                 : amount // ignore: cast_nullable_to_non_nullable
                       as double,
-            accountId: null == accountId
+            accountId: freezed == accountId
                 ? _value.accountId
                 : accountId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            pocketId: null == pocketId
+                      as String?,
+            pocketId: freezed == pocketId
                 ? _value.pocketId
                 : pocketId // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             dayOfMonth: null == dayOfMonth
                 ? _value.dayOfMonth
                 : dayOfMonth // ignore: cast_nullable_to_non_nullable
@@ -120,10 +128,11 @@ abstract class _$$RecurringIncomeImplCopyWith<$Res>
   @useResult
   $Res call({
     String id,
-    String name,
+    String? name,
+    String? description,
     double amount,
-    String accountId,
-    String pocketId,
+    String? accountId,
+    String? pocketId,
     int dayOfMonth,
   });
 }
@@ -143,10 +152,11 @@ class __$$RecurringIncomeImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? name = freezed,
+    Object? description = freezed,
     Object? amount = null,
-    Object? accountId = null,
-    Object? pocketId = null,
+    Object? accountId = freezed,
+    Object? pocketId = freezed,
     Object? dayOfMonth = null,
   }) {
     return _then(
@@ -155,22 +165,26 @@ class __$$RecurringIncomeImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as String,
-        name: null == name
+        name: freezed == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
+        description: freezed == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
         amount: null == amount
             ? _value.amount
             : amount // ignore: cast_nullable_to_non_nullable
                   as double,
-        accountId: null == accountId
+        accountId: freezed == accountId
             ? _value.accountId
             : accountId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        pocketId: null == pocketId
+                  as String?,
+        pocketId: freezed == pocketId
             ? _value.pocketId
             : pocketId // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         dayOfMonth: null == dayOfMonth
             ? _value.dayOfMonth
             : dayOfMonth // ignore: cast_nullable_to_non_nullable
@@ -185,10 +199,11 @@ class __$$RecurringIncomeImplCopyWithImpl<$Res>
 class _$RecurringIncomeImpl implements _RecurringIncome {
   const _$RecurringIncomeImpl({
     required this.id,
-    required this.name,
+    this.name,
+    this.description,
     required this.amount,
-    required this.accountId,
-    required this.pocketId,
+    this.accountId,
+    this.pocketId,
     required this.dayOfMonth,
   });
 
@@ -198,19 +213,22 @@ class _$RecurringIncomeImpl implements _RecurringIncome {
   @override
   final String id;
   @override
-  final String name;
+  final String? name;
+  @override
+  final String? description;
+  // Firestore uses 'description' instead of 'name'
   @override
   final double amount;
   @override
-  final String accountId;
+  final String? accountId;
   @override
-  final String pocketId;
+  final String? pocketId;
   @override
   final int dayOfMonth;
 
   @override
   String toString() {
-    return 'RecurringIncome(id: $id, name: $name, amount: $amount, accountId: $accountId, pocketId: $pocketId, dayOfMonth: $dayOfMonth)';
+    return 'RecurringIncome(id: $id, name: $name, description: $description, amount: $amount, accountId: $accountId, pocketId: $pocketId, dayOfMonth: $dayOfMonth)';
   }
 
   @override
@@ -220,6 +238,8 @@ class _$RecurringIncomeImpl implements _RecurringIncome {
             other is _$RecurringIncomeImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.amount, amount) || other.amount == amount) &&
             (identical(other.accountId, accountId) ||
                 other.accountId == accountId) &&
@@ -235,6 +255,7 @@ class _$RecurringIncomeImpl implements _RecurringIncome {
     runtimeType,
     id,
     name,
+    description,
     amount,
     accountId,
     pocketId,
@@ -261,10 +282,11 @@ class _$RecurringIncomeImpl implements _RecurringIncome {
 abstract class _RecurringIncome implements RecurringIncome {
   const factory _RecurringIncome({
     required final String id,
-    required final String name,
+    final String? name,
+    final String? description,
     required final double amount,
-    required final String accountId,
-    required final String pocketId,
+    final String? accountId,
+    final String? pocketId,
     required final int dayOfMonth,
   }) = _$RecurringIncomeImpl;
 
@@ -274,13 +296,15 @@ abstract class _RecurringIncome implements RecurringIncome {
   @override
   String get id;
   @override
-  String get name;
+  String? get name;
+  @override
+  String? get description; // Firestore uses 'description' instead of 'name'
   @override
   double get amount;
   @override
-  String get accountId;
+  String? get accountId;
   @override
-  String get pocketId;
+  String? get pocketId;
   @override
   int get dayOfMonth;
 

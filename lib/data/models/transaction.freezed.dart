@@ -24,6 +24,7 @@ mixin _$Transaction {
   String get id => throw _privateConstructorUsedError;
   double get amount => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
+  @TimestampConverter()
   DateTime get date => throw _privateConstructorUsedError;
   String get accountId => throw _privateConstructorUsedError;
   String get accountName => throw _privateConstructorUsedError;
@@ -55,7 +56,7 @@ abstract class $TransactionCopyWith<$Res> {
     String id,
     double amount,
     String description,
-    DateTime date,
+    @TimestampConverter() DateTime date,
     String accountId,
     String accountName,
     String categoryId,
@@ -164,7 +165,7 @@ abstract class _$$TransactionImplCopyWith<$Res>
     String id,
     double amount,
     String description,
-    DateTime date,
+    @TimestampConverter() DateTime date,
     String accountId,
     String accountName,
     String categoryId,
@@ -265,7 +266,7 @@ class _$TransactionImpl implements _Transaction {
     required this.id,
     required this.amount,
     required this.description,
-    required this.date,
+    @TimestampConverter() required this.date,
     required this.accountId,
     required this.accountName,
     required this.categoryId,
@@ -286,6 +287,7 @@ class _$TransactionImpl implements _Transaction {
   @override
   final String description;
   @override
+  @TimestampConverter()
   final DateTime date;
   @override
   final String accountId;
@@ -374,7 +376,7 @@ abstract class _Transaction implements Transaction {
     required final String id,
     required final double amount,
     required final String description,
-    required final DateTime date,
+    @TimestampConverter() required final DateTime date,
     required final String accountId,
     required final String accountName,
     required final String categoryId,
@@ -395,6 +397,7 @@ abstract class _Transaction implements Transaction {
   @override
   String get description;
   @override
+  @TimestampConverter()
   DateTime get date;
   @override
   String get accountId;

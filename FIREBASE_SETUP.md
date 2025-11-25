@@ -9,11 +9,13 @@
 5. Enable the following sign-in providers:
 
 ### Email/Password
+
 - Click on **Email/Password**
 - Toggle **Enable**
 - Click **Save**
 
 ### Google Sign-In
+
 - Click on **Google**
 - Toggle **Enable**
 - Enter project support email (your email)
@@ -41,26 +43,26 @@ service cloud.firestore {
     // Users can only access their own data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
+
       match /budgets/{monthKey} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
+
       match /settings/{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      
+
       match /shared_budgets/{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
-    
+
     // Share invitations - users can read all, but only modify their own
     match /share_invitations/{invitationId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && 
-        (resource.data.fromUserId == request.auth.uid || 
+      allow update, delete: if request.auth != null &&
+        (resource.data.fromUserId == request.auth.uid ||
          resource.data.toUserEmail == request.auth.token.email);
     }
   }
@@ -72,6 +74,7 @@ service cloud.firestore {
 ## Testing Checklist
 
 After setup is complete, you should be able to:
+
 - [x] Firebase initialized without errors
 - [ ] Sign up with email/password
 - [ ] Sign in with email/password
@@ -81,6 +84,7 @@ After setup is complete, you should be able to:
 ## Next Steps
 
 Once authentication is working:
+
 - Test creating a user account
 - Verify user appears in Firebase Console
 - Test Google Sign-In

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <!--
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,25 +16,35 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta
+      name="description"
+      content="Budget Pillars - Personal Budget Management"
+    />
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="easy_budget_pillars">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- Google Sign-In Client ID - Get this from Firebase Console -->
+    <!-- Go to: https://console.firebase.google.com/project/budgetpillarsdev/authentication/providers -->
+    <!-- Click on Google provider, then Web SDK configuration to get the Web client ID -->
+    <meta
+      name="google-signin-client_id"
+      content="487033381743-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+    />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Budget Pillars" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
-  <title>easy_budget_pillars</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <title>Budget Pillars</title>
+    <link rel="manifest" href="manifest.json" />
+  </head>
+  <body>
+    <script src="flutter_bootstrap.js" async></script>
+  </body>
 </html>

@@ -8,14 +8,26 @@ part of 'user_settings.dart';
 
 _$UserSettingsImpl _$$UserSettingsImplFromJson(Map<String, dynamic> json) =>
     _$UserSettingsImpl(
-      currency: json['currency'] as String? ?? 'USD',
-      locale: json['locale'] as String? ?? 'en',
-      darkMode: json['darkMode'] as bool? ?? true,
+      currency: json['currency'] == null
+          ? null
+          : Currency.fromJson(json['currency'] as Map<String, dynamic>),
+      monthStartDate: (json['monthStartDate'] as num?)?.toInt() ?? 1,
+      theme: json['theme'] == null
+          ? null
+          : Theme.fromJson(json['theme'] as Map<String, dynamic>),
+      isCompactView: json['isCompactView'] as bool? ?? false,
+      importProfiles:
+          (json['importProfiles'] as List<dynamic>?)
+              ?.map((e) => ImportProfile.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
     <String, dynamic>{
       'currency': instance.currency,
-      'locale': instance.locale,
-      'darkMode': instance.darkMode,
+      'monthStartDate': instance.monthStartDate,
+      'theme': instance.theme,
+      'isCompactView': instance.isCompactView,
+      'importProfiles': instance.importProfiles,
     };

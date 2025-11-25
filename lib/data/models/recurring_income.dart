@@ -7,10 +7,11 @@ part 'recurring_income.g.dart';
 class RecurringIncome with _$RecurringIncome {
   const factory RecurringIncome({
     required String id,
-    required String name,
+    String? name,
+    String? description, // Firestore uses 'description' instead of 'name'
     required double amount,
-    required String accountId,
-    required String pocketId,
+    String? accountId,
+    String? pocketId,
     required int dayOfMonth,
   }) = _RecurringIncome;
 

@@ -10,10 +10,11 @@ _$RecurringIncomeImpl _$$RecurringIncomeImplFromJson(
   Map<String, dynamic> json,
 ) => _$RecurringIncomeImpl(
   id: json['id'] as String,
-  name: json['name'] as String,
+  name: json['name'] as String?,
+  description: json['description'] as String?,
   amount: (json['amount'] as num).toDouble(),
-  accountId: json['accountId'] as String,
-  pocketId: json['pocketId'] as String,
+  accountId: json['accountId'] as String?,
+  pocketId: json['pocketId'] as String?,
   dayOfMonth: (json['dayOfMonth'] as num).toInt(),
 );
 
@@ -22,6 +23,7 @@ Map<String, dynamic> _$$RecurringIncomeImplToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
+  'description': instance.description,
   'amount': instance.amount,
   'accountId': instance.accountId,
   'pocketId': instance.pocketId,

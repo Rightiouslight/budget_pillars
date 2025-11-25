@@ -29,10 +29,13 @@ class FirestoreRepository {
           if (!snapshot.exists || snapshot.data() == null) {
             return null;
           }
+
           try {
-            return MonthlyBudget.fromJson(snapshot.data()!);
-          } catch (e) {
-            print('Error parsing MonthlyBudget: $e');
+            final budget = MonthlyBudget.fromJson(snapshot.data()!);
+            return budget;
+          } catch (e, stackTrace) {
+            print('❌ Error parsing MonthlyBudget: $e');
+            print('Stack trace: $stackTrace');
             return null;
           }
         });
