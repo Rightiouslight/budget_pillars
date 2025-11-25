@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          # Customization options for freezed
+          union_key: "type"
+          union_value_case: "pascal"

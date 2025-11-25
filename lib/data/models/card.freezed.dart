@@ -1,0 +1,860 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'card.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
+
+Card _$CardFromJson(Map<String, dynamic> json) {
+  switch (json['type']) {
+    case 'pocket':
+      return PocketCard.fromJson(json);
+    case 'category':
+      return CategoryCard.fromJson(json);
+
+    default:
+      throw CheckedFromJsonException(
+        json,
+        'type',
+        'Card',
+        'Invalid union type "${json['type']}"!',
+      );
+  }
+}
+
+/// @nodoc
+mixin _$Card {
+  String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get icon => throw _privateConstructorUsedError;
+  String? get color => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )
+    pocket,
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )
+    category,
+  }) => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+  }) => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+    required TResult orElse(),
+  }) => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(PocketCard value) pocket,
+    required TResult Function(CategoryCard value) category,
+  }) => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(PocketCard value)? pocket,
+    TResult? Function(CategoryCard value)? category,
+  }) => throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(PocketCard value)? pocket,
+    TResult Function(CategoryCard value)? category,
+    required TResult orElse(),
+  }) => throw _privateConstructorUsedError;
+
+  /// Serializes this Card to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $CardCopyWith<Card> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $CardCopyWith<$Res> {
+  factory $CardCopyWith(Card value, $Res Function(Card) then) =
+      _$CardCopyWithImpl<$Res, Card>;
+  @useResult
+  $Res call({String id, String name, String icon, String? color});
+}
+
+/// @nodoc
+class _$CardCopyWithImpl<$Res, $Val extends Card>
+    implements $CardCopyWith<$Res> {
+  _$CardCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? icon = null,
+    Object? color = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            icon: null == icon
+                ? _value.icon
+                : icon // ignore: cast_nullable_to_non_nullable
+                      as String,
+            color: freezed == color
+                ? _value.color
+                : color // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$PocketCardImplCopyWith<$Res> implements $CardCopyWith<$Res> {
+  factory _$$PocketCardImplCopyWith(
+    _$PocketCardImpl value,
+    $Res Function(_$PocketCardImpl) then,
+  ) = __$$PocketCardImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String id,
+    String name,
+    String icon,
+    double balance,
+    String? color,
+  });
+}
+
+/// @nodoc
+class __$$PocketCardImplCopyWithImpl<$Res>
+    extends _$CardCopyWithImpl<$Res, _$PocketCardImpl>
+    implements _$$PocketCardImplCopyWith<$Res> {
+  __$$PocketCardImplCopyWithImpl(
+    _$PocketCardImpl _value,
+    $Res Function(_$PocketCardImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? icon = null,
+    Object? balance = null,
+    Object? color = freezed,
+  }) {
+    return _then(
+      _$PocketCardImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        icon: null == icon
+            ? _value.icon
+            : icon // ignore: cast_nullable_to_non_nullable
+                  as String,
+        balance: null == balance
+            ? _value.balance
+            : balance // ignore: cast_nullable_to_non_nullable
+                  as double,
+        color: freezed == color
+            ? _value.color
+            : color // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PocketCardImpl extends PocketCard {
+  const _$PocketCardImpl({
+    required this.id,
+    required this.name,
+    required this.icon,
+    required this.balance,
+    this.color,
+    final String? $type,
+  }) : $type = $type ?? 'pocket',
+       super._();
+
+  factory _$PocketCardImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PocketCardImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String name;
+  @override
+  final String icon;
+  @override
+  final double balance;
+  @override
+  final String? color;
+
+  @JsonKey(name: 'type')
+  final String $type;
+
+  @override
+  String toString() {
+    return 'Card.pocket(id: $id, name: $name, icon: $icon, balance: $balance, color: $color)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PocketCardImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.icon, icon) || other.icon == icon) &&
+            (identical(other.balance, balance) || other.balance == balance) &&
+            (identical(other.color, color) || other.color == color));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name, icon, balance, color);
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PocketCardImplCopyWith<_$PocketCardImpl> get copyWith =>
+      __$$PocketCardImplCopyWithImpl<_$PocketCardImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )
+    pocket,
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )
+    category,
+  }) {
+    return pocket(id, name, icon, balance, color);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+  }) {
+    return pocket?.call(id, name, icon, balance, color);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+    required TResult orElse(),
+  }) {
+    if (pocket != null) {
+      return pocket(id, name, icon, balance, color);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(PocketCard value) pocket,
+    required TResult Function(CategoryCard value) category,
+  }) {
+    return pocket(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(PocketCard value)? pocket,
+    TResult? Function(CategoryCard value)? category,
+  }) {
+    return pocket?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(PocketCard value)? pocket,
+    TResult Function(CategoryCard value)? category,
+    required TResult orElse(),
+  }) {
+    if (pocket != null) {
+      return pocket(this);
+    }
+    return orElse();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PocketCardImplToJson(this);
+  }
+}
+
+abstract class PocketCard extends Card {
+  const factory PocketCard({
+    required final String id,
+    required final String name,
+    required final String icon,
+    required final double balance,
+    final String? color,
+  }) = _$PocketCardImpl;
+  const PocketCard._() : super._();
+
+  factory PocketCard.fromJson(Map<String, dynamic> json) =
+      _$PocketCardImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  String get icon;
+  double get balance;
+  @override
+  String? get color;
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PocketCardImplCopyWith<_$PocketCardImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$CategoryCardImplCopyWith<$Res>
+    implements $CardCopyWith<$Res> {
+  factory _$$CategoryCardImplCopyWith(
+    _$CategoryCardImpl value,
+    $Res Function(_$CategoryCardImpl) then,
+  ) = __$$CategoryCardImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String id,
+    String name,
+    String icon,
+    double budgetValue,
+    double currentValue,
+    String? color,
+    bool isRecurring,
+    int? dueDate,
+    String? destinationPocketId,
+    String? destinationAccountId,
+  });
+}
+
+/// @nodoc
+class __$$CategoryCardImplCopyWithImpl<$Res>
+    extends _$CardCopyWithImpl<$Res, _$CategoryCardImpl>
+    implements _$$CategoryCardImplCopyWith<$Res> {
+  __$$CategoryCardImplCopyWithImpl(
+    _$CategoryCardImpl _value,
+    $Res Function(_$CategoryCardImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? icon = null,
+    Object? budgetValue = null,
+    Object? currentValue = null,
+    Object? color = freezed,
+    Object? isRecurring = null,
+    Object? dueDate = freezed,
+    Object? destinationPocketId = freezed,
+    Object? destinationAccountId = freezed,
+  }) {
+    return _then(
+      _$CategoryCardImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        icon: null == icon
+            ? _value.icon
+            : icon // ignore: cast_nullable_to_non_nullable
+                  as String,
+        budgetValue: null == budgetValue
+            ? _value.budgetValue
+            : budgetValue // ignore: cast_nullable_to_non_nullable
+                  as double,
+        currentValue: null == currentValue
+            ? _value.currentValue
+            : currentValue // ignore: cast_nullable_to_non_nullable
+                  as double,
+        color: freezed == color
+            ? _value.color
+            : color // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        isRecurring: null == isRecurring
+            ? _value.isRecurring
+            : isRecurring // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        dueDate: freezed == dueDate
+            ? _value.dueDate
+            : dueDate // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        destinationPocketId: freezed == destinationPocketId
+            ? _value.destinationPocketId
+            : destinationPocketId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        destinationAccountId: freezed == destinationAccountId
+            ? _value.destinationAccountId
+            : destinationAccountId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$CategoryCardImpl extends CategoryCard {
+  const _$CategoryCardImpl({
+    required this.id,
+    required this.name,
+    required this.icon,
+    required this.budgetValue,
+    required this.currentValue,
+    this.color,
+    this.isRecurring = false,
+    this.dueDate,
+    this.destinationPocketId,
+    this.destinationAccountId,
+    final String? $type,
+  }) : $type = $type ?? 'category',
+       super._();
+
+  factory _$CategoryCardImpl.fromJson(Map<String, dynamic> json) =>
+      _$$CategoryCardImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String name;
+  @override
+  final String icon;
+  @override
+  final double budgetValue;
+  @override
+  final double currentValue;
+  @override
+  final String? color;
+  @override
+  @JsonKey()
+  final bool isRecurring;
+  @override
+  final int? dueDate;
+  @override
+  final String? destinationPocketId;
+  @override
+  final String? destinationAccountId;
+
+  @JsonKey(name: 'type')
+  final String $type;
+
+  @override
+  String toString() {
+    return 'Card.category(id: $id, name: $name, icon: $icon, budgetValue: $budgetValue, currentValue: $currentValue, color: $color, isRecurring: $isRecurring, dueDate: $dueDate, destinationPocketId: $destinationPocketId, destinationAccountId: $destinationAccountId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$CategoryCardImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.icon, icon) || other.icon == icon) &&
+            (identical(other.budgetValue, budgetValue) ||
+                other.budgetValue == budgetValue) &&
+            (identical(other.currentValue, currentValue) ||
+                other.currentValue == currentValue) &&
+            (identical(other.color, color) || other.color == color) &&
+            (identical(other.isRecurring, isRecurring) ||
+                other.isRecurring == isRecurring) &&
+            (identical(other.dueDate, dueDate) || other.dueDate == dueDate) &&
+            (identical(other.destinationPocketId, destinationPocketId) ||
+                other.destinationPocketId == destinationPocketId) &&
+            (identical(other.destinationAccountId, destinationAccountId) ||
+                other.destinationAccountId == destinationAccountId));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    icon,
+    budgetValue,
+    currentValue,
+    color,
+    isRecurring,
+    dueDate,
+    destinationPocketId,
+    destinationAccountId,
+  );
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$CategoryCardImplCopyWith<_$CategoryCardImpl> get copyWith =>
+      __$$CategoryCardImplCopyWithImpl<_$CategoryCardImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )
+    pocket,
+    required TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )
+    category,
+  }) {
+    return category(
+      id,
+      name,
+      icon,
+      budgetValue,
+      currentValue,
+      color,
+      isRecurring,
+      dueDate,
+      destinationPocketId,
+      destinationAccountId,
+    );
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult? Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+  }) {
+    return category?.call(
+      id,
+      name,
+      icon,
+      budgetValue,
+      currentValue,
+      color,
+      isRecurring,
+      dueDate,
+      destinationPocketId,
+      destinationAccountId,
+    );
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double balance,
+      String? color,
+    )?
+    pocket,
+    TResult Function(
+      String id,
+      String name,
+      String icon,
+      double budgetValue,
+      double currentValue,
+      String? color,
+      bool isRecurring,
+      int? dueDate,
+      String? destinationPocketId,
+      String? destinationAccountId,
+    )?
+    category,
+    required TResult orElse(),
+  }) {
+    if (category != null) {
+      return category(
+        id,
+        name,
+        icon,
+        budgetValue,
+        currentValue,
+        color,
+        isRecurring,
+        dueDate,
+        destinationPocketId,
+        destinationAccountId,
+      );
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(PocketCard value) pocket,
+    required TResult Function(CategoryCard value) category,
+  }) {
+    return category(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(PocketCard value)? pocket,
+    TResult? Function(CategoryCard value)? category,
+  }) {
+    return category?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(PocketCard value)? pocket,
+    TResult Function(CategoryCard value)? category,
+    required TResult orElse(),
+  }) {
+    if (category != null) {
+      return category(this);
+    }
+    return orElse();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$CategoryCardImplToJson(this);
+  }
+}
+
+abstract class CategoryCard extends Card {
+  const factory CategoryCard({
+    required final String id,
+    required final String name,
+    required final String icon,
+    required final double budgetValue,
+    required final double currentValue,
+    final String? color,
+    final bool isRecurring,
+    final int? dueDate,
+    final String? destinationPocketId,
+    final String? destinationAccountId,
+  }) = _$CategoryCardImpl;
+  const CategoryCard._() : super._();
+
+  factory CategoryCard.fromJson(Map<String, dynamic> json) =
+      _$CategoryCardImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  String get icon;
+  double get budgetValue;
+  double get currentValue;
+  @override
+  String? get color;
+  bool get isRecurring;
+  int? get dueDate;
+  String? get destinationPocketId;
+  String? get destinationAccountId;
+
+  /// Create a copy of Card
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$CategoryCardImplCopyWith<_$CategoryCardImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
