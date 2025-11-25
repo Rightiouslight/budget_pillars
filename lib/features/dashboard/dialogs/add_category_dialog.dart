@@ -370,7 +370,6 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
             ),
             child: const Text('Delete'),
           ),
-        const Spacer(),
         TextButton(
           onPressed: controllerState.isLoading
               ? null

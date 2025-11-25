@@ -272,7 +272,6 @@ class _AddPocketDialogState extends ConsumerState<AddPocketDialog> {
             ),
             child: const Text('Delete'),
           ),
-        const Spacer(),
         TextButton(
           onPressed: controllerState.isLoading
               ? null
