@@ -841,4 +841,65 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
+
+  /// Update multiple category budgets at once (from Budget Planner)
+  Future<void> updateCategoryBudgets({
+    required String accountId,
+    required Map<String, double> categoryBudgets,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final accounts = List<Account>.from(budget.accounts);
+      final accountIndex = accounts.indexWhere(
+        (account) => account.id == accountId,
+      );
+      if (accountIndex == -1) return;
+
+      final account = accounts[accountIndex];
+      final updatedCards = account.cards.map((card) {
+        return card.maybeWhen(
+          category:
+              (
+                id,
+                name,
+                icon,
+                budgetValue,
+                currentValue,
+                color,
+                isRecurring,
+                dueDate,
+                destinationPocketId,
+                destinationAccountId,
+              ) {
+                // If this category has a new budget value, update it
+                if (categoryBudgets.containsKey(id)) {
+                  return Card.category(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    budgetValue: categoryBudgets[id]!,
+                    currentValue: currentValue,
+                    color: color,
+                    isRecurring: isRecurring,
+                    dueDate: dueDate,
+                    destinationPocketId: destinationPocketId,
+                    destinationAccountId: destinationAccountId,
+                  );
+                }
+                return card;
+              },
+          orElse: () => card,
+        );
+      }).toList();
+
+      final updatedAccount = account.copyWith(cards: updatedCards);
+      accounts[accountIndex] = updatedAccount;
+
+      final updatedBudget = budget.copyWith(accounts: accounts);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
 }

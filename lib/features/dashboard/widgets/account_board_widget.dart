@@ -5,6 +5,8 @@ import '../dialogs/add_account_dialog.dart';
 import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dashboard_controller.dart';
+import '../../../providers/active_budget_provider.dart';
+import '../../budget_planner/budget_planner_dialog.dart';
 import 'pocket_card_widget.dart';
 import 'category_card_widget.dart';
 import '../../../core/constants/app_icons.dart';
@@ -126,6 +128,9 @@ class AccountBoardWidget extends ConsumerWidget {
                     padding: EdgeInsets.zero,
                     onSelected: (value) {
                       switch (value) {
+                        case 'planner':
+                          _showBudgetPlannerDialog(context, ref);
+                          break;
                         case 'reorder':
                           // TODO: Implement reorder mode
                           break;
@@ -138,6 +143,17 @@ class AccountBoardWidget extends ConsumerWidget {
                       }
                     },
                     itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'planner',
+                        child: Row(
+                          children: [
+                            Icon(Icons.calculate_outlined, size: 18),
+                            SizedBox(width: 12),
+                            Text('Budget Planner'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
                       const PopupMenuItem(
                         value: 'reorder',
                         child: Row(
@@ -375,6 +391,35 @@ class AccountBoardWidget extends ConsumerWidget {
       context: context,
       builder: (context) => AddCategoryDialog(accountId: account.id),
     );
+  }
+
+  void _showBudgetPlannerDialog(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.read(activeBudgetProvider);
+    budgetAsync.whenData((budget) {
+      if (budget != null) {
+        showDialog(
+          context: context,
+          builder: (context) => BudgetPlannerDialog(
+            account: account,
+            budget: budget,
+            onSubmit: (changedCategories) async {
+              // Convert list to map for the controller
+              final categoryBudgets = <String, double>{};
+              for (var category in changedCategories) {
+                categoryBudgets[category.id] = category.budgetValue;
+              }
+
+              await ref
+                  .read(dashboardControllerProvider.notifier)
+                  .updateCategoryBudgets(
+                    accountId: account.id,
+                    categoryBudgets: categoryBudgets,
+                  );
+            },
+          ),
+        );
+      }
+    });
   }
 
   void _showEditAccountDialog(BuildContext context) {
