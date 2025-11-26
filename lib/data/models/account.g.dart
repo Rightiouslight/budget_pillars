@@ -23,5 +23,5 @@ Map<String, dynamic> _$$AccountImplToJson(_$AccountImpl instance) =>
       'name': instance.name,
       'icon': instance.icon,
       'defaultPocketId': instance.defaultPocketId,
-      'cards': instance.cards,
+      'cards': instance.cards.map((e) => e.toJson()).toList(),
     };

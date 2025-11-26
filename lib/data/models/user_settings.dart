@@ -7,7 +7,7 @@ import 'view_preferences.dart';
 part 'user_settings.freezed.dart';
 part 'user_settings.g.dart';
 
-@freezed
+@Freezed(toStringOverride: false)
 class UserSettings with _$UserSettings {
   const factory UserSettings({
     Currency? currency,

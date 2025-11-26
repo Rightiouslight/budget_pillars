@@ -31,11 +31,12 @@ _$MonthlyBudgetImpl _$$MonthlyBudgetImplFromJson(Map<String, dynamic> json) =>
           const {},
     );
 
-Map<String, dynamic> _$$MonthlyBudgetImplToJson(_$MonthlyBudgetImpl instance) =>
-    <String, dynamic>{
-      'accounts': instance.accounts,
-      'transactions': instance.transactions,
-      'recurringIncomes': instance.recurringIncomes,
-      'autoTransactionsProcessed': instance.autoTransactionsProcessed,
-      'processedRecurringIncomes': instance.processedRecurringIncomes,
-    };
+Map<String, dynamic> _$$MonthlyBudgetImplToJson(
+  _$MonthlyBudgetImpl instance,
+) => <String, dynamic>{
+  'accounts': instance.accounts.map((e) => e.toJson()).toList(),
+  'transactions': instance.transactions.map((e) => e.toJson()).toList(),
+  'recurringIncomes': instance.recurringIncomes.map((e) => e.toJson()).toList(),
+  'autoTransactionsProcessed': instance.autoTransactionsProcessed,
+  'processedRecurringIncomes': instance.processedRecurringIncomes,
+};

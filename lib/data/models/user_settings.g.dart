@@ -31,11 +31,11 @@ _$UserSettingsImpl _$$UserSettingsImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
     <String, dynamic>{
-      'currency': instance.currency,
+      'currency': instance.currency?.toJson(),
       'monthStartDate': instance.monthStartDate,
-      'theme': instance.theme,
+      'theme': instance.theme?.toJson(),
       'isCompactView': instance.isCompactView,
-      'importProfiles': instance.importProfiles,
-      'viewPreferences': instance.viewPreferences,
+      'importProfiles': instance.importProfiles.map((e) => e.toJson()).toList(),
+      'viewPreferences': instance.viewPreferences?.toJson(),
       'cachedProfilePicture': instance.cachedProfilePicture,
     };

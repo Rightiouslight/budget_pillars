@@ -292,11 +292,6 @@ class _$UserSettingsImpl implements _UserSettings {
   final String? cachedProfilePicture;
 
   @override
-  String toString() {
-    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles, viewPreferences: $viewPreferences, cachedProfilePicture: $cachedProfilePicture)';
-  }
-
-  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&

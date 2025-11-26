@@ -29,15 +29,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _selectedMonthStartDate = settings.monthStartDate;
           _selectedCurrency = settings.currency;
           _selectedTheme = settings.theme;
-          _selectedViewPreferences = settings.viewPreferences ?? const ViewPreferences();
+          _selectedViewPreferences =
+              settings.viewPreferences ?? const ViewPreferences();
         });
       }
     });
   }
 
-  Future<void> _saveSettings() async {
+  Future<void> _autoSaveSettings() async {
     final currentSettings = ref.read(userSettingsProvider).value;
-    if (currentSettings == null) return;
+    if (currentSettings == null) {
+      print('⚠️ Settings auto-save: No current settings available');
+      return;
+    }
 
     final updatedSettings = currentSettings.copyWith(
       monthStartDate: _selectedMonthStartDate ?? 1,
@@ -46,35 +50,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       viewPreferences: _selectedViewPreferences,
     );
 
-    await ref.read(userSettingsControllerProvider.notifier).updateSettings(updatedSettings);
+    print(
+      '💾 Saving settings: theme=${_selectedTheme?.name}/${_selectedTheme?.appearance}, currency=${_selectedCurrency?.code}',
+    );
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Settings saved')),
-      );
+    try {
+      await ref
+          .read(userSettingsControllerProvider.notifier)
+          .updateSettings(updatedSettings);
+      print('✅ Settings saved successfully');
+    } catch (e) {
+      print('❌ Error saving settings: $e');
     }
   }
 
   String _getCurrencySymbol(String code) {
     switch (code) {
-      case 'USD': return '\$';
-      case 'EUR': return '€';
-      case 'GBP': return '£';
-      case 'JPY': return '¥';
-      case 'CAD': return 'C\$';
-      case 'AUD': return 'A\$';
-      case 'ZAR': return 'R';
-      case 'NAD': return 'N\$';
-      case 'INR': return '₹';
-      case 'CNY': return '¥';
-      case 'BRL': return 'R\$';
-      case 'MXN': return 'MX\$';
-      case 'CHF': return 'CHF';
-      case 'NZD': return 'NZ\$';
-      case 'SEK': return 'kr';
-      case 'NOK': return 'kr';
-      case 'DKK': return 'kr';
-      default: return '\$';
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      case 'JPY':
+        return '¥';
+      case 'CAD':
+        return 'C\$';
+      case 'AUD':
+        return 'A\$';
+      case 'ZAR':
+        return 'R';
+      case 'NAD':
+        return 'N\$';
+      case 'INR':
+        return '₹';
+      case 'CNY':
+        return '¥';
+      case 'BRL':
+        return 'R\$';
+      case 'MXN':
+        return 'MX\$';
+      case 'CHF':
+        return 'CHF';
+      case 'NZD':
+        return 'NZ\$';
+      case 'SEK':
+        return 'kr';
+      case 'NOK':
+        return 'kr';
+      case 'DKK':
+        return 'kr';
+      default:
+        return '\$';
     }
   }
 
@@ -106,9 +133,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settingsAsync = ref.watch(userSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: settingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
@@ -117,7 +142,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _selectedMonthStartDate ??= settings.monthStartDate;
           _selectedCurrency ??= settings.currency;
           _selectedTheme ??= settings.theme;
-          _selectedViewPreferences ??= settings.viewPreferences ?? const ViewPreferences();
+          _selectedViewPreferences ??=
+              settings.viewPreferences ?? const ViewPreferences();
 
           final appearance = _selectedTheme?.appearance ?? 'system';
           final themeName = _selectedTheme?.name ?? 'mint';
@@ -147,9 +173,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: appearance == 'light',
                         onTap: () {
                           setState(() {
-                            _selectedTheme = (_selectedTheme ?? const app_theme.Theme())
-                                .copyWith(appearance: 'light');
+                            _selectedTheme =
+                                (_selectedTheme ?? const app_theme.Theme())
+                                    .copyWith(appearance: 'light');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -162,9 +190,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: appearance == 'dark',
                         onTap: () {
                           setState(() {
-                            _selectedTheme = (_selectedTheme ?? const app_theme.Theme())
-                                .copyWith(appearance: 'dark');
+                            _selectedTheme =
+                                (_selectedTheme ?? const app_theme.Theme())
+                                    .copyWith(appearance: 'dark');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -177,9 +207,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: appearance == 'black',
                         onTap: () {
                           setState(() {
-                            _selectedTheme = (_selectedTheme ?? const app_theme.Theme())
-                                .copyWith(appearance: 'black');
+                            _selectedTheme =
+                                (_selectedTheme ?? const app_theme.Theme())
+                                    .copyWith(appearance: 'black');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -192,9 +224,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: appearance == 'system',
                         onTap: () {
                           setState(() {
-                            _selectedTheme = (_selectedTheme ?? const app_theme.Theme())
-                                .copyWith(appearance: 'system');
+                            _selectedTheme =
+                                (_selectedTheme ?? const app_theme.Theme())
+                                    .copyWith(appearance: 'system');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -224,9 +258,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {
-                        _selectedTheme = (_selectedTheme ?? const app_theme.Theme())
-                            .copyWith(name: value);
+                        _selectedTheme =
+                            (_selectedTheme ?? const app_theme.Theme())
+                                .copyWith(name: value);
                       });
+                      _autoSaveSettings();
                     }
                   },
                 ),
@@ -266,9 +302,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: mobile == 'full',
                         onTap: () {
                           setState(() {
-                            _selectedViewPreferences = (_selectedViewPreferences ?? const ViewPreferences())
-                                .copyWith(mobile: 'full');
+                            _selectedViewPreferences =
+                                (_selectedViewPreferences ??
+                                        const ViewPreferences())
+                                    .copyWith(mobile: 'full');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -279,9 +318,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: mobile == 'compact',
                         onTap: () {
                           setState(() {
-                            _selectedViewPreferences = (_selectedViewPreferences ?? const ViewPreferences())
-                                .copyWith(mobile: 'compact');
+                            _selectedViewPreferences =
+                                (_selectedViewPreferences ??
+                                        const ViewPreferences())
+                                    .copyWith(mobile: 'compact');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -311,9 +353,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: desktop == 'full',
                         onTap: () {
                           setState(() {
-                            _selectedViewPreferences = (_selectedViewPreferences ?? const ViewPreferences())
-                                .copyWith(desktop: 'full');
+                            _selectedViewPreferences =
+                                (_selectedViewPreferences ??
+                                        const ViewPreferences())
+                                    .copyWith(desktop: 'full');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -324,9 +369,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         selected: desktop == 'compact',
                         onTap: () {
                           setState(() {
-                            _selectedViewPreferences = (_selectedViewPreferences ?? const ViewPreferences())
-                                .copyWith(desktop: 'compact');
+                            _selectedViewPreferences =
+                                (_selectedViewPreferences ??
+                                        const ViewPreferences())
+                                    .copyWith(desktop: 'compact');
                           });
+                          _autoSaveSettings();
                         },
                       ),
                     ),
@@ -351,18 +399,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     border: OutlineInputBorder(),
                   ),
                   value: _selectedCurrency?.code ?? 'USD',
-                  items: [
-                    'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'ZAR',
-                    'NAD', 'INR', 'CNY', 'BRL', 'MXN', 'CHF', 'NZD',
-                    'SEK', 'NOK', 'DKK',
-                  ].map((code) {
-                    final symbol = _getCurrencySymbol(code);
-                    final name = _getCurrencyName(code);
-                    return DropdownMenuItem(
-                      value: code,
-                      child: Text('$name ($symbol)'),
-                    );
-                  }).toList(),
+                  items:
+                      [
+                        'USD',
+                        'EUR',
+                        'GBP',
+                        'JPY',
+                        'CAD',
+                        'AUD',
+                        'ZAR',
+                        'NAD',
+                        'INR',
+                        'CNY',
+                        'BRL',
+                        'MXN',
+                        'CHF',
+                        'NZD',
+                        'SEK',
+                        'NOK',
+                        'DKK',
+                      ].map((code) {
+                        final symbol = _getCurrencySymbol(code);
+                        final name = _getCurrencyName(code);
+                        return DropdownMenuItem(
+                          value: code,
+                          child: Text('$name ($symbol)'),
+                        );
+                      }).toList(),
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {
@@ -371,6 +434,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           symbol: _getCurrencySymbol(value),
                         );
                       });
+                      _autoSaveSettings();
                     }
                   },
                 ),
@@ -402,6 +466,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       setState(() {
                         _selectedMonthStartDate = value;
                       });
+                      _autoSaveSettings();
                     }
                   },
                 ),
@@ -409,17 +474,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   'The day of the month your budget period starts.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _saveSettings,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save Settings'),
                   ),
                 ),
               ],
@@ -498,7 +552,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: selected ? Theme.of(context).colorScheme.onPrimaryContainer : null,
+              color: selected
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  : null,
               fontWeight: selected ? FontWeight.w500 : null,
             ),
           ),

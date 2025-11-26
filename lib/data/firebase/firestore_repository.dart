@@ -104,12 +104,18 @@ class FirestoreRepository {
 
   /// Save user settings
   Future<void> saveUserSettings(String userId, UserSettings settings) async {
+    print('📝 Firestore: Saving user settings for user: $userId');
+    print('   Path: /users/$userId/data/settings');
+    print('   Data: ${settings.toJson()}');
+
     await _firestore
         .collection('users')
         .doc(userId)
         .collection('data')
         .doc('settings')
         .set(settings.toJson());
+
+    print('✅ Firestore: Settings saved successfully');
   }
 
   // ===== Share Invitation Operations =====

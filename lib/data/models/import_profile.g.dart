@@ -42,7 +42,7 @@ Map<String, dynamic> _$$ImportProfileImplToJson(_$ImportProfileImpl instance) =>
       'name': instance.name,
       'hasHeader': instance.hasHeader,
       'dateFormat': instance.dateFormat,
-      'columnMapping': instance.columnMapping,
+      'columnMapping': instance.columnMapping.toJson(),
       'columnCount': instance.columnCount,
       'smsStartWords': instance.smsStartWords,
       'smsStopWords': instance.smsStopWords,
