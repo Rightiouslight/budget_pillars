@@ -236,10 +236,12 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
                           return DropdownMenuItem<String>(
                             value: id,
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(icon),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text(name)),
+                                Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                const SizedBox(width: 8),
                                 Text(
                                   '\$${balance.toStringAsFixed(2)}',
                                   style: Theme.of(context).textTheme.bodySmall,
@@ -298,10 +300,12 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
                           return DropdownMenuItem<String>(
                             value: id,
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(icon),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text(name)),
+                                Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                const SizedBox(width: 8),
                                 Text(
                                   '\$${balance.toStringAsFixed(2)}',
                                   style: Theme.of(context).textTheme.bodySmall,

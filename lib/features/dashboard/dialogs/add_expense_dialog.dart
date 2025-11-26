@@ -177,10 +177,11 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
                               return DropdownMenuItem<String>(
                                 value: id,
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(icon),
                                     const SizedBox(width: 8),
-                                    Expanded(child: Text(name)),
+                                    Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
                                   ],
                                 ),
                               );

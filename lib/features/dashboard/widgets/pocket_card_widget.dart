@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
 import '../dialogs/transfer_funds_dialog.dart';
+import '../dialogs/card_details_dialog.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
+import '../../../providers/active_budget_provider.dart';
 
 class PocketCardWidget extends ConsumerWidget {
   final String accountId;
@@ -33,22 +35,43 @@ class PocketCardWidget extends ConsumerWidget {
     final cardColor = color != null ? _parseColor(color!) : null;
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: cardColor ?? Theme.of(context).colorScheme.primary,
-          width: 3,
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          // View details - could open a detail dialog in the future
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: cardColor ?? Theme.of(context).colorScheme.primary,
+              width: 3,
+            ),
+          ),
+          child: InkWell(
+            onTap: () {
+              final budgetAsync = ref.read(activeBudgetProvider);
+              budgetAsync.whenData((budget) {
+                if (budget != null) {
+                  final account = budget.accounts.firstWhere(
+                    (acc) => acc.id == accountId,
+                  );
+                  showDialog(
+                    context: context,
+                    builder: (context) => CardDetailsDialog(
+                      accountId: accountId,
+                      card: card_model.Card.pocket(
+                        id: id,
+                        name: name,
+                        icon: icon,
+                        balance: balance,
+                        color: color,
+                      ),
+                      account: account,
+                    ),
+                  );
+                }
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Header with icon, name, balance, and menu
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -204,9 +227,9 @@ class PocketCardWidget extends ConsumerWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
+        ), // Column
+      ), // InkWell
+    ); // Card
   }
 
   void _showEditDialog(BuildContext context) {

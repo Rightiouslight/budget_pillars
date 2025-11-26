@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
 import '../dialogs/transfer_funds_dialog.dart';
+import '../dialogs/card_details_dialog.dart';
 import '../dashboard_controller.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
+import '../../../providers/active_budget_provider.dart';
 
 class CategoryCardWidget extends ConsumerWidget {
   final String accountId;
@@ -43,22 +45,48 @@ class CategoryCardWidget extends ConsumerWidget {
     final isOverBudget = currentValue > budgetValue;
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: cardColor ?? Theme.of(context).colorScheme.primary,
-          width: 3,
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          // View details - could open a detail dialog in the future
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: cardColor ?? Theme.of(context).colorScheme.primary,
+              width: 3,
+            ),
+          ),
+          child: InkWell(
+            onTap: () {
+              final budgetAsync = ref.read(activeBudgetProvider);
+              budgetAsync.whenData((budget) {
+                if (budget != null) {
+                  final account = budget.accounts.firstWhere(
+                    (acc) => acc.id == accountId,
+                  );
+                  showDialog(
+                    context: context,
+                    builder: (context) => CardDetailsDialog(
+                      accountId: accountId,
+                      card: card_model.Card.category(
+                        id: id,
+                        name: name,
+                        icon: icon,
+                        budgetValue: budgetValue,
+                        currentValue: currentValue,
+                        color: color,
+                        isRecurring: isRecurring,
+                        dueDate: dueDate,
+                        destinationPocketId: null,
+                        destinationAccountId: null,
+                      ),
+                      account: account,
+                    ),
+                  );
+                }
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Header with icon, name, remaining, and menu
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -282,9 +310,9 @@ class CategoryCardWidget extends ConsumerWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
+        ), // Column
+      ), // InkWell
+    ); // Card
   }
 
   void _showEditDialog(BuildContext context) {
