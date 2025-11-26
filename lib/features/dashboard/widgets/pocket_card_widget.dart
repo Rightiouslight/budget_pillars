@@ -274,8 +274,17 @@ class PocketCardWidget extends ConsumerWidget {
   void _showAddExpenseDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) =>
-          AddExpenseDialog(accountId: accountId, cards: cards),
+      builder: (context) => AddExpenseDialog(
+        accountId: accountId,
+        categoryId: id,
+        card: card_model.Card.pocket(
+          id: id,
+          name: name,
+          icon: icon,
+          balance: balance,
+          color: color,
+        ),
+      ),
     );
   }
 

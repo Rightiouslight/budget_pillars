@@ -83,11 +83,29 @@ class CardDetailsDialog extends ConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.of(context).pop();
+                        // Get the card ID
+                        final cardId = card.when(
+                          pocket: (id, _, __, ___, ____) => id,
+                          category:
+                              (
+                                id,
+                                _,
+                                __,
+                                ___,
+                                ____,
+                                _____,
+                                ______,
+                                _______,
+                                ________,
+                                _________,
+                              ) => id,
+                        );
                         showDialog(
                           context: context,
                           builder: (context) => AddExpenseDialog(
                             accountId: accountId,
-                            cards: account.cards,
+                            categoryId: cardId,
+                            card: card,
                           ),
                         );
                       },
