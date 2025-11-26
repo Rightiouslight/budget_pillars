@@ -181,6 +181,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           ],
         ),
       ),
+      actionsOverflowButtonSpacing: 8,
       actions: [
         if (_isEditing)
           TextButton(
@@ -190,7 +191,6 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             ),
             child: const Text('Delete'),
           ),
-        const Spacer(),
         TextButton(
           onPressed: controllerState.isLoading
               ? null
