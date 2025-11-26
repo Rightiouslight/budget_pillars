@@ -98,32 +98,33 @@ class CardDetailsDialog extends ConsumerWidget {
                               ),
                             );
                           },
-                          category: (
-                            id,
-                            name,
-                            icon,
-                            budgetValue,
-                            currentValue,
-                            color,
-                            isRecurring,
-                            dueDate,
-                            destinationPocketId,
-                            destinationAccountId,
-                          ) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AddCategoryDialog(
-                                accountId: accountId,
-                                categoryId: id,
-                                initialName: name,
-                                initialIcon: icon,
-                                initialBudgetValue: budgetValue,
-                                initialColor: color,
-                                initialIsRecurring: isRecurring,
-                                initialDueDate: dueDate,
-                              ),
-                            );
-                          },
+                          category:
+                              (
+                                id,
+                                name,
+                                icon,
+                                budgetValue,
+                                currentValue,
+                                color,
+                                isRecurring,
+                                dueDate,
+                                destinationPocketId,
+                                destinationAccountId,
+                              ) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AddCategoryDialog(
+                                    accountId: accountId,
+                                    categoryId: id,
+                                    initialName: name,
+                                    initialIcon: icon,
+                                    initialBudgetValue: budgetValue,
+                                    initialColor: color,
+                                    initialIsRecurring: isRecurring,
+                                    initialDueDate: dueDate,
+                                  ),
+                                );
+                              },
                         );
                       },
                       icon: const Icon(Icons.edit, size: 18),
@@ -139,18 +140,19 @@ class CardDetailsDialog extends ConsumerWidget {
                         Navigator.of(context).pop();
                         final cardId = card.when(
                           pocket: (id, _, __, ___, ____) => id,
-                          category: (
-                            id,
-                            _,
-                            __,
-                            ___,
-                            ____,
-                            _____,
-                            ______,
-                            _______,
-                            ________,
-                            _________,
-                          ) => id,
+                          category:
+                              (
+                                id,
+                                _,
+                                __,
+                                ___,
+                                ____,
+                                _____,
+                                ______,
+                                _______,
+                                ________,
+                                _________,
+                              ) => id,
                         );
                         showDialog(
                           context: context,
