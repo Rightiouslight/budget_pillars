@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/card.dart' as card_model;
 import '../../../data/models/account.dart';
+import '../../../data/models/transaction.dart';
+import '../../../providers/active_budget_provider.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
 import 'add_expense_dialog.dart';
 import 'add_pocket_dialog.dart';
 import 'add_category_dialog.dart';
+import 'package:intl/intl.dart';
 
 class CardDetailsDialog extends ConsumerWidget {
   final String accountId;
@@ -22,6 +25,8 @@ class CardDetailsDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.watch(activeBudgetProvider);
+
     return Dialog(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -190,23 +195,69 @@ class CardDetailsDialog extends ConsumerWidget {
               ),
             ),
 
-            // Transactions list - placeholder for now
-            const Expanded(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, size: 48, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        'Transaction history coming soon',
-                        style: TextStyle(color: Colors.grey),
+            // Transactions list
+            Expanded(
+              child: budgetAsync.when(
+                data: (budget) {
+                  if (budget == null) {
+                    return const Center(child: Text('No budget data'));
+                  }
+
+                  // Filter transactions for this card
+                  final cardTransactions = budget.transactions.where((txn) {
+                    // For categories: match categoryId
+                    // For pockets: match sourcePocketId or targetPocketId
+                    return card.when(
+                      pocket: (id, _, __, ___, ____) =>
+                          txn.sourcePocketId == id || txn.targetPocketId == id,
+                      category:
+                          (
+                            id,
+                            _,
+                            __,
+                            ___,
+                            ____,
+                            _____,
+                            ______,
+                            _______,
+                            ________,
+                            _________,
+                          ) => txn.categoryId == id,
+                    );
+                  }).toList();
+
+                  if (cardTransactions.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.history, size: 48, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              'No transactions yet',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: cardTransactions.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final txn = cardTransactions[index];
+                      return _TransactionTile(transaction: txn, card: card);
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Error: $error')),
               ),
             ),
 
@@ -222,6 +273,118 @@ class CardDetailsDialog extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionTile extends StatelessWidget {
+  final Transaction transaction;
+  final card_model.Card card;
+
+  const _TransactionTile({required this.transaction, required this.card});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+
+    // Determine if this is incoming or outgoing for this card
+    final isIncoming = card.when(
+      pocket: (id, _, __, ___, ____) => transaction.targetPocketId == id,
+      category:
+          (id, _, __, ___, ____, _____, ______, _______, ________, _________) =>
+              false,
+    );
+
+    // Determine the transaction type and other party
+    String transactionType;
+    String? otherParty;
+
+    if (transaction.targetPocketId != null &&
+        transaction.sourcePocketId != null) {
+      // Transfer
+      transactionType = isIncoming ? 'Transfer In' : 'Transfer Out';
+      otherParty = isIncoming
+          ? 'From ${transaction.categoryName}'
+          : 'To ${transaction.targetPocketName}';
+    } else if (transaction.targetPocketId != null) {
+      // Transfer from category to pocket (sinking fund)
+      transactionType = isIncoming ? 'Sinking Fund' : 'Expense';
+      otherParty = isIncoming
+          ? 'From ${transaction.categoryName}'
+          : transaction.categoryName;
+    } else {
+      // Regular expense
+      transactionType = 'Expense';
+      otherParty = null;
+    }
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isIncoming
+              ? Colors.green.withOpacity(0.1)
+              : Theme.of(context).colorScheme.errorContainer.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          isIncoming ? Icons.arrow_downward : Icons.arrow_upward,
+          color: isIncoming
+              ? Colors.green
+              : Theme.of(context).colorScheme.error,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        transaction.description.isNotEmpty
+            ? transaction.description
+            : transactionType,
+        style: const TextStyle(fontWeight: FontWeight.w500),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (otherParty != null) ...[
+            const SizedBox(height: 4),
+            Text(otherParty, style: Theme.of(context).textTheme.bodySmall),
+          ],
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.calendar_today, size: 12, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                dateFormat.format(transaction.date),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(width: 12),
+              Icon(Icons.access_time, size: 12, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                timeFormat.format(transaction.date),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ],
+      ),
+      trailing: Text(
+        '${isIncoming ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: isIncoming
+              ? Colors.green
+              : Theme.of(context).colorScheme.error,
         ),
       ),
     );
