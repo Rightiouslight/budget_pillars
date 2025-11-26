@@ -59,6 +59,12 @@ class PocketCardWidget extends ConsumerWidget {
               color: color,
             );
 
+            // Hide the snackbar
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+            // Exit transfer mode
+            ref.read(transferModeProvider.notifier).exitTransferMode();
+
             // Show transfer dialog with pre-selected source and destination
             showDialog(
               context: context,
@@ -68,9 +74,6 @@ class PocketCardWidget extends ConsumerWidget {
                 destinationCard: destinationCard,
               ),
             );
-
-            // Exit transfer mode
-            ref.read(transferModeProvider.notifier).exitTransferMode();
           } else {
             // Normal tap - show card details dialog
             final budgetAsync = ref.read(activeBudgetProvider);
@@ -318,19 +321,20 @@ class PocketCardWidget extends ConsumerWidget {
   }
 
   void _showTransferDialog(BuildContext context, WidgetRef ref) {
+    // Capture the notifier before showing the snackbar to avoid disposal issues
+    final transferModeNotifier = ref.read(transferModeProvider.notifier);
+
     // Enter transfer mode with this pocket as the source
-    ref
-        .read(transferModeProvider.notifier)
-        .enterTransferMode(
-          card_model.Card.pocket(
-            id: id,
-            name: name,
-            icon: icon,
-            balance: balance,
-            color: color,
-          ),
-          accountId,
-        );
+    transferModeNotifier.enterTransferMode(
+      card_model.Card.pocket(
+        id: id,
+        name: name,
+        icon: icon,
+        balance: balance,
+        color: color,
+      ),
+      accountId,
+    );
 
     // Show a snackbar to indicate transfer mode
     ScaffoldMessenger.of(context).showSnackBar(
@@ -339,7 +343,7 @@ class PocketCardWidget extends ConsumerWidget {
         action: SnackBarAction(
           label: 'Cancel',
           onPressed: () {
-            ref.read(transferModeProvider.notifier).exitTransferMode();
+            transferModeNotifier.exitTransferMode();
           },
         ),
         duration: const Duration(seconds: 10),

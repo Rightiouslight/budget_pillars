@@ -404,24 +404,25 @@ class CategoryCardWidget extends ConsumerWidget {
   }
 
   void _showTransferDialog(BuildContext context, WidgetRef ref) {
+    // Capture the notifier before showing the snackbar to avoid disposal issues
+    final transferModeNotifier = ref.read(transferModeProvider.notifier);
+
     // Enter transfer mode with this category as the source (for refunds)
-    ref
-        .read(transferModeProvider.notifier)
-        .enterTransferMode(
-          card_model.Card.category(
-            id: id,
-            name: name,
-            icon: icon,
-            budgetValue: budgetValue,
-            currentValue: currentValue,
-            color: color,
-            isRecurring: isRecurring,
-            dueDate: dueDate,
-            destinationPocketId: null,
-            destinationAccountId: null,
-          ),
-          accountId,
-        );
+    transferModeNotifier.enterTransferMode(
+      card_model.Card.category(
+        id: id,
+        name: name,
+        icon: icon,
+        budgetValue: budgetValue,
+        currentValue: currentValue,
+        color: color,
+        isRecurring: isRecurring,
+        dueDate: dueDate,
+        destinationPocketId: null,
+        destinationAccountId: null,
+      ),
+      accountId,
+    );
 
     // Show a snackbar to indicate transfer mode
     ScaffoldMessenger.of(context).showSnackBar(
@@ -430,7 +431,7 @@ class CategoryCardWidget extends ConsumerWidget {
         action: SnackBarAction(
           label: 'Cancel',
           onPressed: () {
-            ref.read(transferModeProvider.notifier).exitTransferMode();
+            transferModeNotifier.exitTransferMode();
           },
         ),
         duration: const Duration(seconds: 10),

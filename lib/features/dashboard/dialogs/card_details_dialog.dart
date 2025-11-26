@@ -7,7 +7,6 @@ import '../../../providers/active_budget_provider.dart';
 import '../providers/transfer_mode_provider.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
-import 'add_expense_dialog.dart';
 import 'add_pocket_dialog.dart';
 import 'add_category_dialog.dart';
 import 'package:intl/intl.dart';
@@ -92,96 +91,56 @@ class CardDetailsDialog extends ConsumerWidget {
             // Action buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  // Edit button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        card.when(
-                          pocket: (id, name, icon, balance, color) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AddPocketDialog(
-                                accountId: accountId,
-                                pocketId: id,
-                                initialName: name,
-                                initialIcon: icon,
-                                initialColor: color,
-                              ),
-                            );
-                          },
-                          category:
-                              (
-                                id,
-                                name,
-                                icon,
-                                budgetValue,
-                                currentValue,
-                                color,
-                                isRecurring,
-                                dueDate,
-                                destinationPocketId,
-                                destinationAccountId,
-                              ) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AddCategoryDialog(
-                                    accountId: accountId,
-                                    categoryId: id,
-                                    initialName: name,
-                                    initialIcon: icon,
-                                    initialBudgetValue: budgetValue,
-                                    initialColor: color,
-                                    initialIsRecurring: isRecurring,
-                                    initialDueDate: dueDate,
-                                  ),
-                                );
-                              },
-                        );
-                      },
-                      icon: const Icon(Icons.edit, size: 18),
-                      label: const Text('Edit'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Add Expense button
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        final cardId = card.when(
-                          pocket: (id, _, __, ___, ____) => id,
-                          category:
-                              (
-                                id,
-                                _,
-                                __,
-                                ___,
-                                ____,
-                                _____,
-                                ______,
-                                _______,
-                                ________,
-                                _________,
-                              ) => id,
-                        );
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    card.when(
+                      pocket: (id, name, icon, balance, color) {
                         showDialog(
                           context: context,
-                          builder: (context) => AddExpenseDialog(
+                          builder: (context) => AddPocketDialog(
                             accountId: accountId,
-                            categoryId: cardId,
-                            card: card,
+                            pocketId: id,
+                            initialName: name,
+                            initialIcon: icon,
+                            initialColor: color,
                           ),
                         );
                       },
-                      icon: const Icon(Icons.add_circle_outline, size: 18),
-                      label: const Text('Add Expense'),
-                    ),
-                  ),
-                ],
+                      category:
+                          (
+                            id,
+                            name,
+                            icon,
+                            budgetValue,
+                            currentValue,
+                            color,
+                            isRecurring,
+                            dueDate,
+                            destinationPocketId,
+                            destinationAccountId,
+                          ) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AddCategoryDialog(
+                                accountId: accountId,
+                                categoryId: id,
+                                initialName: name,
+                                initialIcon: icon,
+                                initialBudgetValue: budgetValue,
+                                initialColor: color,
+                                initialIsRecurring: isRecurring,
+                                initialDueDate: dueDate,
+                              ),
+                            );
+                          },
+                    );
+                  },
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text('Edit'),
+                ),
               ),
             ),
 
