@@ -15,6 +15,198 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
+ColumnMapping _$ColumnMappingFromJson(Map<String, dynamic> json) {
+  return _ColumnMapping.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ColumnMapping {
+  String? get date => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+  String? get amount => throw _privateConstructorUsedError;
+
+  /// Serializes this ColumnMapping to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ColumnMapping
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ColumnMappingCopyWith<ColumnMapping> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ColumnMappingCopyWith<$Res> {
+  factory $ColumnMappingCopyWith(
+    ColumnMapping value,
+    $Res Function(ColumnMapping) then,
+  ) = _$ColumnMappingCopyWithImpl<$Res, ColumnMapping>;
+  @useResult
+  $Res call({String? date, String? description, String? amount});
+}
+
+/// @nodoc
+class _$ColumnMappingCopyWithImpl<$Res, $Val extends ColumnMapping>
+    implements $ColumnMappingCopyWith<$Res> {
+  _$ColumnMappingCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ColumnMapping
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? date = freezed,
+    Object? description = freezed,
+    Object? amount = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            date: freezed == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            description: freezed == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            amount: freezed == amount
+                ? _value.amount
+                : amount // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$ColumnMappingImplCopyWith<$Res>
+    implements $ColumnMappingCopyWith<$Res> {
+  factory _$$ColumnMappingImplCopyWith(
+    _$ColumnMappingImpl value,
+    $Res Function(_$ColumnMappingImpl) then,
+  ) = __$$ColumnMappingImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? date, String? description, String? amount});
+}
+
+/// @nodoc
+class __$$ColumnMappingImplCopyWithImpl<$Res>
+    extends _$ColumnMappingCopyWithImpl<$Res, _$ColumnMappingImpl>
+    implements _$$ColumnMappingImplCopyWith<$Res> {
+  __$$ColumnMappingImplCopyWithImpl(
+    _$ColumnMappingImpl _value,
+    $Res Function(_$ColumnMappingImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ColumnMapping
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? date = freezed,
+    Object? description = freezed,
+    Object? amount = freezed,
+  }) {
+    return _then(
+      _$ColumnMappingImpl(
+        date: freezed == date
+            ? _value.date
+            : date // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        description: freezed == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        amount: freezed == amount
+            ? _value.amount
+            : amount // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ColumnMappingImpl implements _ColumnMapping {
+  const _$ColumnMappingImpl({this.date, this.description, this.amount});
+
+  factory _$ColumnMappingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ColumnMappingImplFromJson(json);
+
+  @override
+  final String? date;
+  @override
+  final String? description;
+  @override
+  final String? amount;
+
+  @override
+  String toString() {
+    return 'ColumnMapping(date: $date, description: $description, amount: $amount)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ColumnMappingImpl &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.amount, amount) || other.amount == amount));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, date, description, amount);
+
+  /// Create a copy of ColumnMapping
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ColumnMappingImplCopyWith<_$ColumnMappingImpl> get copyWith =>
+      __$$ColumnMappingImplCopyWithImpl<_$ColumnMappingImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ColumnMappingImplToJson(this);
+  }
+}
+
+abstract class _ColumnMapping implements ColumnMapping {
+  const factory _ColumnMapping({
+    final String? date,
+    final String? description,
+    final String? amount,
+  }) = _$ColumnMappingImpl;
+
+  factory _ColumnMapping.fromJson(Map<String, dynamic> json) =
+      _$ColumnMappingImpl.fromJson;
+
+  @override
+  String? get date;
+  @override
+  String? get description;
+  @override
+  String? get amount;
+
+  /// Create a copy of ColumnMapping
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ColumnMappingImplCopyWith<_$ColumnMappingImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 ImportProfile _$ImportProfileFromJson(Map<String, dynamic> json) {
   return _ImportProfile.fromJson(json);
 }
@@ -23,13 +215,12 @@ ImportProfile _$ImportProfileFromJson(Map<String, dynamic> json) {
 mixin _$ImportProfile {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError; // 'csv', 'text', 'sms'
-  Map<String, dynamic> get columnMapping =>
-      throw _privateConstructorUsedError; // Maps CSV columns to transaction fields
-  String? get regex =>
-      throw _privateConstructorUsedError; // For text/SMS parsing
-  Map<String, String> get categoryMappings =>
-      throw _privateConstructorUsedError;
+  bool get hasHeader => throw _privateConstructorUsedError;
+  String get dateFormat => throw _privateConstructorUsedError;
+  ColumnMapping get columnMapping => throw _privateConstructorUsedError;
+  int? get columnCount => throw _privateConstructorUsedError;
+  String get smsStartWords => throw _privateConstructorUsedError;
+  String get smsStopWords => throw _privateConstructorUsedError;
 
   /// Serializes this ImportProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,11 +242,15 @@ abstract class $ImportProfileCopyWith<$Res> {
   $Res call({
     String id,
     String name,
-    String type,
-    Map<String, dynamic> columnMapping,
-    String? regex,
-    Map<String, String> categoryMappings,
+    bool hasHeader,
+    String dateFormat,
+    ColumnMapping columnMapping,
+    int? columnCount,
+    String smsStartWords,
+    String smsStopWords,
   });
+
+  $ColumnMappingCopyWith<$Res> get columnMapping;
 }
 
 /// @nodoc
@@ -75,10 +270,12 @@ class _$ImportProfileCopyWithImpl<$Res, $Val extends ImportProfile>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? type = null,
+    Object? hasHeader = null,
+    Object? dateFormat = null,
     Object? columnMapping = null,
-    Object? regex = freezed,
-    Object? categoryMappings = null,
+    Object? columnCount = freezed,
+    Object? smsStartWords = null,
+    Object? smsStopWords = null,
   }) {
     return _then(
       _value.copyWith(
@@ -90,25 +287,43 @@ class _$ImportProfileCopyWithImpl<$Res, $Val extends ImportProfile>
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
                       as String,
-            type: null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
+            hasHeader: null == hasHeader
+                ? _value.hasHeader
+                : hasHeader // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            dateFormat: null == dateFormat
+                ? _value.dateFormat
+                : dateFormat // ignore: cast_nullable_to_non_nullable
                       as String,
             columnMapping: null == columnMapping
                 ? _value.columnMapping
                 : columnMapping // ignore: cast_nullable_to_non_nullable
-                      as Map<String, dynamic>,
-            regex: freezed == regex
-                ? _value.regex
-                : regex // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            categoryMappings: null == categoryMappings
-                ? _value.categoryMappings
-                : categoryMappings // ignore: cast_nullable_to_non_nullable
-                      as Map<String, String>,
+                      as ColumnMapping,
+            columnCount: freezed == columnCount
+                ? _value.columnCount
+                : columnCount // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            smsStartWords: null == smsStartWords
+                ? _value.smsStartWords
+                : smsStartWords // ignore: cast_nullable_to_non_nullable
+                      as String,
+            smsStopWords: null == smsStopWords
+                ? _value.smsStopWords
+                : smsStopWords // ignore: cast_nullable_to_non_nullable
+                      as String,
           )
           as $Val,
     );
+  }
+
+  /// Create a copy of ImportProfile
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ColumnMappingCopyWith<$Res> get columnMapping {
+    return $ColumnMappingCopyWith<$Res>(_value.columnMapping, (value) {
+      return _then(_value.copyWith(columnMapping: value) as $Val);
+    });
   }
 }
 
@@ -124,11 +339,16 @@ abstract class _$$ImportProfileImplCopyWith<$Res>
   $Res call({
     String id,
     String name,
-    String type,
-    Map<String, dynamic> columnMapping,
-    String? regex,
-    Map<String, String> categoryMappings,
+    bool hasHeader,
+    String dateFormat,
+    ColumnMapping columnMapping,
+    int? columnCount,
+    String smsStartWords,
+    String smsStopWords,
   });
+
+  @override
+  $ColumnMappingCopyWith<$Res> get columnMapping;
 }
 
 /// @nodoc
@@ -147,10 +367,12 @@ class __$$ImportProfileImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? type = null,
+    Object? hasHeader = null,
+    Object? dateFormat = null,
     Object? columnMapping = null,
-    Object? regex = freezed,
-    Object? categoryMappings = null,
+    Object? columnCount = freezed,
+    Object? smsStartWords = null,
+    Object? smsStopWords = null,
   }) {
     return _then(
       _$ImportProfileImpl(
@@ -162,22 +384,30 @@ class __$$ImportProfileImplCopyWithImpl<$Res>
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
                   as String,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
+        hasHeader: null == hasHeader
+            ? _value.hasHeader
+            : hasHeader // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        dateFormat: null == dateFormat
+            ? _value.dateFormat
+            : dateFormat // ignore: cast_nullable_to_non_nullable
                   as String,
         columnMapping: null == columnMapping
-            ? _value._columnMapping
+            ? _value.columnMapping
             : columnMapping // ignore: cast_nullable_to_non_nullable
-                  as Map<String, dynamic>,
-        regex: freezed == regex
-            ? _value.regex
-            : regex // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        categoryMappings: null == categoryMappings
-            ? _value._categoryMappings
-            : categoryMappings // ignore: cast_nullable_to_non_nullable
-                  as Map<String, String>,
+                  as ColumnMapping,
+        columnCount: freezed == columnCount
+            ? _value.columnCount
+            : columnCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        smsStartWords: null == smsStartWords
+            ? _value.smsStartWords
+            : smsStartWords // ignore: cast_nullable_to_non_nullable
+                  as String,
+        smsStopWords: null == smsStopWords
+            ? _value.smsStopWords
+            : smsStopWords // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -189,12 +419,13 @@ class _$ImportProfileImpl implements _ImportProfile {
   const _$ImportProfileImpl({
     required this.id,
     required this.name,
-    this.type = 'csv',
-    final Map<String, dynamic> columnMapping = const {},
-    this.regex,
-    final Map<String, String> categoryMappings = const {},
-  }) : _columnMapping = columnMapping,
-       _categoryMappings = categoryMappings;
+    this.hasHeader = true,
+    this.dateFormat = 'M/d/yyyy',
+    this.columnMapping = const ColumnMapping(),
+    this.columnCount,
+    this.smsStartWords = '',
+    this.smsStopWords = '',
+  });
 
   factory _$ImportProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$ImportProfileImplFromJson(json);
@@ -205,35 +436,25 @@ class _$ImportProfileImpl implements _ImportProfile {
   final String name;
   @override
   @JsonKey()
-  final String type;
-  // 'csv', 'text', 'sms'
-  final Map<String, dynamic> _columnMapping;
-  // 'csv', 'text', 'sms'
+  final bool hasHeader;
   @override
   @JsonKey()
-  Map<String, dynamic> get columnMapping {
-    if (_columnMapping is EqualUnmodifiableMapView) return _columnMapping;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_columnMapping);
-  }
-
-  // Maps CSV columns to transaction fields
-  @override
-  final String? regex;
-  // For text/SMS parsing
-  final Map<String, String> _categoryMappings;
-  // For text/SMS parsing
+  final String dateFormat;
   @override
   @JsonKey()
-  Map<String, String> get categoryMappings {
-    if (_categoryMappings is EqualUnmodifiableMapView) return _categoryMappings;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_categoryMappings);
-  }
+  final ColumnMapping columnMapping;
+  @override
+  final int? columnCount;
+  @override
+  @JsonKey()
+  final String smsStartWords;
+  @override
+  @JsonKey()
+  final String smsStopWords;
 
   @override
   String toString() {
-    return 'ImportProfile(id: $id, name: $name, type: $type, columnMapping: $columnMapping, regex: $regex, categoryMappings: $categoryMappings)';
+    return 'ImportProfile(id: $id, name: $name, hasHeader: $hasHeader, dateFormat: $dateFormat, columnMapping: $columnMapping, columnCount: $columnCount, smsStartWords: $smsStartWords, smsStopWords: $smsStopWords)';
   }
 
   @override
@@ -243,16 +464,18 @@ class _$ImportProfileImpl implements _ImportProfile {
             other is _$ImportProfileImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.type, type) || other.type == type) &&
-            const DeepCollectionEquality().equals(
-              other._columnMapping,
-              _columnMapping,
-            ) &&
-            (identical(other.regex, regex) || other.regex == regex) &&
-            const DeepCollectionEquality().equals(
-              other._categoryMappings,
-              _categoryMappings,
-            ));
+            (identical(other.hasHeader, hasHeader) ||
+                other.hasHeader == hasHeader) &&
+            (identical(other.dateFormat, dateFormat) ||
+                other.dateFormat == dateFormat) &&
+            (identical(other.columnMapping, columnMapping) ||
+                other.columnMapping == columnMapping) &&
+            (identical(other.columnCount, columnCount) ||
+                other.columnCount == columnCount) &&
+            (identical(other.smsStartWords, smsStartWords) ||
+                other.smsStartWords == smsStartWords) &&
+            (identical(other.smsStopWords, smsStopWords) ||
+                other.smsStopWords == smsStopWords));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -261,10 +484,12 @@ class _$ImportProfileImpl implements _ImportProfile {
     runtimeType,
     id,
     name,
-    type,
-    const DeepCollectionEquality().hash(_columnMapping),
-    regex,
-    const DeepCollectionEquality().hash(_categoryMappings),
+    hasHeader,
+    dateFormat,
+    columnMapping,
+    columnCount,
+    smsStartWords,
+    smsStopWords,
   );
 
   /// Create a copy of ImportProfile
@@ -285,10 +510,12 @@ abstract class _ImportProfile implements ImportProfile {
   const factory _ImportProfile({
     required final String id,
     required final String name,
-    final String type,
-    final Map<String, dynamic> columnMapping,
-    final String? regex,
-    final Map<String, String> categoryMappings,
+    final bool hasHeader,
+    final String dateFormat,
+    final ColumnMapping columnMapping,
+    final int? columnCount,
+    final String smsStartWords,
+    final String smsStopWords,
   }) = _$ImportProfileImpl;
 
   factory _ImportProfile.fromJson(Map<String, dynamic> json) =
@@ -299,13 +526,17 @@ abstract class _ImportProfile implements ImportProfile {
   @override
   String get name;
   @override
-  String get type; // 'csv', 'text', 'sms'
+  bool get hasHeader;
   @override
-  Map<String, dynamic> get columnMapping; // Maps CSV columns to transaction fields
+  String get dateFormat;
   @override
-  String? get regex; // For text/SMS parsing
+  ColumnMapping get columnMapping;
   @override
-  Map<String, String> get categoryMappings;
+  int? get columnCount;
+  @override
+  String get smsStartWords;
+  @override
+  String get smsStopWords;
 
   /// Create a copy of ImportProfile
   /// with the given fields replaced by the non-null parameter values.
