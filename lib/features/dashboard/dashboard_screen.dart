@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../providers/active_budget_provider.dart';
-import '../../features/auth/auth_controller.dart';
 import 'widgets/account_board_widget.dart';
+import 'widgets/budget_header.dart';
 import 'dialogs/add_account_dialog.dart';
 import 'services/auto_payment_service.dart';
 import 'dashboard_controller.dart';
@@ -32,60 +31,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final monthDisplayName = ref.watch(monthDisplayNameProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Budget Pillars'),
-            Text(
-              monthDisplayName,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        actions: [
-          // Previous Month Button
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              ref.read(activeBudgetInfoProvider.notifier).previousMonth();
-            },
-            tooltip: 'Previous Month',
-          ),
-          // Next Month Button
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              ref.read(activeBudgetInfoProvider.notifier).nextMonth();
-            },
-            tooltip: 'Next Month',
-          ),
-          // Reports Button
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              context.push('/reports');
-            },
-            tooltip: 'Reports',
-          ),
-          // Settings Button
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              context.push('/settings');
-            },
-            tooltip: 'Settings',
-          ),
-          // Sign Out Button
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-            },
-            tooltip: 'Sign Out',
-          ),
-        ],
-      ),
+      appBar: const BudgetHeader(),
       body: budgetAsync.when(
         data: (budget) {
           if (budget == null) {
@@ -172,6 +118,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildBudgetView(BuildContext context, WidgetRef ref, budget) {
+    final isReorderingAccounts = ref.watch(reorderAccountsModeProvider);
+
     if (budget.accounts.isEmpty) {
       return _buildEmptyBudget(
         context,
@@ -200,10 +148,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemCount: budget.accounts.length,
       onReorder: (oldIndex, newIndex) {
-        ref
-            .read(dashboardControllerProvider.notifier)
-            .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
+        if (isReorderingAccounts) {
+          ref
+              .read(dashboardControllerProvider.notifier)
+              .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
+        }
       },
+      buildDefaultDragHandles: isReorderingAccounts,
       proxyDecorator: (child, index, animation) {
         return AnimatedBuilder(
           animation: animation,
@@ -225,10 +176,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           margin: EdgeInsets.only(
             right: i < budget.accounts.length - 1 ? 16 : 0,
           ),
-          child: AccountBoardWidget(
-            account: budget.accounts[i],
-            accountIndex: i,
-            totalAccounts: budget.accounts.length,
+          child: Stack(
+            children: [
+              AccountBoardWidget(
+                account: budget.accounts[i],
+                accountIndex: i,
+                totalAccounts: budget.accounts.length,
+              ),
+              if (isReorderingAccounts)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.drag_handle,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       },

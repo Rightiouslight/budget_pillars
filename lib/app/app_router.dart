@@ -6,6 +6,8 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/import_export/import_export_screen.dart';
+import '../features/import/import_screen.dart';
+import '../features/guide/guide_screen.dart';
 
 /// Provider for GoRouter
 final routerProvider = Provider<GoRouter>((ref) {
@@ -49,6 +51,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/reports',
         name: 'reports',
         builder: (context, state) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: '/import',
+        name: 'import',
+        builder: (context, state) => const ImportScreen(),
+      ),
+      GoRoute(
+        path: '/guide',
+        name: 'guide',
+        builder: (context, state) => const GuideScreen(),
       ),
       GoRoute(
         path: '/import-export',
