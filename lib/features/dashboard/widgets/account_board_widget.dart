@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/account.dart';
+import '../dialogs/add_account_dialog.dart';
 import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dashboard_controller.dart';
@@ -377,9 +378,13 @@ class AccountBoardWidget extends ConsumerWidget {
   }
 
   void _showEditAccountDialog(BuildContext context) {
-    // TODO: Implement edit account dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit account feature coming soon')),
+    showDialog(
+      context: context,
+      builder: (context) => AddAccountDialog(
+        accountId: account.id,
+        initialName: account.name,
+        initialIcon: account.icon,
+      ),
     );
   }
 

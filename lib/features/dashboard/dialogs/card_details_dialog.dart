@@ -5,6 +5,8 @@ import '../../../data/models/account.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
 import 'add_expense_dialog.dart';
+import 'add_pocket_dialog.dart';
+import 'add_category_dialog.dart';
 
 class CardDetailsDialog extends ConsumerWidget {
   final String accountId;
@@ -76,16 +78,68 @@ class CardDetailsDialog extends ConsumerWidget {
             // Action buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    // Get the card ID
-                    final cardId = card.when(
-                      pocket: (id, _, __, ___, ____) => id,
-                      category:
-                          (
+              child: Row(
+                children: [
+                  // Edit button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        card.when(
+                          pocket: (id, name, icon, balance, color) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AddPocketDialog(
+                                accountId: accountId,
+                                pocketId: id,
+                                initialName: name,
+                                initialIcon: icon,
+                                initialColor: color,
+                              ),
+                            );
+                          },
+                          category: (
+                            id,
+                            name,
+                            icon,
+                            budgetValue,
+                            currentValue,
+                            color,
+                            isRecurring,
+                            dueDate,
+                            destinationPocketId,
+                            destinationAccountId,
+                          ) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AddCategoryDialog(
+                                accountId: accountId,
+                                categoryId: id,
+                                initialName: name,
+                                initialIcon: icon,
+                                initialBudgetValue: budgetValue,
+                                initialColor: color,
+                                initialIsRecurring: isRecurring,
+                                initialDueDate: dueDate,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Edit'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Add Expense button
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        final cardId = card.when(
+                          pocket: (id, _, __, ___, ____) => id,
+                          category: (
                             id,
                             _,
                             __,
@@ -97,19 +151,21 @@ class CardDetailsDialog extends ConsumerWidget {
                             ________,
                             _________,
                           ) => id,
-                    );
-                    showDialog(
-                      context: context,
-                      builder: (context) => AddExpenseDialog(
-                        accountId: accountId,
-                        categoryId: cardId,
-                        card: card,
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                  label: const Text('Add Expense'),
-                ),
+                        );
+                        showDialog(
+                          context: context,
+                          builder: (context) => AddExpenseDialog(
+                            accountId: accountId,
+                            categoryId: cardId,
+                            card: card,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add_circle_outline, size: 18),
+                      label: const Text('Add Expense'),
+                    ),
+                  ),
+                ],
               ),
             ),
 

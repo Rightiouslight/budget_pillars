@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dashboard_controller.dart';
 
-/// Dialog for adding a new account
+/// Dialog for adding or editing an account
 class AddAccountDialog extends ConsumerStatefulWidget {
-  const AddAccountDialog({super.key});
+  final String? accountId; // If editing, pass the account ID
+  final String? initialName;
+  final String? initialIcon;
+
+  const AddAccountDialog({
+    super.key,
+    this.accountId,
+    this.initialName,
+    this.initialIcon,
+  });
 
   @override
   ConsumerState<AddAccountDialog> createState() => _AddAccountDialogState();
@@ -12,8 +21,8 @@ class AddAccountDialog extends ConsumerStatefulWidget {
 
 class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  String _selectedIcon = '💼';
+  late final TextEditingController _nameController;
+  late String _selectedIcon;
 
   final List<String> _iconOptions = [
     '💼',
@@ -31,16 +40,68 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+    _selectedIcon = widget.initialIcon ?? '💼';
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
   }
 
+  bool get _isEditing => widget.accountId != null;
+
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      if (_isEditing) {
+        await ref
+            .read(dashboardControllerProvider.notifier)
+            .editAccount(
+              accountId: widget.accountId!,
+              name: _nameController.text.trim(),
+              icon: _selectedIcon,
+            );
+      } else {
+        await ref
+            .read(dashboardControllerProvider.notifier)
+            .addAccount(name: _nameController.text.trim(), icon: _selectedIcon);
+      }
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete this account? All pockets and categories in this account will be deleted. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
       await ref
           .read(dashboardControllerProvider.notifier)
-          .addAccount(name: _nameController.text.trim(), icon: _selectedIcon);
+          .deleteAccount(widget.accountId!);
 
       if (mounted) {
         Navigator.of(context).pop();
@@ -53,7 +114,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     final controllerState = ref.watch(dashboardControllerProvider);
 
     return AlertDialog(
-      title: const Text('Add Account'),
+      title: Text(_isEditing ? 'Edit Account' : 'Add Account'),
       content: Form(
         key: _formKey,
         child: Column(
@@ -73,7 +134,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                 }
                 return null;
               },
-              autofocus: true,
+              autofocus: !_isEditing,
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 24),
@@ -121,6 +182,15 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         ),
       ),
       actions: [
+        if (_isEditing)
+          TextButton(
+            onPressed: controllerState.isLoading ? null : _delete,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        const Spacer(),
         TextButton(
           onPressed: controllerState.isLoading
               ? null
@@ -135,7 +205,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Add Account'),
+              : Text(_isEditing ? 'Save' : 'Add Account'),
         ),
       ],
     );
