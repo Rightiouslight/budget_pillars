@@ -59,7 +59,8 @@ class PocketCardWidget extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: cardColor?.withOpacity(0.2) ??
+                      color:
+                          cardColor?.withOpacity(0.2) ??
                           Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -82,12 +83,8 @@ class PocketCardWidget extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -104,12 +101,12 @@ class PocketCardWidget extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           'Pocket',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -119,9 +116,9 @@ class PocketCardWidget extends ConsumerWidget {
                   Text(
                     '\$${balance.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: balance >= 0 ? Colors.green : Colors.red,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: balance >= 0 ? Colors.green : Colors.red,
+                    ),
                   ),
 
                   // More menu
@@ -243,9 +240,7 @@ class PocketCardWidget extends ConsumerWidget {
               // TODO: Implement delete functionality
               Navigator.of(context).pop();
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
@@ -256,20 +251,16 @@ class PocketCardWidget extends ConsumerWidget {
   void _showAddExpenseDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AddExpenseDialog(
-        accountId: accountId,
-        cards: cards,
-      ),
+      builder: (context) =>
+          AddExpenseDialog(accountId: accountId, cards: cards),
     );
   }
 
   void _showTransferDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => TransferFundsDialog(
-        accountId: accountId,
-        cards: cards,
-      ),
+      builder: (context) =>
+          TransferFundsDialog(accountId: accountId, cards: cards),
     );
   }
 

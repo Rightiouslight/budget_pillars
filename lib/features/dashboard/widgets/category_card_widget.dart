@@ -69,7 +69,8 @@ class CategoryCardWidget extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: cardColor?.withOpacity(0.2) ??
+                      color:
+                          cardColor?.withOpacity(0.2) ??
                           Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -92,12 +93,8 @@ class CategoryCardWidget extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -116,25 +113,21 @@ class CategoryCardWidget extends ConsumerWidget {
                           children: [
                             Text(
                               'Category',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                             ),
                             if (dueDate != null && dueDate != 99) ...[
                               Text(
                                 ' • Due: Day $dueDate',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                     ),
                               ),
                             ],
@@ -151,18 +144,15 @@ class CategoryCardWidget extends ConsumerWidget {
                       Text(
                         '\$${remaining.abs().toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isOverBudget ? Colors.red : Colors.green,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: isOverBudget ? Colors.red : Colors.green,
+                        ),
                       ),
                       Text(
                         isOverBudget ? 'Over' : 'Left',
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -218,10 +208,8 @@ class CategoryCardWidget extends ConsumerWidget {
                     child: Text(
                       'Budget: \$${budgetValue.toStringAsFixed(2)} | Spent: \$${currentValue.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   if (isRecurring && remaining > 0) ...[
@@ -250,10 +238,9 @@ class CategoryCardWidget extends ConsumerWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 4,
-                backgroundColor: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withOpacity(0.3),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   cardColor ??
                       (isOverBudget
@@ -332,9 +319,7 @@ class CategoryCardWidget extends ConsumerWidget {
               // TODO: Implement delete functionality
               Navigator.of(context).pop();
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
@@ -345,20 +330,16 @@ class CategoryCardWidget extends ConsumerWidget {
   void _showAddExpenseDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AddExpenseDialog(
-        accountId: accountId,
-        cards: cards,
-      ),
+      builder: (context) =>
+          AddExpenseDialog(accountId: accountId, cards: cards),
     );
   }
 
   void _showTransferDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => TransferFundsDialog(
-        accountId: accountId,
-        cards: cards,
-      ),
+      builder: (context) =>
+          TransferFundsDialog(accountId: accountId, cards: cards),
     );
   }
 
@@ -384,10 +365,9 @@ class CategoryCardWidget extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await ref.read(dashboardControllerProvider.notifier).quickPayCategory(
-            accountId: accountId,
-            categoryId: id,
-          );
+      await ref
+          .read(dashboardControllerProvider.notifier)
+          .quickPayCategory(accountId: accountId, categoryId: id);
     }
   }
 
