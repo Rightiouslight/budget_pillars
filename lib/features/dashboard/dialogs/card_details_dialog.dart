@@ -4,6 +4,7 @@ import '../../../data/models/card.dart' as card_model;
 import '../../../data/models/account.dart';
 import '../../../data/models/transaction.dart';
 import '../../../providers/active_budget_provider.dart';
+import '../providers/transfer_mode_provider.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
 import 'add_expense_dialog.dart';
@@ -26,6 +27,14 @@ class CardDetailsDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgetAsync = ref.watch(activeBudgetProvider);
+
+    // Listen for transfer mode changes and close dialog when transfer mode is entered
+    ref.listen<TransferModeState?>(transferModeProvider, (previous, next) {
+      // If transfer mode was just entered (previous was null, next is not null)
+      if (previous == null && next != null) {
+        Navigator.of(context).pop();
+      }
+    });
 
     return Dialog(
       child: ConstrainedBox(
