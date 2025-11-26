@@ -35,43 +35,43 @@ class PocketCardWidget extends ConsumerWidget {
     final cardColor = color != null ? _parseColor(color!) : null;
 
     return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: cardColor ?? Theme.of(context).colorScheme.primary,
-              width: 3,
-            ),
-          ),
-          child: InkWell(
-            onTap: () {
-              final budgetAsync = ref.read(activeBudgetProvider);
-              budgetAsync.whenData((budget) {
-                if (budget != null) {
-                  final account = budget.accounts.firstWhere(
-                    (acc) => acc.id == accountId,
-                  );
-                  showDialog(
-                    context: context,
-                    builder: (context) => CardDetailsDialog(
-                      accountId: accountId,
-                      card: card_model.Card.pocket(
-                        id: id,
-                        name: name,
-                        icon: icon,
-                        balance: balance,
-                        color: color,
-                      ),
-                      account: account,
-                    ),
-                  );
-                }
-              });
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: cardColor ?? Theme.of(context).colorScheme.primary,
+          width: 3,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          final budgetAsync = ref.read(activeBudgetProvider);
+          budgetAsync.whenData((budget) {
+            if (budget != null) {
+              final account = budget.accounts.firstWhere(
+                (acc) => acc.id == accountId,
+              );
+              showDialog(
+                context: context,
+                builder: (context) => CardDetailsDialog(
+                  accountId: accountId,
+                  card: card_model.Card.pocket(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance,
+                    color: color,
+                  ),
+                  account: account,
+                ),
+              );
+            }
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // Header with icon, name, balance, and menu
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),

@@ -181,7 +181,12 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
                                   children: [
                                     Text(icon),
                                     const SizedBox(width: 8),
-                                    Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                    Flexible(
+                                      child: Text(
+                                        name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               );

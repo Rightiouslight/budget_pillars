@@ -33,44 +33,45 @@ class CardDetailsDialog extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: card.when(
-                  pocket: (id, name, icon, balance, color) {
-                    return PocketCardWidget(
-                      accountId: accountId,
-                      id: id,
-                      name: name,
-                      icon: icon,
-                      balance: balance,
-                      color: color,
-                      isDefault: id == account.defaultPocketId,
-                      cards: account.cards,
-                    );
-                  },
-                  category: (
-                    id,
-                    name,
-                    icon,
-                    budgetValue,
-                    currentValue,
-                    color,
-                    isRecurring,
-                    dueDate,
-                    destinationPocketId,
-                    destinationAccountId,
-                  ) {
-                    return CategoryCardWidget(
-                      accountId: accountId,
-                      id: id,
-                      name: name,
-                      icon: icon,
-                      budgetValue: budgetValue,
-                      currentValue: currentValue,
-                      color: color,
-                      isRecurring: isRecurring,
-                      dueDate: dueDate,
-                      cards: account.cards,
-                    );
-                  },
-                ),
+                pocket: (id, name, icon, balance, color) {
+                  return PocketCardWidget(
+                    accountId: accountId,
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance,
+                    color: color,
+                    isDefault: id == account.defaultPocketId,
+                    cards: account.cards,
+                  );
+                },
+                category:
+                    (
+                      id,
+                      name,
+                      icon,
+                      budgetValue,
+                      currentValue,
+                      color,
+                      isRecurring,
+                      dueDate,
+                      destinationPocketId,
+                      destinationAccountId,
+                    ) {
+                      return CategoryCardWidget(
+                        accountId: accountId,
+                        id: id,
+                        name: name,
+                        icon: icon,
+                        budgetValue: budgetValue,
+                        currentValue: currentValue,
+                        color: color,
+                        isRecurring: isRecurring,
+                        dueDate: dueDate,
+                        cards: account.cards,
+                      );
+                    },
+              ),
             ),
 
             // Action buttons
@@ -127,8 +128,8 @@ class CardDetailsDialog extends ConsumerWidget {
                   Text(
                     'Transaction History',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),

@@ -240,7 +240,12 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
                               children: [
                                 Text(icon),
                                 const SizedBox(width: 8),
-                                Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '\$${balance.toStringAsFixed(2)}',
@@ -304,7 +309,12 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
                               children: [
                                 Text(icon),
                                 const SizedBox(width: 8),
-                                Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '\$${balance.toStringAsFixed(2)}',
