@@ -5,6 +5,7 @@ import '../../data/models/monthly_budget.dart';
 import '../../data/models/account.dart';
 import '../../data/models/card.dart';
 import '../../data/models/transaction.dart';
+import '../../data/models/recurring_income.dart';
 import '../../providers/active_budget_provider.dart';
 
 /// Provider for the dashboard controller
@@ -105,6 +106,186 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
           .toList();
 
       final updatedBudget = budget.copyWith(accounts: updatedAccounts);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
+
+  // ===== INCOME OPERATIONS =====
+
+  /// Add income to a pocket
+  Future<void> addIncome({
+    required String accountId,
+    required String pocketId,
+    required double amount,
+    required String description,
+    DateTime? date,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final incomeDate = date ?? DateTime.now();
+
+      // Find the account and pocket
+      final accountIndex = budget.accounts.indexWhere(
+        (account) => account.id == accountId,
+      );
+      if (accountIndex == -1) return;
+
+      final account = budget.accounts[accountIndex];
+      final pocketIndex = account.cards.indexWhere(
+        (card) => card.when(
+          pocket: (id, _, __, ___, ____) => id == pocketId,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) => false,
+        ),
+      );
+      if (pocketIndex == -1) return;
+
+      // Update pocket balance
+      final updatedCards = List<Card>.from(account.cards);
+      final pocket = updatedCards[pocketIndex];
+      updatedCards[pocketIndex] = pocket.when(
+        pocket: (id, name, icon, balance, color) {
+          return Card.pocket(
+            id: id,
+            name: name,
+            icon: icon,
+            balance: balance + amount,
+            color: color,
+          );
+        },
+        category:
+            (
+              _,
+              __,
+              ___,
+              ____,
+              _____,
+              ______,
+              _______,
+              ________,
+              _________,
+              __________,
+            ) => pocket,
+      );
+
+      // Create transaction
+      final transaction = Transaction(
+        id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
+        amount: amount,
+        description: description,
+        date: incomeDate,
+        accountId: accountId,
+        accountName: account.name,
+        categoryId: 'income',
+        categoryName:
+            'Income to ${pocket.when(pocket: (_, name, __, ___, ____) => name, category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => '')}',
+        targetPocketId: pocketId,
+        targetPocketName: pocket.when(
+          pocket: (_, name, __, ___, ____) => name,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) => '',
+        ),
+      );
+
+      // Update budget
+      final accounts = List<Account>.from(budget.accounts);
+      accounts[accountIndex] = account.copyWith(cards: updatedCards);
+
+      final updatedBudget = budget.copyWith(
+        accounts: accounts,
+        transactions: [transaction, ...budget.transactions],
+      );
+
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
+
+  /// Save or update a recurring income
+  Future<void> saveRecurringIncome({
+    String? id,
+    required String accountId,
+    required String pocketId,
+    required double amount,
+    required String description,
+    required int dayOfMonth,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final recurringIncomes = List<RecurringIncome>.from(
+        budget.recurringIncomes,
+      );
+
+      if (id != null) {
+        // Update existing recurring income
+        final index = recurringIncomes.indexWhere((income) => income.id == id);
+        if (index != -1) {
+          recurringIncomes[index] = RecurringIncome(
+            id: id,
+            description: description,
+            amount: amount,
+            accountId: accountId,
+            pocketId: pocketId,
+            dayOfMonth: dayOfMonth,
+          );
+        }
+      } else {
+        // Add new recurring income
+        final newIncome = RecurringIncome(
+          id: 'rec_inc_${DateTime.now().millisecondsSinceEpoch}',
+          description: description,
+          amount: amount,
+          accountId: accountId,
+          pocketId: pocketId,
+          dayOfMonth: dayOfMonth,
+        );
+        recurringIncomes.add(newIncome);
+      }
+
+      final updatedBudget = budget.copyWith(recurringIncomes: recurringIncomes);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
+
+  /// Delete a recurring income
+  Future<void> deleteRecurringIncome(String incomeId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final recurringIncomes = budget.recurringIncomes
+          .where((income) => income.id != incomeId)
+          .toList();
+
+      final updatedBudget = budget.copyWith(recurringIncomes: recurringIncomes);
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }

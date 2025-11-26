@@ -4,6 +4,8 @@ import '../../../data/models/account.dart';
 import '../dialogs/add_account_dialog.dart';
 import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_category_dialog.dart';
+import '../dialogs/add_income_dialog.dart';
+import '../dialogs/recurring_incomes_dialog.dart';
 import '../dashboard_controller.dart';
 import '../../../providers/active_budget_provider.dart';
 import '../../budget_planner/budget_planner_dialog.dart';
@@ -102,6 +104,27 @@ class AccountBoardWidget extends ConsumerWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Add Income
+                  Tooltip(
+                    message: 'Add Income',
+                    child: IconButton(
+                      icon: const Icon(Icons.attach_money, size: 20),
+                      onPressed: () => _showAddIncomeDialog(context),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+
+                  // Recurring Incomes
+                  Tooltip(
+                    message: 'Recurring Incomes',
+                    child: IconButton(
+                      icon: const Icon(Icons.event_repeat, size: 20),
+                      onPressed: () =>
+                          _showRecurringIncomesDialog(context, ref),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+
                   // Add Pocket
                   Tooltip(
                     message: 'Add Pocket',
@@ -391,6 +414,26 @@ class AccountBoardWidget extends ConsumerWidget {
       context: context,
       builder: (context) => AddCategoryDialog(accountId: account.id),
     );
+  }
+
+  void _showAddIncomeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddIncomeDialog(account: account),
+    );
+  }
+
+  void _showRecurringIncomesDialog(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.read(activeBudgetProvider);
+    budgetAsync.whenData((budget) {
+      if (budget != null) {
+        showDialog(
+          context: context,
+          builder: (context) =>
+              RecurringIncomesDialog(account: account, budget: budget),
+        );
+      }
+    });
   }
 
   void _showBudgetPlannerDialog(BuildContext context, WidgetRef ref) {
