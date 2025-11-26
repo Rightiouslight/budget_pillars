@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/active_budget_provider.dart';
 import '../../features/auth/auth_controller.dart';
 import 'widgets/account_board_widget.dart';
 import 'dialogs/add_account_dialog.dart';
+import 'services/auto_payment_service.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Process automatic payments on dashboard load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(autoPaymentServiceProvider).processIfNeeded();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final budgetAsync = ref.watch(activeBudgetProvider);
     final budgetInfo = ref.watch(activeBudgetInfoProvider);
     final monthDisplayName = ref.watch(monthDisplayNameProvider);
@@ -42,6 +58,22 @@ class DashboardScreen extends ConsumerWidget {
               ref.read(activeBudgetInfoProvider.notifier).nextMonth();
             },
             tooltip: 'Next Month',
+          ),
+          // Reports Button
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              context.push('/reports');
+            },
+            tooltip: 'Reports',
+          ),
+          // Settings Button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              context.push('/settings');
+            },
+            tooltip: 'Settings',
           ),
           // Sign Out Button
           IconButton(

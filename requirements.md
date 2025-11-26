@@ -140,33 +140,31 @@ sealed class Card with _$Card {
   const Card._();
 
   @FreezedUnionValue('pocket')
-  const factory Card.pocket(
-    String id,
-    String name,
-    String icon,
-    double balance,
+  const factory Card.pocket({
+    required String id,
+    required String name,
+    required String icon,
+    required double balance,
     String? color,
-  ) = Pocket;
+  }) = Pocket;
 
   @FreezedUnionValue('category')
-  const factory Card.category(
-    String id,
-    String name,
-    String icon,
-    double budgetValue,
-    double currentValue,
+  const factory Card.category({
+    required String id,
+    required String name,
+    required String icon,
+    required double budgetValue,
+    required double currentValue,
     String? color,
     @Default(false) bool isRecurring,
     int? dueDate,
     String? destinationPocketId,
     String? destinationAccountId,
-  ) = Category;
+  }) = Category;
 
   factory Card.fromJson(Map<String, dynamic> json) => _$CardFromJson(json);
 }
 ```
-
-_(Note: This represents a simplified version. For full `freezed` implementation, Pocket and Category might be in their own files and referenced here.)_
 
 **`transaction.dart`**
 
@@ -192,7 +190,43 @@ class Transaction with _$Transaction {
 }
 ```
 
-**(Other models like `UserSettings`, `ShareInvitation`, etc., must also be created following this pattern.)**
+**`user_settings.dart`**
+
+```dart
+@freezed
+class UserSettings with _$UserSettings {
+  const factory UserSettings({
+    required Currency currency,
+    required int monthStartDate,
+    required Theme theme,
+    @Default(false) bool isCompactView,
+    @Default([]) List<ImportProfile> importProfiles,
+  }) = _UserSettings;
+
+  factory UserSettings.fromJson(Map<String, dynamic> json) => _$UserSettingsFromJson(json);
+}
+```
+
+**`share_invitation.dart`**
+
+```dart
+@freezed
+class ShareInvitation with _$ShareInvitation {
+    const factory ShareInvitation({
+        required String id,
+        required String ownerUid,
+        required String ownerName,
+        required String sharedWithEmail,
+        required String permission, // 'read' | 'write'
+        required String status, // 'pending' | 'accepted' | 'declined'
+        required DateTime createdAt,
+    }) = _ShareInvitation;
+
+    factory ShareInvitation.fromJson(Map<String, dynamic> json) => _$ShareInvitationFromJson(json);
+}
+```
+
+_(Note: Other smaller models like `RecurringIncome`, `Currency`, `Theme`, `ImportProfile`, etc. must also be created following this pattern.)_
 
 ### 3.2. Firebase Repository Pattern
 
@@ -200,7 +234,11 @@ A `FirestoreRepository` class will abstract all Firestore operations. This servi
 
 - **`Stream<MonthlyBudget?> budgetStream(String userId, String monthKey)`**: Returns a real-time stream of the budget document.
 - **`Future<void> saveBudget(String userId, String monthKey, MonthlyBudget budget)`**: Saves the entire budget document.
-- Other methods for user settings, sharing, etc.
+- **`Stream<UserSettings> userSettingsStream(String userId)`**: Returns a real-time stream of user settings.
+- **`Future<void> saveUserSettings(String userId, UserSettings settings)`**: Saves user settings.
+- **`Future<void> sendInvitation(...)`**: Creates a `ShareInvitation` document.
+- **`Future<void> manageInvitation(...)`**: Updates an invitation's status and creates access documents.
+- **`Stream<List<ShareInvitation>> invitationsStream(String userEmail)`**: Gets pending invitations for a user.
 
 ### 3.3. Offline Persistence
 

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dialogs/add_pocket_dialog.dart';
+import '../dialogs/add_expense_dialog.dart';
+import '../dialogs/transfer_funds_dialog.dart';
+import '../../../core/constants/app_icons.dart';
+import '../../../data/models/card.dart' as card_model;
 
-class PocketCardWidget extends StatelessWidget {
+class PocketCardWidget extends ConsumerWidget {
   final String accountId;
   final String id;
   final String name;
   final String icon;
   final double balance;
   final String? color;
+  final bool isDefault;
+  final List<card_model.Card> cards;
 
   const PocketCardWidget({
     super.key,
@@ -17,82 +24,262 @@ class PocketCardWidget extends StatelessWidget {
     required this.icon,
     required this.balance,
     this.color,
+    this.isDefault = false,
+    required this.cards,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cardColor = color != null ? _parseColor(color!) : null;
 
     return Card(
-      color: cardColor,
       elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: cardColor ?? Theme.of(context).colorScheme.primary,
+          width: 3,
+        ),
+      ),
       child: InkWell(
         onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => AddPocketDialog(
-              accountId: accountId,
-              pocketId: id,
-              initialName: name,
-              initialIcon: icon,
-              initialColor: color,
-            ),
-          );
+          // View details - could open a detail dialog in the future
         },
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(icon, style: const TextStyle(fontSize: 24)),
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Name and Balance
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with icon, name, balance, and menu
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              child: Row(
+                children: [
+                  // Icon
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cardColor?.withOpacity(0.2) ??
+                          Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _getValidIcon(icon),
+                        style: const TextStyle(fontSize: 20),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Pocket',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Name with default indicator
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isDefault) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.star,
+                                size: 16,
+                                color: Colors.amber.shade600,
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Pocket',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Balance
+                  Text(
+                    '\$${balance.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: balance >= 0 ? Colors.green : Colors.red,
+                        ),
+                  ),
+
+                  // More menu
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_horiz, size: 20),
+                    padding: EdgeInsets.zero,
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          _showEditDialog(context);
+                          break;
+                        case 'delete':
+                          _showDeleteConfirmation(context);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 12),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        enabled: !isDefault,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              size: 18,
+                              color: isDefault ? Colors.grey : Colors.red,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: isDefault ? Colors.grey : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Divider
+            const Divider(height: 1),
+
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: () => _showAddExpenseDialog(context),
+                      icon: const Icon(Icons.add_circle_outline, size: 18),
+                      label: const Text('Expense'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: () => _showTransferDialog(context),
+                      icon: const Icon(Icons.swap_horiz, size: 18),
+                      label: const Text('Transfer'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-
-              // Balance
-              Text(
-                '\$${balance.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: balance >= 0 ? Colors.green : Colors.red,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddPocketDialog(
+        accountId: accountId,
+        pocketId: id,
+        initialName: name,
+        initialIcon: icon,
+        initialColor: color,
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    if (isDefault) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Pocket'),
+        content: Text('Are you sure you want to delete "$name"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              // TODO: Implement delete functionality
+              Navigator.of(context).pop();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddExpenseDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddExpenseDialog(
+        accountId: accountId,
+        cards: cards,
+      ),
+    );
+  }
+
+  void _showTransferDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => TransferFundsDialog(
+        accountId: accountId,
+        cards: cards,
+      ),
+    );
+  }
+
+  String _getValidIcon(String icon) {
+    // Check if icon matches one of our valid pocket icons
+    if (AppIcons.isValidPocketIcon(icon)) {
+      return icon;
+    }
+    // Return default icon if not found
+    return AppIcons.defaultPocketIcon;
   }
 
   Color? _parseColor(String colorString) {

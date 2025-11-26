@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/account.dart';
 import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
 import '../dialogs/transfer_funds_dialog.dart';
+import '../dashboard_controller.dart';
 import 'pocket_card_widget.dart';
 import 'category_card_widget.dart';
+import '../../../core/constants/app_icons.dart';
 
-class AccountBoardWidget extends StatelessWidget {
+class AccountBoardWidget extends ConsumerWidget {
   final Account account;
   final int accountIndex;
   final int totalAccounts;
@@ -20,7 +23,7 @@ class AccountBoardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Calculate account summary
     double totalInPockets = 0;
     double totalBudgeted = 0;
@@ -64,7 +67,10 @@ class AccountBoardWidget extends StatelessWidget {
                   // Account name and navigation indicator
                   Row(
                     children: [
-                      Text(account.icon, style: const TextStyle(fontSize: 32)),
+                      Text(
+                        _getValidIcon(account.icon),
+                        style: const TextStyle(fontSize: 32),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -81,6 +87,43 @@ class AccountBoardWidget extends StatelessWidget {
                           ],
                         ),
                       ),
+                      // Reorder buttons (only show if more than 1 account)
+                      if (totalAccounts > 1) ...[
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left),
+                          onPressed: accountIndex > 0
+                              ? () {
+                                  ref
+                                      .read(
+                                        dashboardControllerProvider.notifier,
+                                      )
+                                      .reorderAccounts(
+                                        oldIndex: accountIndex,
+                                        newIndex: accountIndex - 1,
+                                      );
+                                }
+                              : null,
+                          tooltip: 'Move Left',
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right),
+                          onPressed: accountIndex < totalAccounts - 1
+                              ? () {
+                                  ref
+                                      .read(
+                                        dashboardControllerProvider.notifier,
+                                      )
+                                      .reorderAccounts(
+                                        oldIndex: accountIndex,
+                                        newIndex: accountIndex + 1,
+                                      );
+                                }
+                              : null,
+                          tooltip: 'Move Right',
+                          iconSize: 20,
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -146,13 +189,23 @@ class AccountBoardWidget extends StatelessWidget {
                         ],
                       ),
                     )
-                  : ListView.builder(
+                  : ReorderableListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: account.cards.length,
+                      onReorder: (oldIndex, newIndex) {
+                        ref
+                            .read(dashboardControllerProvider.notifier)
+                            .reorderCards(
+                              accountIndex: accountIndex,
+                              oldIndex: oldIndex,
+                              newIndex: newIndex,
+                            );
+                      },
                       itemBuilder: (context, index) {
                         final card = account.cards[index];
 
                         return Padding(
+                          key: ValueKey('card_${account.id}_$index'),
                           padding: const EdgeInsets.only(bottom: 12),
                           child: card.when(
                             pocket: (id, name, icon, balance, color) {
@@ -163,6 +216,8 @@ class AccountBoardWidget extends StatelessWidget {
                                 icon: icon,
                                 balance: balance,
                                 color: color,
+                                isDefault: id == account.defaultPocketId,
+                                cards: account.cards,
                               );
                             },
                             category:
@@ -188,6 +243,7 @@ class AccountBoardWidget extends StatelessWidget {
                                     color: color,
                                     isRecurring: isRecurring,
                                     dueDate: dueDate,
+                                    cards: account.cards,
                                   );
                                 },
                           ),
@@ -275,6 +331,15 @@ class AccountBoardWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getValidIcon(String icon) {
+    // Check if icon matches one of our valid account icons
+    if (AppIcons.isValidAccountIcon(icon)) {
+      return icon;
+    }
+    // Return default icon if not found
+    return AppIcons.defaultAccountIcon;
   }
 }
 

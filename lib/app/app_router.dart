@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../data/firebase/auth_repository.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/settings/settings_screen.dart';
+import '../features/reports/reports_screen.dart';
+import '../features/import_export/import_export_screen.dart';
 
 /// Provider for GoRouter
 final routerProvider = Provider<GoRouter>((ref) {
@@ -36,6 +39,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/dashboard',
         name: 'dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/reports',
+        name: 'reports',
+        builder: (context, state) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: '/import-export',
+        name: 'import-export',
+        builder: (context, state) => const ImportExportScreen(),
       ),
     ],
   );

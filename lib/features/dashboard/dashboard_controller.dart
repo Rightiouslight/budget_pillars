@@ -609,4 +609,236 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
+
+  // ===== RECURRING EXPENSE OPERATIONS =====
+
+  /// Quick Pay for a recurring category - pays the remaining budgeted amount
+  /// If category has destinationPocketId (sinking fund), transfers to that pocket
+  /// Otherwise, logs as a regular expense
+  Future<void> quickPayCategory({
+    required String accountId,
+    required String categoryId,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      // Find the account and category
+      final account = budget.accounts.firstWhere((a) => a.id == accountId);
+
+      // Find the category card
+      final categoryCard = account.cards.firstWhere((card) {
+        return card.when(
+          pocket: (_, __, ___, ____, _____) => false,
+          category:
+              (
+                id,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+              ) => id == categoryId,
+        );
+      });
+
+      String? categoryName;
+      double? budgetValue;
+      double? currentValue;
+      String? destinationPocketId;
+      String? destinationAccountId;
+
+      categoryCard.when(
+        pocket: (_, __, ___, ____, _____) {},
+        category:
+            (
+              id,
+              name,
+              icon,
+              budgetVal,
+              currentVal,
+              color,
+              isRecurring,
+              dueDate,
+              destPocketId,
+              destAcctId,
+            ) {
+              categoryName = name;
+              budgetValue = budgetVal;
+              currentValue = currentVal;
+              destinationPocketId = destPocketId;
+              destinationAccountId = destAcctId;
+            },
+      );
+
+      final remainingAmount = (budgetValue ?? 0.0) - (currentValue ?? 0.0);
+
+      if (remainingAmount <= 0) {
+        // Nothing to pay
+        return;
+      }
+
+      // Check if this is a sinking fund (has destination pocket)
+      if (destinationPocketId != null) {
+        // Transfer to destination pocket instead of expense
+        final targetAccountId = destinationAccountId ?? accountId;
+
+        await transferFunds(
+          sourceAccountId: accountId,
+          sourceCardId: account.defaultPocketId,
+          isSourcePocket: true,
+          destinationAccountId: targetAccountId,
+          destinationPocketId: destinationPocketId!,
+          amount: remainingAmount,
+          description: 'Sinking Fund: $categoryName',
+        );
+      } else {
+        // Regular expense
+        await addExpense(
+          accountId: accountId,
+          categoryId: categoryId,
+          amount: remainingAmount,
+          description: 'Quick Pay: $categoryName',
+        );
+      }
+    });
+  }
+
+  /// Process automatic payments for all recurring categories that are due
+  /// Should be called on app startup
+  Future<void> processAutomaticPayments() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final now = DateTime.now();
+      final autoProcessed = Map<String, bool>.from(
+        budget.autoTransactionsProcessed,
+      );
+      bool hasUpdates = false;
+
+      for (final account in budget.accounts) {
+        for (final card in account.cards) {
+          await card.when(
+            pocket: (_, __, ___, ____, _____) async {},
+            category:
+                (
+                  id,
+                  name,
+                  icon,
+                  budgetValue,
+                  currentValue,
+                  color,
+                  isRecurring,
+                  dueDate,
+                  destPocketId,
+                  destAcctId,
+                ) async {
+                  // Only process recurring categories with due dates
+                  if (!isRecurring || dueDate == null) return;
+
+                  // Check if already processed this month
+                  final processKey = '$_monthKey:$id';
+                  if (autoProcessed.containsKey(processKey)) return;
+
+                  // Calculate due date for current budget period
+                  final categoryDueDate = DateTime(
+                    now.year,
+                    now.month,
+                    dueDate,
+                  );
+
+                  // If we're past the due date and haven't processed yet
+                  if (now.isAfter(categoryDueDate) ||
+                      now.isAtSameMomentAs(categoryDueDate)) {
+                    await quickPayCategory(
+                      accountId: account.id,
+                      categoryId: id,
+                    );
+
+                    // Mark as processed
+                    autoProcessed[processKey] = true;
+                    hasUpdates = true;
+                  }
+                },
+          );
+        }
+      }
+
+      // Save updated auto-processed map if there were changes
+      if (hasUpdates) {
+        final updatedBudget = budget.copyWith(
+          autoTransactionsProcessed: autoProcessed,
+        );
+        await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+      }
+    });
+  }
+
+  // ===== REORDERING OPERATIONS =====
+
+  /// Reorder accounts horizontally
+  Future<void> reorderAccounts({
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      final accounts = List<Account>.from(budget.accounts);
+
+      // Adjust newIndex if moving down
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      // Reorder accounts
+      final account = accounts.removeAt(oldIndex);
+      accounts.insert(newIndex, account);
+
+      final updatedBudget = budget.copyWith(accounts: accounts);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
+
+  /// Reorder cards within an account
+  Future<void> reorderCards({
+    required int accountIndex,
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null || accountIndex >= budget.accounts.length) return;
+
+      final accounts = List<Account>.from(budget.accounts);
+      final account = accounts[accountIndex];
+      final cards = List<Card>.from(account.cards);
+
+      // Adjust newIndex if moving down
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      // Reorder cards
+      final card = cards.removeAt(oldIndex);
+      cards.insert(newIndex, card);
+
+      // Update account with reordered cards
+      final updatedAccount = account.copyWith(cards: cards);
+      accounts[accountIndex] = updatedAccount;
+
+      final updatedBudget = budget.copyWith(accounts: accounts);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
 }
