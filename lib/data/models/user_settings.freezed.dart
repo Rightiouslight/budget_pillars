@@ -29,6 +29,7 @@ mixin _$UserSettings {
       throw _privateConstructorUsedError; // Deprecated - use viewPreferences instead
   List<ImportProfile> get importProfiles => throw _privateConstructorUsedError;
   ViewPreferences? get viewPreferences => throw _privateConstructorUsedError;
+  String? get cachedProfilePicture => throw _privateConstructorUsedError;
 
   /// Serializes this UserSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,6 +55,7 @@ abstract class $UserSettingsCopyWith<$Res> {
     bool isCompactView,
     List<ImportProfile> importProfiles,
     ViewPreferences? viewPreferences,
+    String? cachedProfilePicture,
   });
 
   $CurrencyCopyWith<$Res>? get currency;
@@ -82,6 +84,7 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
     Object? isCompactView = null,
     Object? importProfiles = null,
     Object? viewPreferences = freezed,
+    Object? cachedProfilePicture = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -109,6 +112,10 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
                 ? _value.viewPreferences
                 : viewPreferences // ignore: cast_nullable_to_non_nullable
                       as ViewPreferences?,
+            cachedProfilePicture: freezed == cachedProfilePicture
+                ? _value.cachedProfilePicture
+                : cachedProfilePicture // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -173,6 +180,7 @@ abstract class _$$UserSettingsImplCopyWith<$Res>
     bool isCompactView,
     List<ImportProfile> importProfiles,
     ViewPreferences? viewPreferences,
+    String? cachedProfilePicture,
   });
 
   @override
@@ -203,6 +211,7 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
     Object? isCompactView = null,
     Object? importProfiles = null,
     Object? viewPreferences = freezed,
+    Object? cachedProfilePicture = freezed,
   }) {
     return _then(
       _$UserSettingsImpl(
@@ -230,6 +239,10 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
             ? _value.viewPreferences
             : viewPreferences // ignore: cast_nullable_to_non_nullable
                   as ViewPreferences?,
+        cachedProfilePicture: freezed == cachedProfilePicture
+            ? _value.cachedProfilePicture
+            : cachedProfilePicture // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -245,6 +258,7 @@ class _$UserSettingsImpl implements _UserSettings {
     this.isCompactView = false,
     final List<ImportProfile> importProfiles = const [],
     this.viewPreferences,
+    this.cachedProfilePicture,
   }) : _importProfiles = importProfiles;
 
   factory _$UserSettingsImpl.fromJson(Map<String, dynamic> json) =>
@@ -274,10 +288,12 @@ class _$UserSettingsImpl implements _UserSettings {
 
   @override
   final ViewPreferences? viewPreferences;
+  @override
+  final String? cachedProfilePicture;
 
   @override
   String toString() {
-    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles, viewPreferences: $viewPreferences)';
+    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles, viewPreferences: $viewPreferences, cachedProfilePicture: $cachedProfilePicture)';
   }
 
   @override
@@ -297,7 +313,9 @@ class _$UserSettingsImpl implements _UserSettings {
               _importProfiles,
             ) &&
             (identical(other.viewPreferences, viewPreferences) ||
-                other.viewPreferences == viewPreferences));
+                other.viewPreferences == viewPreferences) &&
+            (identical(other.cachedProfilePicture, cachedProfilePicture) ||
+                other.cachedProfilePicture == cachedProfilePicture));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -310,6 +328,7 @@ class _$UserSettingsImpl implements _UserSettings {
     isCompactView,
     const DeepCollectionEquality().hash(_importProfiles),
     viewPreferences,
+    cachedProfilePicture,
   );
 
   /// Create a copy of UserSettings
@@ -334,6 +353,7 @@ abstract class _UserSettings implements UserSettings {
     final bool isCompactView,
     final List<ImportProfile> importProfiles,
     final ViewPreferences? viewPreferences,
+    final String? cachedProfilePicture,
   }) = _$UserSettingsImpl;
 
   factory _UserSettings.fromJson(Map<String, dynamic> json) =
@@ -351,6 +371,8 @@ abstract class _UserSettings implements UserSettings {
   List<ImportProfile> get importProfiles;
   @override
   ViewPreferences? get viewPreferences;
+  @override
+  String? get cachedProfilePicture;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.

@@ -54,6 +54,7 @@ dependencies:
 
   # Utils
   intl: ^0.19.0
+  http: ^1.2.2
 
   # File handling (for import/export)
   file_picker: ^8.1.4

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../providers/active_budget_provider.dart';
+import '../../../providers/user_settings_provider.dart';
 import '../../../data/firebase/auth_repository.dart';
+import '../../../utils/profile_picture_cache.dart';
 import '../../auth/auth_controller.dart';
 import '../dialogs/add_account_dialog.dart';
 import '../dialogs/view_transactions_dialog.dart';
@@ -333,14 +335,22 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: user.photoURL != null
-                      ? NetworkImage(user.photoURL!)
-                      : null,
-                  child: user.photoURL == null
-                      ? Text(_getAvatarFallback(user.displayName))
-                      : null,
+                Consumer(
+                  builder: (context, ref, child) {
+                    final settings = ref.watch(userSettingsProvider).value;
+                    final cachedPicture = settings?.cachedProfilePicture;
+                    final imageBytes = decodeProfilePicture(cachedPicture);
+
+                    return CircleAvatar(
+                      radius: 16,
+                      backgroundImage: imageBytes != null
+                          ? MemoryImage(imageBytes)
+                          : null,
+                      child: imageBytes == null
+                          ? Text(_getAvatarFallback(user.displayName))
+                          : null,
+                    );
+                  },
                 ),
                 const SizedBox(width: 4),
                 const Icon(Icons.arrow_drop_down, size: 20),
