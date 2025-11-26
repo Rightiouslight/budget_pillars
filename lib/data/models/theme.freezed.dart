@@ -21,10 +21,9 @@ Theme _$ThemeFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Theme {
-  String get mode =>
-      throw _privateConstructorUsedError; // 'light', 'dark', 'system'
-  String get primaryColor => throw _privateConstructorUsedError;
-  String get accentColor => throw _privateConstructorUsedError;
+  String get appearance =>
+      throw _privateConstructorUsedError; // 'light', 'dark', 'black', 'system'
+  String get name => throw _privateConstructorUsedError;
 
   /// Serializes this Theme to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -40,7 +39,7 @@ abstract class $ThemeCopyWith<$Res> {
   factory $ThemeCopyWith(Theme value, $Res Function(Theme) then) =
       _$ThemeCopyWithImpl<$Res, Theme>;
   @useResult
-  $Res call({String mode, String primaryColor, String accentColor});
+  $Res call({String appearance, String name});
 }
 
 /// @nodoc
@@ -57,24 +56,16 @@ class _$ThemeCopyWithImpl<$Res, $Val extends Theme>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? mode = null,
-    Object? primaryColor = null,
-    Object? accentColor = null,
-  }) {
+  $Res call({Object? appearance = null, Object? name = null}) {
     return _then(
       _value.copyWith(
-            mode: null == mode
-                ? _value.mode
-                : mode // ignore: cast_nullable_to_non_nullable
+            appearance: null == appearance
+                ? _value.appearance
+                : appearance // ignore: cast_nullable_to_non_nullable
                       as String,
-            primaryColor: null == primaryColor
-                ? _value.primaryColor
-                : primaryColor // ignore: cast_nullable_to_non_nullable
-                      as String,
-            accentColor: null == accentColor
-                ? _value.accentColor
-                : accentColor // ignore: cast_nullable_to_non_nullable
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
                       as String,
           )
           as $Val,
@@ -90,7 +81,7 @@ abstract class _$$ThemeImplCopyWith<$Res> implements $ThemeCopyWith<$Res> {
   ) = __$$ThemeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String mode, String primaryColor, String accentColor});
+  $Res call({String appearance, String name});
 }
 
 /// @nodoc
@@ -106,24 +97,16 @@ class __$$ThemeImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? mode = null,
-    Object? primaryColor = null,
-    Object? accentColor = null,
-  }) {
+  $Res call({Object? appearance = null, Object? name = null}) {
     return _then(
       _$ThemeImpl(
-        mode: null == mode
-            ? _value.mode
-            : mode // ignore: cast_nullable_to_non_nullable
+        appearance: null == appearance
+            ? _value.appearance
+            : appearance // ignore: cast_nullable_to_non_nullable
                   as String,
-        primaryColor: null == primaryColor
-            ? _value.primaryColor
-            : primaryColor // ignore: cast_nullable_to_non_nullable
-                  as String,
-        accentColor: null == accentColor
-            ? _value.accentColor
-            : accentColor // ignore: cast_nullable_to_non_nullable
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
                   as String,
       ),
     );
@@ -133,29 +116,22 @@ class __$$ThemeImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$ThemeImpl implements _Theme {
-  const _$ThemeImpl({
-    this.mode = 'system',
-    this.primaryColor = '#1976D2',
-    this.accentColor = '#DC004E',
-  });
+  const _$ThemeImpl({this.appearance = 'system', this.name = 'mint'});
 
   factory _$ThemeImpl.fromJson(Map<String, dynamic> json) =>
       _$$ThemeImplFromJson(json);
 
   @override
   @JsonKey()
-  final String mode;
-  // 'light', 'dark', 'system'
+  final String appearance;
+  // 'light', 'dark', 'black', 'system'
   @override
   @JsonKey()
-  final String primaryColor;
-  @override
-  @JsonKey()
-  final String accentColor;
+  final String name;
 
   @override
   String toString() {
-    return 'Theme(mode: $mode, primaryColor: $primaryColor, accentColor: $accentColor)';
+    return 'Theme(appearance: $appearance, name: $name)';
   }
 
   @override
@@ -163,16 +139,14 @@ class _$ThemeImpl implements _Theme {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ThemeImpl &&
-            (identical(other.mode, mode) || other.mode == mode) &&
-            (identical(other.primaryColor, primaryColor) ||
-                other.primaryColor == primaryColor) &&
-            (identical(other.accentColor, accentColor) ||
-                other.accentColor == accentColor));
+            (identical(other.appearance, appearance) ||
+                other.appearance == appearance) &&
+            (identical(other.name, name) || other.name == name));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, mode, primaryColor, accentColor);
+  int get hashCode => Object.hash(runtimeType, appearance, name);
 
   /// Create a copy of Theme
   /// with the given fields replaced by the non-null parameter values.
@@ -189,20 +163,15 @@ class _$ThemeImpl implements _Theme {
 }
 
 abstract class _Theme implements Theme {
-  const factory _Theme({
-    final String mode,
-    final String primaryColor,
-    final String accentColor,
-  }) = _$ThemeImpl;
+  const factory _Theme({final String appearance, final String name}) =
+      _$ThemeImpl;
 
   factory _Theme.fromJson(Map<String, dynamic> json) = _$ThemeImpl.fromJson;
 
   @override
-  String get mode; // 'light', 'dark', 'system'
+  String get appearance; // 'light', 'dark', 'black', 'system'
   @override
-  String get primaryColor;
-  @override
-  String get accentColor;
+  String get name;
 
   /// Create a copy of Theme
   /// with the given fields replaced by the non-null parameter values.

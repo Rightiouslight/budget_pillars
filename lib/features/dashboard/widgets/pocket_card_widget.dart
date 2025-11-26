@@ -4,6 +4,7 @@ import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
 import '../dialogs/transfer_funds_dialog.dart';
 import '../dialogs/card_details_dialog.dart';
+import '../providers/transfer_mode_provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
 import '../../../providers/active_budget_provider.dart';
@@ -33,40 +34,68 @@ class PocketCardWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cardColor = color != null ? _parseColor(color!) : null;
+    final transferMode = ref.watch(transferModeProvider);
 
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: cardColor ?? Theme.of(context).colorScheme.primary,
+          color: transferMode != null
+              ? Theme.of(context).colorScheme.secondary
+              : (cardColor ?? Theme.of(context).colorScheme.primary),
           width: 3,
         ),
       ),
       child: InkWell(
         onTap: () {
-          final budgetAsync = ref.read(activeBudgetProvider);
-          budgetAsync.whenData((budget) {
-            if (budget != null) {
-              final account = budget.accounts.firstWhere(
-                (acc) => acc.id == accountId,
-              );
-              showDialog(
-                context: context,
-                builder: (context) => CardDetailsDialog(
-                  accountId: accountId,
-                  card: card_model.Card.pocket(
-                    id: id,
-                    name: name,
-                    icon: icon,
-                    balance: balance,
-                    color: color,
+          // If in transfer mode, this pocket is the destination
+          if (transferMode != null) {
+            final destinationCard = card_model.Card.pocket(
+              id: id,
+              name: name,
+              icon: icon,
+              balance: balance,
+              color: color,
+            );
+
+            // Show transfer dialog with pre-selected source and destination
+            showDialog(
+              context: context,
+              builder: (context) => TransferFundsDialog(
+                accountId: accountId,
+                sourceCard: transferMode.sourceCard,
+                destinationCard: destinationCard,
+              ),
+            );
+
+            // Exit transfer mode
+            ref.read(transferModeProvider.notifier).exitTransferMode();
+          } else {
+            // Normal tap - show card details dialog
+            final budgetAsync = ref.read(activeBudgetProvider);
+            budgetAsync.whenData((budget) {
+              if (budget != null) {
+                final account = budget.accounts.firstWhere(
+                  (acc) => acc.id == accountId,
+                );
+                showDialog(
+                  context: context,
+                  builder: (context) => CardDetailsDialog(
+                    accountId: accountId,
+                    card: card_model.Card.pocket(
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      balance: balance,
+                      color: color,
+                    ),
+                    account: account,
                   ),
-                  account: account,
-                ),
-              );
-            }
-          });
+                );
+              }
+            });
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Column(
@@ -215,7 +244,7 @@ class PocketCardWidget extends ConsumerWidget {
                   ),
                   Expanded(
                     child: TextButton.icon(
-                      onPressed: () => _showTransferDialog(context),
+                      onPressed: () => _showTransferDialog(context, ref),
                       icon: const Icon(Icons.swap_horiz, size: 18),
                       label: const Text('Transfer'),
                       style: TextButton.styleFrom(
@@ -288,11 +317,33 @@ class PocketCardWidget extends ConsumerWidget {
     );
   }
 
-  void _showTransferDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) =>
-          TransferFundsDialog(accountId: accountId, cards: cards),
+  void _showTransferDialog(BuildContext context, WidgetRef ref) {
+    // Enter transfer mode with this pocket as the source
+    ref
+        .read(transferModeProvider.notifier)
+        .enterTransferMode(
+          card_model.Card.pocket(
+            id: id,
+            name: name,
+            icon: icon,
+            balance: balance,
+            color: color,
+          ),
+          accountId,
+        );
+
+    // Show a snackbar to indicate transfer mode
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Transfer mode: Select a destination pocket'),
+        action: SnackBarAction(
+          label: 'Cancel',
+          onPressed: () {
+            ref.read(transferModeProvider.notifier).exitTransferMode();
+          },
+        ),
+        duration: const Duration(seconds: 10),
+      ),
     );
   }
 

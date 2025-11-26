@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
-import '../dialogs/transfer_funds_dialog.dart';
 import '../dialogs/card_details_dialog.dart';
 import '../dashboard_controller.dart';
+import '../providers/transfer_mode_provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
 import '../../../providers/active_budget_provider.dart';
@@ -43,114 +43,122 @@ class CategoryCardWidget extends ConsumerWidget {
         ? (currentValue / budgetValue).clamp(0.0, 1.0)
         : 0.0;
     final isOverBudget = currentValue > budgetValue;
+    final transferMode = ref.watch(transferModeProvider);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: cardColor ?? Theme.of(context).colorScheme.primary,
-          width: 3,
+    return Opacity(
+      // Reduce opacity when in transfer mode to show it's not a valid destination
+      opacity: transferMode != null ? 0.5 : 1.0,
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: cardColor ?? Theme.of(context).colorScheme.primary,
+            width: 3,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: () {
-          final budgetAsync = ref.read(activeBudgetProvider);
-          budgetAsync.whenData((budget) {
-            if (budget != null) {
-              final account = budget.accounts.firstWhere(
-                (acc) => acc.id == accountId,
-              );
-              showDialog(
-                context: context,
-                builder: (context) => CardDetailsDialog(
-                  accountId: accountId,
-                  card: card_model.Card.category(
-                    id: id,
-                    name: name,
-                    icon: icon,
-                    budgetValue: budgetValue,
-                    currentValue: currentValue,
-                    color: color,
-                    isRecurring: isRecurring,
-                    dueDate: dueDate,
-                    destinationPocketId: null,
-                    destinationAccountId: null,
+        child: InkWell(
+          onTap: () {
+            // Categories cannot be transfer destinations, show message if in transfer mode
+            if (transferMode != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Categories cannot be transfer destinations. Select a pocket instead.',
                   ),
-                  account: account,
+                  duration: Duration(seconds: 2),
                 ),
               );
+              return;
             }
-          });
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with icon, name, remaining, and menu
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-              child: Row(
-                children: [
-                  // Icon
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color:
-                          cardColor?.withOpacity(0.2) ??
-                          Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
+
+            // Normal tap - show card details dialog
+            final budgetAsync = ref.read(activeBudgetProvider);
+            budgetAsync.whenData((budget) {
+              if (budget != null) {
+                final account = budget.accounts.firstWhere(
+                  (acc) => acc.id == accountId,
+                );
+                showDialog(
+                  context: context,
+                  builder: (context) => CardDetailsDialog(
+                    accountId: accountId,
+                    card: card_model.Card.category(
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      budgetValue: budgetValue,
+                      currentValue: currentValue,
+                      color: color,
+                      isRecurring: isRecurring,
+                      dueDate: dueDate,
+                      destinationPocketId: null,
+                      destinationAccountId: null,
                     ),
-                    child: Center(
-                      child: Text(
-                        _getValidIcon(icon),
-                        style: const TextStyle(fontSize: 20),
+                    account: account,
+                  ),
+                );
+              }
+            });
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with icon, name, remaining, and menu
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+                child: Row(
+                  children: [
+                    // Icon
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color:
+                            cardColor?.withOpacity(0.2) ??
+                            Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _getValidIcon(icon),
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
+                    const SizedBox(width: 12),
 
-                  // Name with recurring indicator
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                name,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                                overflow: TextOverflow.ellipsis,
+                    // Name with recurring indicator
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  name,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
-                            if (isRecurring) ...[
-                              const SizedBox(width: 6),
-                              Icon(
-                                Icons.repeat,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                              if (isRecurring) ...[
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.repeat,
+                                  size: 16,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Text(
-                              'Category',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                            if (dueDate != null && dueDate != 99) ...[
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
                               Text(
-                                ' • Due: Day $dueDate',
+                                'Category',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(
@@ -158,161 +166,179 @@ class CategoryCardWidget extends ConsumerWidget {
                                       ).colorScheme.onSurfaceVariant,
                                     ),
                               ),
+                              if (dueDate != null && dueDate != 99) ...[
+                                Text(
+                                  ' • Due: Day $dueDate',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Remaining Amount
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '\$${remaining.abs().toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isOverBudget ? Colors.red : Colors.green,
+                              ),
+                        ),
+                        Text(
+                          isOverBudget ? 'Over' : 'Left',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
-                  ),
 
-                  // Remaining Amount
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '\$${remaining.abs().toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isOverBudget ? Colors.red : Colors.green,
+                    // More menu
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_horiz, size: 20),
+                      padding: EdgeInsets.zero,
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            _showEditDialog(context);
+                            break;
+                          case 'delete':
+                            _showDeleteConfirmation(context);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 12),
+                              Text('Edit'),
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        isOverBudget ? 'Over' : 'Left',
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 12),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Budget info with Quick Pay checkbox
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Budget: \$${budgetValue.toStringAsFixed(2)} | Spent: \$${currentValue.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                    ],
-                  ),
-
-                  // More menu
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_horiz, size: 20),
-                    padding: EdgeInsets.zero,
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          _showEditDialog(context);
-                          break;
-                        case 'delete':
-                          _showDeleteConfirmation(context);
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 12),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 12),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
+                    ),
+                    if (isRecurring && remaining > 0) ...[
+                      Tooltip(
+                        message: 'Quick Pay remaining amount',
+                        child: Checkbox(
+                          value: false,
+                          onChanged: (checked) {
+                            if (checked == true) {
+                              _handleQuickPay(context, ref);
+                            }
+                          },
+                          visualDensity: VisualDensity.compact,
                         ),
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Budget info with Quick Pay checkbox
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Budget: \$${budgetValue.toStringAsFixed(2)} | Spent: \$${currentValue.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+              // Progress Bar
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 4,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    cardColor ??
+                        (isOverBudget
+                            ? Colors.red
+                            : Theme.of(context).colorScheme.primary),
+                  ),
+                ),
+              ),
+
+              // Divider
+              const Divider(height: 1),
+
+              // Action buttons
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => _showAddExpenseDialog(context),
+                        icon: const Icon(Icons.add_circle_outline, size: 18),
+                        label: const Text('Expense'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
                       ),
                     ),
-                  ),
-                  if (isRecurring && remaining > 0) ...[
-                    Tooltip(
-                      message: 'Quick Pay remaining amount',
-                      child: Checkbox(
-                        value: false,
-                        onChanged: (checked) {
-                          if (checked == true) {
-                            _handleQuickPay(context, ref);
-                          }
-                        },
-                        visualDensity: VisualDensity.compact,
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => _showTransferDialog(context, ref),
+                        icon: const Icon(Icons.swap_horiz, size: 18),
+                        label: const Text('Transfer'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
-
-            // Progress Bar
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(12),
-              ),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 4,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  cardColor ??
-                      (isOverBudget
-                          ? Colors.red
-                          : Theme.of(context).colorScheme.primary),
                 ),
               ),
-            ),
-
-            // Divider
-            const Divider(height: 1),
-
-            // Action buttons
-            Padding(
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => _showAddExpenseDialog(context),
-                      icon: const Icon(Icons.add_circle_outline, size: 18),
-                      label: const Text('Expense'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => _showTransferDialog(context),
-                      icon: const Icon(Icons.swap_horiz, size: 18),
-                      label: const Text('Transfer'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ), // Column
-      ), // InkWell
-    ); // Card
+            ],
+          ), // Column
+        ), // InkWell
+      ), // Card
+    ); // Opacity
   }
 
   void _showEditDialog(BuildContext context) {
@@ -377,11 +403,38 @@ class CategoryCardWidget extends ConsumerWidget {
     );
   }
 
-  void _showTransferDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) =>
-          TransferFundsDialog(accountId: accountId, cards: cards),
+  void _showTransferDialog(BuildContext context, WidgetRef ref) {
+    // Enter transfer mode with this category as the source (for refunds)
+    ref
+        .read(transferModeProvider.notifier)
+        .enterTransferMode(
+          card_model.Card.category(
+            id: id,
+            name: name,
+            icon: icon,
+            budgetValue: budgetValue,
+            currentValue: currentValue,
+            color: color,
+            isRecurring: isRecurring,
+            dueDate: dueDate,
+            destinationPocketId: null,
+            destinationAccountId: null,
+          ),
+          accountId,
+        );
+
+    // Show a snackbar to indicate transfer mode
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Transfer mode: Select a destination pocket'),
+        action: SnackBarAction(
+          label: 'Cancel',
+          onPressed: () {
+            ref.read(transferModeProvider.notifier).exitTransferMode();
+          },
+        ),
+        duration: const Duration(seconds: 10),
+      ),
     );
   }
 

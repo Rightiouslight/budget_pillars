@@ -4,15 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/card.dart' as models;
 import '../dashboard_controller.dart';
 
-/// Dialog for transferring funds between pockets
+/// Dialog for transferring funds between pockets/categories
 class TransferFundsDialog extends ConsumerStatefulWidget {
   final String accountId;
-  final List<models.Card> cards;
+  final models.Card sourceCard; // Pre-selected source
+  final models.Card destinationCard; // Pre-selected destination (pocket)
 
   const TransferFundsDialog({
     super.key,
     required this.accountId,
-    required this.cards,
+    required this.sourceCard,
+    required this.destinationCard,
   });
 
   @override
@@ -24,8 +26,6 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _amountController;
   late final TextEditingController _descriptionController;
-  String? _sourcePocketId;
-  String? _destinationPocketId;
 
   @override
   void initState() {
@@ -41,97 +41,144 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
     super.dispose();
   }
 
-  List<models.Card> get _pockets {
-    return widget.cards.where((card) {
-      return card.when(
-        pocket: (_, __, ___, ____, _____) => true,
-        category:
-            (
-              _,
-              __,
-              ___,
-              ____,
-              _____,
-              ______,
-              _______,
-              ________,
-              _________,
-              __________,
-            ) => false,
-      );
-    }).toList();
-  }
+  // Get the source card details
+  String get _sourceCardId => widget.sourceCard.when(
+    pocket: (id, _, __, ___, ____) => id,
+    category:
+        (id, _, __, ___, ____, _____, ______, _______, ________, _________) =>
+            id,
+  );
 
-  double _getPocketBalance(String pocketId) {
-    final pocket = _pockets.firstWhere(
-      (card) => card.when(
-        pocket: (id, _, __, ___, ____) => id == pocketId,
-        category:
-            (
-              _,
-              __,
-              ___,
-              ____,
-              _____,
-              ______,
-              _______,
-              ________,
-              _________,
-              __________,
-            ) => false,
-      ),
-    );
-    return pocket.when(
-      pocket: (_, __, ___, balance, ____) => balance,
-      category:
-          (
-            _,
-            __,
-            ___,
-            ____,
-            _____,
-            ______,
-            _______,
-            ________,
-            _________,
-            __________,
-          ) => 0.0,
-    );
-  }
+  String get _sourceCardName => widget.sourceCard.when(
+    pocket: (_, name, __, ___, ____) => name,
+    category:
+        (_, name, __, ___, ____, _____, ______, _______, ________, _________) =>
+            name,
+  );
+
+  String get _sourceCardIcon => widget.sourceCard.when(
+    pocket: (_, __, icon, ___, ____) => icon,
+    category:
+        (_, __, icon, ___, ____, _____, ______, _______, ________, _________) =>
+            icon,
+  );
+
+  bool get _isSourcePocket => widget.sourceCard.when(
+    pocket: (_, __, ___, ____, _____) => true,
+    category:
+        (
+          _,
+          __,
+          ___,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+          _________,
+          __________,
+        ) => false,
+  );
+
+  double get _sourceAvailableAmount => widget.sourceCard.when(
+    pocket: (_, __, ___, balance, ____) => balance,
+    category:
+        (
+          _,
+          __,
+          ___,
+          budgetValue,
+          currentValue,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+        ) {
+          // For categories, available is what's been spent (currentValue)
+          return currentValue;
+        },
+  );
+
+  // Get the destination pocket details
+  String get _destinationPocketId => widget.destinationCard.when(
+    pocket: (id, _, __, ___, ____) => id,
+    category:
+        (
+          _,
+          __,
+          ___,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+          _________,
+          __________,
+        ) => '',
+  );
+
+  String get _destinationPocketName => widget.destinationCard.when(
+    pocket: (_, name, __, ___, ____) => name,
+    category:
+        (
+          _,
+          __,
+          ___,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+          _________,
+          __________,
+        ) => '',
+  );
+
+  String get _destinationPocketIcon => widget.destinationCard.when(
+    pocket: (_, __, icon, ___, ____) => icon,
+    category:
+        (
+          _,
+          __,
+          ___,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+          _________,
+          __________,
+        ) => '',
+  );
+
+  double get _destinationBalance => widget.destinationCard.when(
+    pocket: (_, __, ___, balance, ____) => balance,
+    category:
+        (
+          _,
+          __,
+          ___,
+          ____,
+          _____,
+          ______,
+          _______,
+          ________,
+          _________,
+          __________,
+        ) => 0.0,
+  );
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      if (_sourcePocketId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a source pocket')),
-        );
-        return;
-      }
-
-      if (_destinationPocketId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a destination pocket')),
-        );
-        return;
-      }
-
-      if (_sourcePocketId == _destinationPocketId) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Source and destination must be different'),
-          ),
-        );
-        return;
-      }
-
       final amount = double.parse(_amountController.text);
-      final sourceBalance = _getPocketBalance(_sourcePocketId!);
 
-      if (amount > sourceBalance) {
+      if (amount > _sourceAvailableAmount) {
+        final sourceType = _isSourcePocket ? 'pocket' : 'category';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Insufficient funds in source pocket (\$${sourceBalance.toStringAsFixed(2)} available)',
+              'Insufficient funds in source $sourceType (\$${_sourceAvailableAmount.toStringAsFixed(2)} available)',
             ),
           ),
         );
@@ -144,10 +191,10 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
           .read(dashboardControllerProvider.notifier)
           .transferFunds(
             sourceAccountId: widget.accountId,
-            sourceCardId: _sourcePocketId!,
-            isSourcePocket: true, // Always transferring from pocket to pocket
+            sourceCardId: _sourceCardId,
+            isSourcePocket: _isSourcePocket,
             destinationAccountId: widget.accountId,
-            destinationPocketId: _destinationPocketId!,
+            destinationPocketId: _destinationPocketId,
             amount: amount,
             description: description.isEmpty ? 'Transfer' : description,
           );
@@ -162,221 +209,213 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
   Widget build(BuildContext context) {
     final controllerState = ref.watch(dashboardControllerProvider);
 
-    return AlertDialog(
-      title: const Text('Transfer Funds'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Amount
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  hintText: '0.00',
-                  border: OutlineInputBorder(),
-                  prefixText: '\$ ',
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 425),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Transfer Funds',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Move funds from $_sourceCardName to $_destinationPocketName',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  ),
                 ],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  final amount = double.tryParse(value);
-                  if (amount == null || amount <= 0) {
-                    return 'Please enter a valid amount';
-                  }
-                  return null;
-                },
-                autofocus: true,
               ),
-              const SizedBox(height: 16),
+            ),
 
-              // Description
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'e.g., Savings for vacation',
-                  border: OutlineInputBorder(),
-                ),
-                textCapitalization: TextCapitalization.sentences,
-                maxLines: 2,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Source Pocket Selector
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'From Pocket',
-                  border: const OutlineInputBorder(),
-                  helperText: _sourcePocketId != null
-                      ? 'Balance: \$${_getPocketBalance(_sourcePocketId!).toStringAsFixed(2)}'
-                      : null,
-                ),
-                value: _sourcePocketId,
-                items: _pockets
-                    .map((card) {
-                      return card.when(
-                        pocket: (id, name, icon, balance, color) {
-                          return DropdownMenuItem<String>(
-                            value: id,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(icon),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '\$${balance.toStringAsFixed(2)}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
+            // Form content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Source card display
+                      Text(
+                        'From',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              _sourceCardIcon,
+                              style: const TextStyle(fontSize: 20),
                             ),
-                          );
-                        },
-                        category:
-                            (
-                              _,
-                              __,
-                              ___,
-                              ____,
-                              _____,
-                              ______,
-                              _______,
-                              ________,
-                              _________,
-                              __________,
-                            ) {
-                              return null;
-                            },
-                      );
-                    })
-                    .whereType<DropdownMenuItem<String>>()
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _sourcePocketId = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a source pocket';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Destination Pocket Selector
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'To Pocket',
-                  border: const OutlineInputBorder(),
-                  helperText: _destinationPocketId != null
-                      ? 'Balance: \$${_getPocketBalance(_destinationPocketId!).toStringAsFixed(2)}'
-                      : null,
-                ),
-                value: _destinationPocketId,
-                items: _pockets
-                    .map((card) {
-                      return card.when(
-                        pocket: (id, name, icon, balance, color) {
-                          return DropdownMenuItem<String>(
-                            value: id,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(icon),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '\$${balance.toStringAsFixed(2)}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _sourceCardName,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
                             ),
-                          );
+                            Text(
+                              '\$${_sourceAvailableAmount.toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Destination pocket display
+                      Text('To', style: Theme.of(context).textTheme.labelLarge),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              _destinationPocketIcon,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _destinationPocketName,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            Text(
+                              '\$${_destinationBalance.toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Amount field
+                      Text(
+                        'Amount',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _amountController,
+                        decoration: InputDecoration(
+                          hintText: '0.00',
+                          border: const OutlineInputBorder(),
+                          helperText:
+                              'Available: \$${_sourceAvailableAmount.toStringAsFixed(2)}',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          final amount = double.tryParse(value);
+                          if (amount == null || amount <= 0) {
+                            return 'Please enter a valid amount';
+                          }
+                          return null;
                         },
-                        category:
-                            (
-                              _,
-                              __,
-                              ___,
-                              ____,
-                              _____,
-                              ______,
-                              _______,
-                              ________,
-                              _________,
-                              __________,
-                            ) {
-                              return null;
-                            },
-                      );
-                    })
-                    .whereType<DropdownMenuItem<String>>()
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _destinationPocketId = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a destination pocket';
-                  }
-                  return null;
-                },
+                        autofocus: true,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Description
+                      Text(
+                        'Description (Optional)',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g., Savings transfer',
+                          border: OutlineInputBorder(),
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLines: 2,
+                        onFieldSubmitted: (_) => _submit(),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+
+            // Footer with actions
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Theme.of(context).dividerColor),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: controllerState.isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: controllerState.isLoading ? null : _submit,
+                    child: controllerState.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Transfer'),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: controllerState.isLoading
-              ? null
-              : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: controllerState.isLoading ? null : _submit,
-          child: controllerState.isLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Transfer'),
-        ),
-      ],
     );
   }
 }

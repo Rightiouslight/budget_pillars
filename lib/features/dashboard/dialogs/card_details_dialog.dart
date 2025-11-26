@@ -5,7 +5,6 @@ import '../../../data/models/account.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
 import 'add_expense_dialog.dart';
-import 'transfer_funds_dialog.dart';
 
 class CardDetailsDialog extends ConsumerWidget {
   final String accountId;
@@ -77,60 +76,40 @@ class CardDetailsDialog extends ConsumerWidget {
             // Action buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Get the card ID
-                        final cardId = card.when(
-                          pocket: (id, _, __, ___, ____) => id,
-                          category:
-                              (
-                                id,
-                                _,
-                                __,
-                                ___,
-                                ____,
-                                _____,
-                                ______,
-                                _______,
-                                ________,
-                                _________,
-                              ) => id,
-                        );
-                        showDialog(
-                          context: context,
-                          builder: (context) => AddExpenseDialog(
-                            accountId: accountId,
-                            categoryId: cardId,
-                            card: card,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.add_circle_outline, size: 18),
-                      label: const Text('Add Expense'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        showDialog(
-                          context: context,
-                          builder: (context) => TransferFundsDialog(
-                            accountId: accountId,
-                            cards: account.cards,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.swap_horiz, size: 18),
-                      label: const Text('Transfer'),
-                    ),
-                  ),
-                ],
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Get the card ID
+                    final cardId = card.when(
+                      pocket: (id, _, __, ___, ____) => id,
+                      category:
+                          (
+                            id,
+                            _,
+                            __,
+                            ___,
+                            ____,
+                            _____,
+                            ______,
+                            _______,
+                            ________,
+                            _________,
+                          ) => id,
+                    );
+                    showDialog(
+                      context: context,
+                      builder: (context) => AddExpenseDialog(
+                        accountId: accountId,
+                        categoryId: cardId,
+                        card: card,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                  label: const Text('Add Expense'),
+                ),
               ),
             ),
 

@@ -25,8 +25,10 @@ mixin _$UserSettings {
   int get monthStartDate =>
       throw _privateConstructorUsedError; // Day of month when budget period starts (1-28)
   Theme? get theme => throw _privateConstructorUsedError;
-  bool get isCompactView => throw _privateConstructorUsedError;
+  bool get isCompactView =>
+      throw _privateConstructorUsedError; // Deprecated - use viewPreferences instead
   List<ImportProfile> get importProfiles => throw _privateConstructorUsedError;
+  ViewPreferences? get viewPreferences => throw _privateConstructorUsedError;
 
   /// Serializes this UserSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,10 +53,12 @@ abstract class $UserSettingsCopyWith<$Res> {
     Theme? theme,
     bool isCompactView,
     List<ImportProfile> importProfiles,
+    ViewPreferences? viewPreferences,
   });
 
   $CurrencyCopyWith<$Res>? get currency;
   $ThemeCopyWith<$Res>? get theme;
+  $ViewPreferencesCopyWith<$Res>? get viewPreferences;
 }
 
 /// @nodoc
@@ -77,6 +81,7 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
     Object? theme = freezed,
     Object? isCompactView = null,
     Object? importProfiles = null,
+    Object? viewPreferences = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -100,6 +105,10 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
                 ? _value.importProfiles
                 : importProfiles // ignore: cast_nullable_to_non_nullable
                       as List<ImportProfile>,
+            viewPreferences: freezed == viewPreferences
+                ? _value.viewPreferences
+                : viewPreferences // ignore: cast_nullable_to_non_nullable
+                      as ViewPreferences?,
           )
           as $Val,
     );
@@ -132,6 +141,20 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
       return _then(_value.copyWith(theme: value) as $Val);
     });
   }
+
+  /// Create a copy of UserSettings
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ViewPreferencesCopyWith<$Res>? get viewPreferences {
+    if (_value.viewPreferences == null) {
+      return null;
+    }
+
+    return $ViewPreferencesCopyWith<$Res>(_value.viewPreferences!, (value) {
+      return _then(_value.copyWith(viewPreferences: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -149,12 +172,15 @@ abstract class _$$UserSettingsImplCopyWith<$Res>
     Theme? theme,
     bool isCompactView,
     List<ImportProfile> importProfiles,
+    ViewPreferences? viewPreferences,
   });
 
   @override
   $CurrencyCopyWith<$Res>? get currency;
   @override
   $ThemeCopyWith<$Res>? get theme;
+  @override
+  $ViewPreferencesCopyWith<$Res>? get viewPreferences;
 }
 
 /// @nodoc
@@ -176,6 +202,7 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
     Object? theme = freezed,
     Object? isCompactView = null,
     Object? importProfiles = null,
+    Object? viewPreferences = freezed,
   }) {
     return _then(
       _$UserSettingsImpl(
@@ -199,6 +226,10 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
             ? _value._importProfiles
             : importProfiles // ignore: cast_nullable_to_non_nullable
                   as List<ImportProfile>,
+        viewPreferences: freezed == viewPreferences
+            ? _value.viewPreferences
+            : viewPreferences // ignore: cast_nullable_to_non_nullable
+                  as ViewPreferences?,
       ),
     );
   }
@@ -213,6 +244,7 @@ class _$UserSettingsImpl implements _UserSettings {
     this.theme,
     this.isCompactView = false,
     final List<ImportProfile> importProfiles = const [],
+    this.viewPreferences,
   }) : _importProfiles = importProfiles;
 
   factory _$UserSettingsImpl.fromJson(Map<String, dynamic> json) =>
@@ -229,7 +261,9 @@ class _$UserSettingsImpl implements _UserSettings {
   @override
   @JsonKey()
   final bool isCompactView;
+  // Deprecated - use viewPreferences instead
   final List<ImportProfile> _importProfiles;
+  // Deprecated - use viewPreferences instead
   @override
   @JsonKey()
   List<ImportProfile> get importProfiles {
@@ -239,8 +273,11 @@ class _$UserSettingsImpl implements _UserSettings {
   }
 
   @override
+  final ViewPreferences? viewPreferences;
+
+  @override
   String toString() {
-    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles)';
+    return 'UserSettings(currency: $currency, monthStartDate: $monthStartDate, theme: $theme, isCompactView: $isCompactView, importProfiles: $importProfiles, viewPreferences: $viewPreferences)';
   }
 
   @override
@@ -258,7 +295,9 @@ class _$UserSettingsImpl implements _UserSettings {
             const DeepCollectionEquality().equals(
               other._importProfiles,
               _importProfiles,
-            ));
+            ) &&
+            (identical(other.viewPreferences, viewPreferences) ||
+                other.viewPreferences == viewPreferences));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -270,6 +309,7 @@ class _$UserSettingsImpl implements _UserSettings {
     theme,
     isCompactView,
     const DeepCollectionEquality().hash(_importProfiles),
+    viewPreferences,
   );
 
   /// Create a copy of UserSettings
@@ -293,6 +333,7 @@ abstract class _UserSettings implements UserSettings {
     final Theme? theme,
     final bool isCompactView,
     final List<ImportProfile> importProfiles,
+    final ViewPreferences? viewPreferences,
   }) = _$UserSettingsImpl;
 
   factory _UserSettings.fromJson(Map<String, dynamic> json) =
@@ -305,9 +346,11 @@ abstract class _UserSettings implements UserSettings {
   @override
   Theme? get theme;
   @override
-  bool get isCompactView;
+  bool get isCompactView; // Deprecated - use viewPreferences instead
   @override
   List<ImportProfile> get importProfiles;
+  @override
+  ViewPreferences? get viewPreferences;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.

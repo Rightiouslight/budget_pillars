@@ -86,8 +86,8 @@ class FirestoreRepository {
     return _firestore
         .collection('users')
         .doc(userId)
-        .collection('settings')
-        .doc('preferences')
+        .collection('data')
+        .doc('settings')
         .snapshots()
         .map((snapshot) {
           if (!snapshot.exists || snapshot.data() == null) {
@@ -107,8 +107,8 @@ class FirestoreRepository {
     await _firestore
         .collection('users')
         .doc(userId)
-        .collection('settings')
-        .doc('preferences')
+        .collection('data')
+        .doc('settings')
         .set(settings.toJson());
   }
 

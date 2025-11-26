@@ -21,6 +21,11 @@ _$UserSettingsImpl _$$UserSettingsImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => ImportProfile.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      viewPreferences: json['viewPreferences'] == null
+          ? null
+          : ViewPreferences.fromJson(
+              json['viewPreferences'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
@@ -30,4 +35,5 @@ Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
       'theme': instance.theme,
       'isCompactView': instance.isCompactView,
       'importProfiles': instance.importProfiles,
+      'viewPreferences': instance.viewPreferences,
     };
