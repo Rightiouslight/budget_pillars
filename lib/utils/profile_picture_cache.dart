@@ -10,7 +10,7 @@ Future<String?> downloadAndCacheProfilePicture(String? photoURL) async {
 
   try {
     final response = await http.get(Uri.parse(photoURL));
-    
+
     if (response.statusCode == 200) {
       // Convert to base64
       final base64String = base64Encode(response.bodyBytes);

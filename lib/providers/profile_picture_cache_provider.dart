@@ -5,7 +5,9 @@ import '../utils/profile_picture_cache.dart';
 import 'user_settings_provider.dart';
 
 /// Provider that handles caching user profile pictures
-final profilePictureCacheProvider = Provider<ProfilePictureCacheController>((ref) {
+final profilePictureCacheProvider = Provider<ProfilePictureCacheController>((
+  ref,
+) {
   return ProfilePictureCacheController(ref);
 });
 
@@ -23,17 +25,20 @@ class ProfilePictureCacheController {
     if (settings == null) return;
 
     // If we already have a cached picture, no need to download again
-    if (settings.cachedProfilePicture != null && settings.cachedProfilePicture!.isNotEmpty) {
+    if (settings.cachedProfilePicture != null &&
+        settings.cachedProfilePicture!.isNotEmpty) {
       return;
     }
 
     // If user has a photo URL and it's not cached, download and cache it
     if (user.photoURL != null && user.photoURL!.isNotEmpty) {
       final base64Image = await downloadAndCacheProfilePicture(user.photoURL);
-      
+
       if (base64Image != null) {
         final repository = _ref.read(firestoreRepositoryProvider);
-        final updatedSettings = settings.copyWith(cachedProfilePicture: base64Image);
+        final updatedSettings = settings.copyWith(
+          cachedProfilePicture: base64Image,
+        );
         await repository.saveUserSettings(user.uid, updatedSettings);
       }
     }
@@ -49,10 +54,12 @@ class ProfilePictureCacheController {
 
     if (user.photoURL != null && user.photoURL!.isNotEmpty) {
       final base64Image = await downloadAndCacheProfilePicture(user.photoURL);
-      
+
       if (base64Image != null) {
         final repository = _ref.read(firestoreRepositoryProvider);
-        final updatedSettings = settings.copyWith(cachedProfilePicture: base64Image);
+        final updatedSettings = settings.copyWith(
+          cachedProfilePicture: base64Image,
+        );
         await repository.saveUserSettings(user.uid, updatedSettings);
       }
     }
