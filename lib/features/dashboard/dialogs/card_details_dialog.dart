@@ -7,8 +7,6 @@ import '../../../providers/active_budget_provider.dart';
 import '../providers/transfer_mode_provider.dart';
 import '../widgets/pocket_card_widget.dart';
 import '../widgets/category_card_widget.dart';
-import 'add_pocket_dialog.dart';
-import 'add_category_dialog.dart';
 import 'package:intl/intl.dart';
 
 class CardDetailsDialog extends ConsumerWidget {
@@ -85,62 +83,6 @@ class CardDetailsDialog extends ConsumerWidget {
                         cards: account.cards,
                       );
                     },
-              ),
-            ),
-
-            // Action buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    card.when(
-                      pocket: (id, name, icon, balance, color) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AddPocketDialog(
-                            accountId: accountId,
-                            pocketId: id,
-                            initialName: name,
-                            initialIcon: icon,
-                            initialColor: color,
-                          ),
-                        );
-                      },
-                      category:
-                          (
-                            id,
-                            name,
-                            icon,
-                            budgetValue,
-                            currentValue,
-                            color,
-                            isRecurring,
-                            dueDate,
-                            destinationPocketId,
-                            destinationAccountId,
-                          ) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AddCategoryDialog(
-                                accountId: accountId,
-                                categoryId: id,
-                                initialName: name,
-                                initialIcon: icon,
-                                initialBudgetValue: budgetValue,
-                                initialColor: color,
-                                initialIsRecurring: isRecurring,
-                                initialDueDate: dueDate,
-                              ),
-                            );
-                          },
-                    );
-                  },
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Edit'),
-                ),
               ),
             ),
 

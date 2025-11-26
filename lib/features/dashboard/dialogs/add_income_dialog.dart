@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../data/models/account.dart';
 import '../../../data/models/card.dart';
 import '../../../data/models/recurring_income.dart';
+import '../../../core/constants/app_icons.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog for adding income to a pocket (one-time or recurring)
@@ -30,6 +31,19 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
   bool _isRecurring = false;
   DateTime _selectedDate = DateTime.now();
   int _dayOfMonth = 99; // 99 = Immediately
+
+  String _getValidIcon(String? icon) {
+    // Check if icon is null or empty
+    if (icon == null || icon.isEmpty) {
+      return AppIcons.defaultPocketIcon;
+    }
+    // Check if icon matches one of our valid pocket icons
+    if (AppIcons.isValidPocketIcon(icon)) {
+      return icon;
+    }
+    // Return default icon if not found
+    return AppIcons.defaultPocketIcon;
+  }
 
   @override
   void initState() {
@@ -187,7 +201,7 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
                             child: Row(
                               children: [
                                 Text(
-                                  pocket.icon,
+                                  _getValidIcon(pocket.icon),
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 const SizedBox(width: 8),
@@ -369,7 +383,7 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(isEditing ? 'Save Changes' : 'Add Income'),
+                        : const Text('Add Income'),
                   ),
                 ],
               ),
