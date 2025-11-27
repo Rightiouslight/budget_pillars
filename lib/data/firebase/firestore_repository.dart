@@ -42,6 +42,28 @@ class FirestoreRepository {
         });
   }
 
+  /// Get a single monthly budget snapshot (not a stream)
+  Future<MonthlyBudget?> getBudget(String userId, String monthKey) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('budgets')
+        .doc(monthKey)
+        .get();
+
+    if (!snapshot.exists || snapshot.data() == null) {
+      return null;
+    }
+
+    try {
+      return MonthlyBudget.fromJson(snapshot.data()!);
+    } catch (e, stackTrace) {
+      print('❌ Error parsing MonthlyBudget: $e');
+      print('Stack trace: $stackTrace');
+      return null;
+    }
+  }
+
   /// Save the monthly budget for a specific user and month
   Future<void> saveBudget(
     String userId,

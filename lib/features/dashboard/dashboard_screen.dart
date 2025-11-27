@@ -5,6 +5,7 @@ import '../../providers/budget_override_provider.dart';
 import 'widgets/account_board_widget.dart';
 import 'widgets/budget_header.dart';
 import 'dialogs/add_account_dialog.dart';
+import 'dialogs/budget_creation_dialog.dart';
 import 'services/auto_payment_service.dart';
 import 'dashboard_controller.dart';
 
@@ -107,7 +108,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) => const AddAccountDialog(),
+                builder: (context) => const BudgetCreationDialog(),
               );
             },
             icon: const Icon(Icons.add),

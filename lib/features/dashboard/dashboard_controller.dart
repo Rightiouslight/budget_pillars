@@ -1226,4 +1226,172 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
+
+  // ===== BUDGET CREATION OPERATIONS =====
+
+  /// Get the previous month's budget
+  Future<MonthlyBudget?> getPreviousMonthBudget() async {
+    // Parse current month key (format: yyyy-MM)
+    final currentMonthKey = _monthKey;
+    final parts = currentMonthKey.split('-');
+    final year = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+
+    // Calculate previous month
+    final previousMonth = month == 1 ? 12 : month - 1;
+    final previousYear = month == 1 ? year - 1 : year;
+    final previousMonthKey =
+        '$previousYear-${previousMonth.toString().padLeft(2, '0')}';
+
+    try {
+      return await _repository.getBudget(_userId, previousMonthKey);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Import previous month's budget with optional balance retention
+  Future<void> importPreviousBudget({
+    required MonthlyBudget previousBudget,
+    required bool keepBalances,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      // Copy accounts and process cards
+      final newAccounts = previousBudget.accounts.map((account) {
+        final newCards = account.cards.map((card) {
+          return card.when(
+            pocket: (id, name, icon, balance, color) {
+              // Reset balance if user chose to start from zero
+              return Card.pocket(
+                id: id,
+                name: name,
+                icon: icon,
+                balance: keepBalances ? balance : 0.0,
+                color: color,
+              );
+            },
+            category:
+                (
+                  id,
+                  name,
+                  icon,
+                  budgetValue,
+                  currentValue,
+                  color,
+                  isRecurring,
+                  dueDate,
+                  destinationPocketId,
+                  destinationAccountId,
+                ) {
+                  // Always reset currentValue to 0 for categories
+                  return Card.category(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    budgetValue: budgetValue,
+                    currentValue: 0.0,
+                    color: color,
+                    isRecurring: isRecurring,
+                    dueDate: dueDate,
+                    destinationPocketId: destinationPocketId,
+                    destinationAccountId: destinationAccountId,
+                  );
+                },
+          );
+        }).toList();
+
+        return account.copyWith(cards: newCards);
+      }).toList();
+
+      // Process recurring incomes with dayOfMonth == 99 (immediate)
+      final newTransactions = <Transaction>[];
+      final processedIncomes = <String, bool>{};
+
+      for (final income in previousBudget.recurringIncomes) {
+        if (income.dayOfMonth == 99) {
+          // Find the account and pocket
+          final account = newAccounts.firstWhere(
+            (a) => a.id == income.accountId,
+          );
+          final pocketIndex = account.cards.indexWhere(
+            (c) =>
+                c.whenOrNull(
+                  pocket: (id, _, __, ___, ____) => id == income.pocketId,
+                ) !=
+                null,
+          );
+
+          if (pocketIndex != -1) {
+            final pocket = account.cards[pocketIndex];
+            pocket.whenOrNull(
+              pocket: (id, name, icon, balance, color) {
+                // Add income to pocket balance
+                final updatedPocket = Card.pocket(
+                  id: id,
+                  name: name,
+                  icon: icon,
+                  balance: balance + income.amount,
+                  color: color,
+                );
+                account.cards[pocketIndex] = updatedPocket;
+
+                // Create transaction record
+                final now = DateTime.now();
+                newTransactions.add(
+                  Transaction(
+                    id: 'txn_${now.millisecondsSinceEpoch}_${income.id}',
+                    amount: income.amount,
+                    description: income.description ?? 'Recurring income',
+                    date: now,
+                    accountId: account.id,
+                    accountName: account.name,
+                    categoryId: id,
+                    categoryName: 'Income to $name',
+                  ),
+                );
+
+                processedIncomes[income.id] = true;
+              },
+            );
+          }
+        }
+      }
+
+      // Create the new budget
+      final newBudget = MonthlyBudget(
+        accounts: newAccounts,
+        transactions: newTransactions,
+        recurringIncomes: previousBudget.recurringIncomes,
+        autoTransactionsProcessed: {},
+        processedRecurringIncomes: processedIncomes,
+      );
+
+      await _repository.saveBudget(_userId, _monthKey, newBudget);
+    });
+  }
+
+  /// Create an empty budget
+  Future<void> createEmptyBudget() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final emptyBudget = MonthlyBudget(
+        accounts: [],
+        transactions: [],
+        recurringIncomes: [],
+        autoTransactionsProcessed: {},
+        processedRecurringIncomes: {},
+      );
+
+      await _repository.saveBudget(_userId, _monthKey, emptyBudget);
+    });
+  }
+
+  /// Create a demo budget with sample data
+  Future<void> createDemoBudget(MonthlyBudget demoBudget) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _repository.saveBudget(_userId, _monthKey, demoBudget);
+    });
+  }
 }

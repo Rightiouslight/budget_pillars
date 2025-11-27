@@ -99,11 +99,18 @@ Future<void> _testBudgetSetup(WidgetTester tester) async {
   debugPrint('🧪 Testing Budget Setup...');
 
   // Check if we need to create initial budget
-  final startScratchButton = find.text('Start from Scratch');
+  final createBudgetButton = find.text('Create Budget');
 
-  if (startScratchButton.evaluate().isNotEmpty) {
+  if (createBudgetButton.evaluate().isNotEmpty) {
+    // Tap the Create Budget button to open the dialog
+    await tester.tap(createBudgetButton);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // Tap "Start from Scratch" option in the dialog
+    final startScratchButton = find.text('Start from Scratch');
     await tester.tap(startScratchButton);
     await tester.pumpAndSettle(const Duration(seconds: 2));
+
     debugPrint('✅ Created new budget');
   } else {
     debugPrint('ℹ️ Budget already exists');
