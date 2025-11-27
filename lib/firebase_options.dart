@@ -64,7 +64,8 @@ class DevelopmentFirebaseOptions {
     messagingSenderId: '487033381743',
     projectId: 'budgetpillarsdev',
     storageBucket: 'budgetpillarsdev.firebasestorage.app',
-    iosClientId: '487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com',
+    iosClientId:
+        '487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com',
     iosBundleId: 'budgetpillars.lojinnovation.com.easyBudgetPillars',
   );
 
@@ -74,7 +75,8 @@ class DevelopmentFirebaseOptions {
     messagingSenderId: '487033381743',
     projectId: 'budgetpillarsdev',
     storageBucket: 'budgetpillarsdev.firebasestorage.app',
-    iosClientId: '487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com',
+    iosClientId:
+        '487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com',
     iosBundleId: 'budgetpillars.lojinnovation.com.easyBudgetPillars',
   );
 

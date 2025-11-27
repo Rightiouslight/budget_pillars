@@ -34,23 +34,24 @@ class ProductionFirebaseOptions {
   }
 
   // TODO: Replace these with your actual production Firebase configuration
-  // Run: flutterfire configure --project=your-prod-project-id
+
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_PROD_WEB_API_KEY',
-    appId: 'YOUR_PROD_WEB_APP_ID',
-    messagingSenderId: 'YOUR_PROD_MESSAGING_SENDER_ID',
-    projectId: 'budgetpillars', // Your production project ID
-    authDomain: 'budgetpillars.firebaseapp.com',
-    storageBucket: 'budgetpillars.firebasestorage.app',
-    measurementId: 'YOUR_PROD_MEASUREMENT_ID',
+    apiKey: 'AIzaSyB2vISec3_1i_D2KBrqFKGakfUBAersoFA',
+    appId: '1:1065513142302:web:773525822d7436e856860f',
+    messagingSenderId: '1065513142302',
+    projectId: 'pocketflow-tw4kf',
+    authDomain: 'pocketflow-tw4kf.firebaseapp.com',
+    storageBucket: 'pocketflow-tw4kf.firebasestorage.app',
   );
 
+  // Run: flutterfire configure --project=your-prod-project-id
+
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_PROD_ANDROID_API_KEY',
-    appId: 'YOUR_PROD_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_PROD_MESSAGING_SENDER_ID',
-    projectId: 'budgetpillars',
-    storageBucket: 'budgetpillars.firebasestorage.app',
+    apiKey: 'AIzaSyDgU4fkN8RExycQhsR5MbZIDNgcHdWDQ1Y',
+    appId: '1:1065513142302:android:9a98b4fa2e44ef3956860f',
+    messagingSenderId: '1065513142302',
+    projectId: 'pocketflow-tw4kf',
+    storageBucket: 'pocketflow-tw4kf.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -74,12 +75,12 @@ class ProductionFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_PROD_WINDOWS_API_KEY',
-    appId: 'YOUR_PROD_WINDOWS_APP_ID',
-    messagingSenderId: 'YOUR_PROD_MESSAGING_SENDER_ID',
-    projectId: 'budgetpillars',
-    authDomain: 'budgetpillars.firebaseapp.com',
-    storageBucket: 'budgetpillars.firebasestorage.app',
-    measurementId: 'YOUR_PROD_WINDOWS_MEASUREMENT_ID',
+    apiKey: 'AIzaSyB2vISec3_1i_D2KBrqFKGakfUBAersoFA',
+    appId: '1:1065513142302:web:b25b49732d7fda0756860f',
+    messagingSenderId: '1065513142302',
+    projectId: 'pocketflow-tw4kf',
+    authDomain: 'pocketflow-tw4kf.firebaseapp.com',
+    storageBucket: 'pocketflow-tw4kf.firebasestorage.app',
   );
+
 }

@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "487033381743",
-    "project_id": "budgetpillarsdev",
-    "storage_bucket": "budgetpillarsdev.firebasestorage.app"
+    "project_number": "1065513142302",
+    "project_id": "pocketflow-tw4kf",
+    "storage_bucket": "pocketflow-tw4kf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:487033381743:android:084b0794211a73c456fe9a",
+        "mobilesdk_app_id": "1:1065513142302:android:9a98b4fa2e44ef3956860f",
         "android_client_info": {
           "package_name": "budgetpillars.lojinnovation.com.easy_budget_pillars"
         }
       },
       "oauth_client": [
         {
-          "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+          "client_id": "1065513142302-gbpq61qnbuu4i4hmmehojbcqkuau4q1n.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCSSx80_KO-BBxzT7PsFnIY2tJA2Ru6g8I"
+          "current_key": "AIzaSyDgU4fkN8RExycQhsR5MbZIDNgcHdWDQ1Y"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+              "client_id": "1065513142302-gbpq61qnbuu4i4hmmehojbcqkuau4q1n.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

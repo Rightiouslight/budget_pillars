@@ -18,11 +18,13 @@ void main() async {
       EnvironmentConfig.firestoreEmulatorHost,
       EnvironmentConfig.firestoreEmulatorPort,
     );
-    
+
     if (EnvironmentConfig.enableDebugLogging) {
-      debugPrint('🔧 Using Firestore Emulator: '
-          '${EnvironmentConfig.firestoreEmulatorHost}:'
-          '${EnvironmentConfig.firestoreEmulatorPort}');
+      debugPrint(
+        '🔧 Using Firestore Emulator: '
+        '${EnvironmentConfig.firestoreEmulatorHost}:'
+        '${EnvironmentConfig.firestoreEmulatorPort}',
+      );
     }
   }
 
@@ -31,7 +33,7 @@ void main() async {
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
-  
+
   if (EnvironmentConfig.enableDebugLogging) {
     debugPrint('🚀 Starting ${EnvironmentConfig.appName}');
     debugPrint('📦 Environment: ${EnvironmentConfig.current.name}');
