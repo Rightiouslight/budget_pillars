@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_icons.dart';
+import '../../../core/widgets/icon_picker_dialog.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog for adding or editing a category
@@ -34,25 +36,10 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _budgetController;
-  late String _selectedIcon;
+  late int _selectedIconCodePoint;
   String? _selectedColor;
   bool _isRecurring = false;
   int? _dueDate;
-
-  final List<String> _iconOptions = [
-    '🍔',
-    '🏠',
-    '⚡',
-    '🚗',
-    '📱',
-    '🎬',
-    '🏥',
-    '🎓',
-    '🛒',
-    '💊',
-    '🎮',
-    '✈️',
-  ];
 
   final List<String?> _colorOptions = [
     null, // Default
@@ -73,7 +60,19 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
     _budgetController = TextEditingController(
       text: widget.initialBudgetValue?.toStringAsFixed(2) ?? '',
     );
-    _selectedIcon = widget.initialIcon ?? '🍔';
+
+    // Parse icon from string (codePoint) or use default
+    if (widget.initialIcon != null) {
+      final parsed = int.tryParse(widget.initialIcon!);
+      if (parsed != null && AppIcons.isValidCategoryIcon(parsed)) {
+        _selectedIconCodePoint = parsed;
+      } else {
+        _selectedIconCodePoint = AppIcons.defaultCategoryIcon.codePoint;
+      }
+    } else {
+      _selectedIconCodePoint = AppIcons.defaultCategoryIcon.codePoint;
+    }
+
     _selectedColor = widget.initialColor;
     _isRecurring = widget.initialIsRecurring ?? false;
     _dueDate = widget.initialDueDate;
@@ -99,7 +98,7 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
               accountId: widget.accountId,
               categoryId: widget.categoryId!,
               name: _nameController.text.trim(),
-              icon: _selectedIcon,
+              icon: _selectedIconCodePoint.toString(),
               budgetValue: budgetValue,
               color: _selectedColor,
               isRecurring: _isRecurring,
@@ -111,7 +110,7 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
             .addCategory(
               accountId: widget.accountId,
               name: _nameController.text.trim(),
-              icon: _selectedIcon,
+              icon: _selectedIconCodePoint.toString(),
               budgetValue: budgetValue,
               color: _selectedColor,
               isRecurring: _isRecurring,
@@ -228,38 +227,33 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _iconOptions.map((icon) {
-                  final isSelected = icon == _selectedIcon;
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedIcon = icon;
-                      });
-                    },
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context).colorScheme.surface,
-                        border: Border.all(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.outline,
-                          width: isSelected ? 2 : 1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(icon, style: const TextStyle(fontSize: 24)),
-                      ),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final selected = await showDialog<int>(
+                    context: context,
+                    builder: (context) => IconPickerDialog(
+                      availableIcons: AppIcons.categoryIcons,
+                      initialCodePoint: _selectedIconCodePoint,
+                      title: 'Select Category Icon',
                     ),
                   );
-                }).toList(),
+                  if (selected != null) {
+                    setState(() {
+                      _selectedIconCodePoint = selected;
+                    });
+                  }
+                },
+                icon: Icon(
+                  AppIcons.getCategoryIconData(_selectedIconCodePoint),
+                  size: 28,
+                ),
+                label: const Text('Choose Icon'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
 

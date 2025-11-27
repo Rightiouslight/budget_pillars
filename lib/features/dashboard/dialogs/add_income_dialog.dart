@@ -32,17 +32,18 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
   DateTime _selectedDate = DateTime.now();
   int _dayOfMonth = 99; // 99 = Immediately
 
-  String _getValidIcon(String? icon) {
+  IconData _getValidIcon(String? icon) {
     // Check if icon is null or empty
     if (icon == null || icon.isEmpty) {
-      return AppIcons.defaultPocketIcon;
+      return AppIcons.defaultPocketIcon.iconData;
     }
-    // Check if icon matches one of our valid pocket icons
-    if (AppIcons.isValidPocketIcon(icon)) {
-      return icon;
+    // Try to parse icon as codePoint
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidPocketIcon(codePoint)) {
+      return AppIcons.getPocketIconData(codePoint);
     }
     // Return default icon if not found
-    return AppIcons.defaultPocketIcon;
+    return AppIcons.defaultPocketIcon.iconData;
   }
 
   @override
@@ -200,10 +201,7 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
                             value: pocket.id,
                             child: Row(
                               children: [
-                                Text(
-                                  _getValidIcon(pocket.icon),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
+                                Icon(_getValidIcon(pocket.icon), size: 16),
                                 const SizedBox(width: 8),
                                 Text(pocket.name),
                               ],

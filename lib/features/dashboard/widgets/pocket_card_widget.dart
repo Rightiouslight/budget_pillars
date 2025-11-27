@@ -119,11 +119,12 @@ class PocketCardWidget extends ConsumerWidget {
                           Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Center(
-                      child: Text(
-                        _getValidIcon(icon),
-                        style: const TextStyle(fontSize: 20),
-                      ),
+                    child: Icon(
+                      _getValidIcon(icon),
+                      size: 20,
+                      color:
+                          cardColor ??
+                          Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -351,13 +352,14 @@ class PocketCardWidget extends ConsumerWidget {
     );
   }
 
-  String _getValidIcon(String icon) {
-    // Check if icon matches one of our valid pocket icons
-    if (AppIcons.isValidPocketIcon(icon)) {
-      return icon;
+  IconData _getValidIcon(String icon) {
+    // Try to parse icon as codePoint
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidPocketIcon(codePoint)) {
+      return AppIcons.getPocketIconData(codePoint);
     }
     // Return default icon if not found
-    return AppIcons.defaultPocketIcon;
+    return AppIcons.defaultPocketIcon.iconData;
   }
 
   Color? _parseColor(String colorString) {

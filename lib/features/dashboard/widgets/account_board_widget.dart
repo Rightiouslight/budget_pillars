@@ -82,9 +82,10 @@ class AccountBoardWidget extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
+                child: Icon(
                   _getValidIcon(account.icon),
-                  style: const TextStyle(fontSize: 20),
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
               const SizedBox(width: 12),
@@ -502,11 +503,14 @@ class AccountBoardWidget extends ConsumerWidget {
     );
   }
 
-  String _getValidIcon(String icon) {
-    if (AppIcons.isValidAccountIcon(icon)) {
-      return icon;
+  IconData _getValidIcon(String icon) {
+    // Try to parse icon as codePoint
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidAccountIcon(codePoint)) {
+      return AppIcons.getAccountIconData(codePoint);
     }
-    return AppIcons.defaultAccountIcon;
+    // Return default icon if not found
+    return AppIcons.defaultAccountIcon.iconData;
   }
 }
 

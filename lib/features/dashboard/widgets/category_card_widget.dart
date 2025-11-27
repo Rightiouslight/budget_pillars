@@ -120,11 +120,12 @@ class CategoryCardWidget extends ConsumerWidget {
                             Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Center(
-                        child: Text(
-                          _getValidIcon(icon),
-                          style: const TextStyle(fontSize: 20),
-                        ),
+                      child: Icon(
+                        _getValidIcon(icon),
+                        size: 20,
+                        color:
+                            cardColor ??
+                            Theme.of(context).colorScheme.onSecondaryContainer,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -467,13 +468,14 @@ class CategoryCardWidget extends ConsumerWidget {
     }
   }
 
-  String _getValidIcon(String icon) {
-    // Check if icon matches one of our valid category icons
-    if (AppIcons.isValidCategoryIcon(icon)) {
-      return icon;
+  IconData _getValidIcon(String icon) {
+    // Try to parse icon as codePoint
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidCategoryIcon(codePoint)) {
+      return AppIcons.getCategoryIconData(codePoint);
     }
     // Return default icon if not found
-    return AppIcons.defaultCategoryIcon;
+    return AppIcons.defaultCategoryIcon.iconData;
   }
 
   Color? _parseColor(String colorString) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_icons.dart';
+import '../../../core/widgets/icon_picker_dialog.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog for adding or editing an account
@@ -22,28 +24,24 @@ class AddAccountDialog extends ConsumerStatefulWidget {
 class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late String _selectedIcon;
-
-  final List<String> _iconOptions = [
-    '💼',
-    '🏦',
-    '💰',
-    '💳',
-    '🏠',
-    '🚗',
-    '🎓',
-    '🏥',
-    '🛒',
-    '✈️',
-    '🎯',
-    '⭐',
-  ];
+  late int _selectedIconCodePoint;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
-    _selectedIcon = widget.initialIcon ?? '💼';
+
+    // Parse icon from string (codePoint) or use default
+    if (widget.initialIcon != null) {
+      final parsed = int.tryParse(widget.initialIcon!);
+      if (parsed != null && AppIcons.isValidAccountIcon(parsed)) {
+        _selectedIconCodePoint = parsed;
+      } else {
+        _selectedIconCodePoint = AppIcons.defaultAccountIcon.codePoint;
+      }
+    } else {
+      _selectedIconCodePoint = AppIcons.defaultAccountIcon.codePoint;
+    }
   }
 
   @override
@@ -62,12 +60,15 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             .editAccount(
               accountId: widget.accountId!,
               name: _nameController.text.trim(),
-              icon: _selectedIcon,
+              icon: _selectedIconCodePoint.toString(),
             );
       } else {
         await ref
             .read(dashboardControllerProvider.notifier)
-            .addAccount(name: _nameController.text.trim(), icon: _selectedIcon);
+            .addAccount(
+              name: _nameController.text.trim(),
+              icon: _selectedIconCodePoint.toString(),
+            );
       }
 
       if (mounted) {
@@ -145,38 +146,33 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _iconOptions.map((icon) {
-                final isSelected = icon == _selectedIcon;
-                return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIcon = icon;
-                    });
-                  },
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surface,
-                      border: Border.all(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.outline,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(icon, style: const TextStyle(fontSize: 24)),
-                    ),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final selected = await showDialog<int>(
+                  context: context,
+                  builder: (context) => IconPickerDialog(
+                    availableIcons: AppIcons.accountIcons,
+                    initialCodePoint: _selectedIconCodePoint,
+                    title: 'Select Account Icon',
                   ),
                 );
-              }).toList(),
+                if (selected != null) {
+                  setState(() {
+                    _selectedIconCodePoint = selected;
+                  });
+                }
+              },
+              icon: Icon(
+                AppIcons.getAccountIconData(_selectedIconCodePoint),
+                size: 28,
+              ),
+              label: const Text('Choose Icon'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
             ),
           ],
         ),
