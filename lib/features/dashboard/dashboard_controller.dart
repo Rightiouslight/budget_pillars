@@ -1104,7 +1104,7 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     // Save to Firebase in background
     try {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
-      
+
       // Clear override after successful save
       // Small delay to ensure Firestore stream has updated
       await Future.delayed(const Duration(milliseconds: 100));
@@ -1125,7 +1125,8 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
   }) async {
     // Get current budget synchronously from the stream provider
     final currentBudget = _ref.read(activeBudgetProvider).value;
-    if (currentBudget == null || accountIndex >= currentBudget.accounts.length) return;
+    if (currentBudget == null || accountIndex >= currentBudget.accounts.length)
+      return;
 
     final accounts = List<Account>.from(currentBudget.accounts);
     final account = accounts[accountIndex];
@@ -1152,7 +1153,7 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     // Save to Firebase in background
     try {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
-      
+
       // Clear override after successful save
       // Small delay to ensure Firestore stream has updated
       await Future.delayed(const Duration(milliseconds: 100));
