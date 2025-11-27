@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../data/models/card.dart' as models;
+import '../../../providers/user_settings_provider.dart';
+import '../../../providers/active_budget_provider.dart';
+import '../../../utils/sms_parser.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog for adding an expense transaction
@@ -27,6 +31,7 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
   late final TextEditingController _descriptionController;
   DateTime _selectedDate = DateTime.now();
   bool _isDuplicate = false;
+  bool _isPastedDuplicate = false;
 
   @override
   void initState() {
@@ -110,6 +115,169 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
     }
   }
 
+  Future<void> _pasteFromClipboard() async {
+    final settings = ref.read(userSettingsProvider).value;
+    if (settings == null) return;
+
+    // Find an SMS profile with parsing rules
+    final smsProfile = settings.importProfiles.firstWhere(
+      (profile) =>
+          profile.smsStartWords.isNotEmpty || profile.smsStopWords.isNotEmpty,
+      orElse: () => settings.importProfiles.isNotEmpty
+          ? settings.importProfiles.first
+          : throw Exception('No import profile found'),
+    );
+
+    try {
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      if (clipboardData?.text == null || clipboardData!.text!.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Clipboard is empty'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get currency from settings
+      final currencyCode = settings.currency?.code ?? 'USD';
+
+      // Parse the SMS data
+      final smsData = SmsParser.extractSMSData(
+        message: clipboardData.text!,
+        currencyString: currencyCode,
+        startKeywordsString: smsProfile.smsStartWords,
+        stopKeywordsString: smsProfile.smsStopWords,
+      );
+
+      // Parse amount
+      final amount = double.tryParse(smsData.amount);
+      if (amount == null || amount == 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not extract amount from clipboard text'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Parse date
+      DateTime? parsedDate;
+      if (smsData.date != 'N/A') {
+        try {
+          // Try different date formats
+          final formats = [
+            'dd-MMM-yyyy',
+            'yyyy-MM-dd',
+            'MM/dd/yyyy',
+            'dd/MM/yyyy',
+          ];
+
+          for (final format in formats) {
+            try {
+              parsedDate = DateFormat(format).parse(smsData.date);
+              break;
+            } catch (_) {
+              continue;
+            }
+          }
+        } catch (_) {
+          parsedDate = null;
+        }
+      }
+
+      // Check for duplicate transactions
+      final budgetAsync = ref.read(activeBudgetProvider);
+      bool isDuplicate = false;
+
+      print('🔍 Checking for duplicates...');
+      print('   Budget hasValue: ${budgetAsync.hasValue}');
+      print('   Budget value is null: ${budgetAsync.value == null}');
+
+      if (budgetAsync.hasValue && budgetAsync.value != null) {
+        final transactions = budgetAsync.value!.transactions;
+        final dateToCheck = parsedDate ?? DateTime.now();
+
+        print('   Total transactions: ${transactions.length}');
+        print('   Checking amount: $amount');
+        print(
+          '   Checking date: ${dateToCheck.year}-${dateToCheck.month}-${dateToCheck.day}',
+        );
+
+        isDuplicate = transactions.any((tx) {
+          // Check if same date (ignoring time)
+          final txDate = tx.date;
+          final sameDate =
+              txDate.year == dateToCheck.year &&
+              txDate.month == dateToCheck.month &&
+              txDate.day == dateToCheck.day;
+
+          // Check if same amount
+          final sameAmount = (tx.amount - amount).abs() < 0.01;
+
+          if (sameDate || sameAmount) {
+            print(
+              '   Comparing with tx: ${tx.description} - ${tx.amount} on ${txDate.year}-${txDate.month}-${txDate.day}',
+            );
+            print('      Same date: $sameDate, Same amount: $sameAmount');
+          }
+
+          return sameDate && sameAmount;
+        });
+
+        print('   Duplicate found: $isDuplicate');
+      }
+
+      // Populate the fields
+      setState(() {
+        _amountController.text = amount.toStringAsFixed(2);
+        if (smsData.description != 'N/A' && smsData.description.isNotEmpty) {
+          _descriptionController.text = smsData.description;
+        }
+        if (parsedDate != null) {
+          _selectedDate = parsedDate;
+        }
+        _isPastedDuplicate = isDuplicate;
+      });
+
+      if (mounted) {
+        if (isDuplicate) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Transaction data loaded - Warning: Similar transaction already exists',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Transaction data loaded from clipboard'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error parsing SMS: ${e.toString()}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       final amount = double.parse(_amountController.text);
@@ -122,6 +290,7 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             categoryId: widget.categoryId,
             amount: amount,
             description: description.isEmpty ? 'Expense' : description,
+            date: _selectedDate,
           );
 
       if (mounted) {
@@ -296,6 +465,42 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
                         maxLines: 3,
                         onFieldSubmitted: (_) => _submit(),
                       ),
+                      const SizedBox(height: 16),
+
+                      // Paste from SMS button
+                      OutlinedButton.icon(
+                        onPressed: _pasteFromClipboard,
+                        icon: const Icon(Icons.content_paste, size: 18),
+                        label: const Text('Paste from SMS'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 40),
+                        ),
+                      ),
+
+                      // Duplicate warning message (inline)
+                      if (_isPastedDuplicate) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.orange,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Possible duplicate: A transaction with the same amount and date already exists.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.orange.shade700,
+                                      fontSize: 12,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

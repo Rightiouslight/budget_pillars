@@ -690,6 +690,7 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     required String categoryId,
     required double amount,
     required String description,
+    DateTime? date,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -706,7 +707,7 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
         id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
         amount: amount,
         description: description,
-        date: DateTime.now(),
+        date: date ?? DateTime.now(),
         accountId: accountId,
         accountName: account.name,
         categoryId: categoryId,
