@@ -1394,4 +1394,16 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       await _repository.saveBudget(_userId, _monthKey, demoBudget);
     });
   }
+
+  /// Delete the current month's budget
+  Future<void> deleteCurrentMonthBudget() async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.deleteBudget(_userId, _monthKey);
+      state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow; // Re-throw so the caller knows it failed
+    }
+  }
 }

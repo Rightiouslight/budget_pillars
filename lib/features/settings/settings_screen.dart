@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/user_settings_provider.dart';
 import '../../providers/user_settings_controller.dart';
+import '../../providers/active_budget_provider.dart';
 import '../../data/models/currency.dart';
 import '../../data/models/theme.dart' as app_theme;
 import '../../data/models/view_preferences.dart';
+import '../dashboard/dashboard_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -476,10 +478,165 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
+                const SizedBox(height: 32),
+
+                const Divider(),
+                const SizedBox(height: 24),
+
+                // Danger Zone Section
+                Text(
+                  'Danger Zone',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  elevation: 0,
+                  color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.error.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Delete Current Month Budget',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Permanently delete all data for ${ref.watch(monthDisplayNameProvider)}. '
+                          'This cannot be undone.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _showDeleteConfirmation(context, ref),
+                            icon: const Icon(Icons.delete_forever),
+                            label: const Text('Delete This Month\'s Budget'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.error,
+                              side: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
+    final monthName = ref.read(monthDisplayNameProvider);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.warning_amber_rounded,
+          color: Theme.of(context).colorScheme.error,
+          size: 48,
+        ),
+        title: const Text('Delete Budget?'),
+        content: Text(
+          'Are you sure you want to delete all budget data for $monthName?\n\n'
+          'This will permanently remove:\n'
+          '• All accounts and their cards\n'
+          '• All transactions\n'
+          '• All recurring incomes\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              final theme = Theme.of(context);
+              
+              navigator.pop(); // Close confirmation dialog
+              
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+              
+              try {
+                await ref
+                    .read(dashboardControllerProvider.notifier)
+                    .deleteCurrentMonthBudget();
+                
+                navigator.pop(); // Close loading dialog
+                
+                // Show snackbar
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Budget for $monthName deleted'),
+                    backgroundColor: theme.colorScheme.error,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+                
+                // Small delay then close settings
+                await Future.delayed(const Duration(milliseconds: 100));
+                navigator.pop(); // Close settings screen
+              } catch (e) {
+                navigator.pop(); // Close loading dialog
+                
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Error deleting budget: $e'),
+                    backgroundColor: theme.colorScheme.error,
+                  ),
+                );
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
