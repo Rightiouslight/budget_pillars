@@ -87,7 +87,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     // Initialize text controllers
     _profileNameController = TextEditingController(text: _profileName);
     _smsStartWordsController = TextEditingController(text: _smsStartWords);
@@ -134,7 +134,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
         _smsStopWords = profile.smsStopWords;
         _testResult = null;
       });
-      
+
       // Update text controllers
       _profileNameController.text = profile.name;
       _smsStartWordsController.text = profile.smsStartWords;
@@ -150,7 +150,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
         _smsStopWords = '';
         _testResult = null;
       });
-      
+
       // Reset text controllers
       _profileNameController.text = '';
       _smsStartWordsController.text = '';
