@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/monthly_budget.dart';
 import '../models/user_settings.dart';
+import '../models/user_data.dart';
 import '../models/share_invitation.dart';
 import '../models/shared_budget_access.dart';
 
@@ -121,6 +122,49 @@ class FirestoreRepository {
         .set(settings.toJson());
 
     print('✅ Firestore: Settings saved successfully');
+  }
+
+  // ===== User Data Operations =====
+
+  /// Get a stream of user data
+  Stream<UserData?> userDataStream(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('data')
+        .doc('userData')
+        .snapshots()
+        .map((snapshot) {
+          if (!snapshot.exists || snapshot.data() == null) {
+            print(
+              '⚠️  Firestore: No userData document found for user: $userId',
+            );
+            print('   Returning null');
+            return null;
+          }
+          try {
+            print('✅ Firestore: UserData loaded for user: $userId');
+            return UserData.fromJson(snapshot.data()!);
+          } catch (e) {
+            print('❌ Error parsing UserData: $e');
+            return null;
+          }
+        });
+  }
+
+  /// Save user data
+  Future<void> saveUserData(String userId, UserData userData) async {
+    print('📝 Firestore: Saving user data for user: $userId');
+    print('   Path: /users/$userId/data/userData');
+
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('data')
+        .doc('userData')
+        .set(userData.toJson());
+
+    print('✅ Firestore: UserData saved successfully');
   }
 
   // ===== Share Invitation Operations =====

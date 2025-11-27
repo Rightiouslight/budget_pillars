@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../providers/active_budget_provider.dart';
-import '../../../providers/user_settings_provider.dart';
+import '../../../providers/user_data_provider.dart';
 import '../../../data/firebase/auth_repository.dart';
 import '../../../utils/profile_picture_cache.dart';
 import '../../auth/auth_controller.dart';
@@ -354,8 +354,8 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
               children: [
                 Consumer(
                   builder: (context, ref, child) {
-                    final settings = ref.watch(userSettingsProvider).value;
-                    final cachedPicture = settings?.cachedProfilePicture;
+                    final userData = ref.watch(userDataProvider).value;
+                    final cachedPicture = userData?.cachedProfilePicture;
                     final imageBytes = decodeProfilePicture(cachedPicture);
 
                     return CircleAvatar(
