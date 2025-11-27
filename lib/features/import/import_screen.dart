@@ -53,6 +53,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Text editing controllers
+  late TextEditingController _profileNameController;
+  late TextEditingController _smsStartWordsController;
+  late TextEditingController _smsStopWordsController;
+  late TextEditingController _testSmsController;
+
   // Common state
   ImportStep _currentStep = ImportStep.upload;
   String _selectedProfileId = 'none';
@@ -81,6 +87,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // Initialize text controllers
+    _profileNameController = TextEditingController(text: _profileName);
+    _smsStartWordsController = TextEditingController(text: _smsStartWords);
+    _smsStopWordsController = TextEditingController(text: _smsStopWords);
+    _testSmsController = TextEditingController(text: _testSms);
 
     // Load first profile if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,6 +109,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _profileNameController.dispose();
+    _smsStartWordsController.dispose();
+    _smsStopWordsController.dispose();
+    _testSmsController.dispose();
     super.dispose();
   }
 
@@ -118,6 +134,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
         _smsStopWords = profile.smsStopWords;
         _testResult = null;
       });
+      
+      // Update text controllers
+      _profileNameController.text = profile.name;
+      _smsStartWordsController.text = profile.smsStartWords;
+      _smsStopWordsController.text = profile.smsStopWords;
     } else {
       // Reset to defaults
       setState(() {
@@ -129,6 +150,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
         _smsStopWords = '';
         _testResult = null;
       });
+      
+      // Reset text controllers
+      _profileNameController.text = '';
+      _smsStartWordsController.text = '';
+      _smsStopWordsController.text = '';
     }
   }
 
@@ -985,7 +1011,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
                       labelText: 'Profile Name',
                       border: OutlineInputBorder(),
                     ),
-                    controller: TextEditingController(text: _profileName),
+                    controller: _profileNameController,
                     onChanged: (value) {
                       setState(() {
                         _profileName = value;
@@ -1434,7 +1460,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
                     labelText: 'Profile Name',
                     border: OutlineInputBorder(),
                   ),
-                  controller: TextEditingController(text: _profileName),
+                  controller: _profileNameController,
                   onChanged: (value) {
                     setState(() {
                       _profileName = value;
@@ -1462,9 +1488,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
                               helperText:
                                   'Words that come before the transaction description',
                             ),
-                            controller: TextEditingController(
-                              text: _smsStartWords,
-                            ),
+                            controller: _smsStartWordsController,
                             onChanged: (value) {
                               setState(() {
                                 _smsStartWords = value;
@@ -1480,9 +1504,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
                               helperText:
                                   'Words that mark the end of the description',
                             ),
-                            controller: TextEditingController(
-                              text: _smsStopWords,
-                            ),
+                            controller: _smsStopWordsController,
                             onChanged: (value) {
                               setState(() {
                                 _smsStopWords = value;
@@ -1510,7 +1532,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
                               border: OutlineInputBorder(),
                             ),
                             maxLines: 4,
-                            controller: TextEditingController(text: _testSms),
+                            controller: _testSmsController,
                             onChanged: (value) {
                               setState(() {
                                 _testSms = value;
