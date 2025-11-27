@@ -55,6 +55,7 @@ class CardDetailsDialog extends ConsumerWidget {
                     color: color,
                     isDefault: id == account.defaultPocketId,
                     cards: account.cards,
+                    enableInteraction: false,
                   );
                 },
                 category:
@@ -81,6 +82,7 @@ class CardDetailsDialog extends ConsumerWidget {
                         isRecurring: isRecurring,
                         dueDate: dueDate,
                         cards: account.cards,
+                        enableInteraction: false,
                       );
                     },
               ),

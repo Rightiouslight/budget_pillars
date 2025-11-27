@@ -9,7 +9,6 @@ import '../../../utils/profile_picture_cache.dart';
 import '../../auth/auth_controller.dart';
 import '../../notifications/notification_controller.dart';
 import '../../notifications/notifications_sheet.dart';
-import '../dialogs/add_account_dialog.dart';
 import '../dialogs/view_transactions_dialog.dart';
 
 class BudgetHeader extends ConsumerStatefulWidget
@@ -130,13 +129,6 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
           );
         },
       ),
-    );
-  }
-
-  void _showAddAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const AddAccountDialog(),
     );
   }
 
@@ -458,14 +450,6 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
             ),
           ],
         ),
-        const SizedBox(width: 8),
-        // Add Account Button (desktop only)
-        if (MediaQuery.of(context).size.width > 600)
-          FilledButton.icon(
-            onPressed: _showAddAccountDialog,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Account'),
-          ),
         const SizedBox(width: 8),
       ],
     );

@@ -20,6 +20,7 @@ class CategoryCardWidget extends ConsumerWidget {
   final bool isRecurring;
   final int? dueDate;
   final List<card_model.Card> cards;
+  final bool enableInteraction;
 
   const CategoryCardWidget({
     super.key,
@@ -33,6 +34,7 @@ class CategoryCardWidget extends ConsumerWidget {
     this.isRecurring = false,
     this.dueDate,
     required this.cards,
+    this.enableInteraction = true,
   });
 
   @override
@@ -58,49 +60,51 @@ class CategoryCardWidget extends ConsumerWidget {
           ),
         ),
         child: InkWell(
-          onTap: () {
-            // Categories cannot be transfer destinations, show message if in transfer mode
-            if (transferMode != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Categories cannot be transfer destinations. Select a pocket instead.',
-                  ),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              return;
-            }
+          onTap: !enableInteraction
+              ? null
+              : () {
+                  // Categories cannot be transfer destinations, show message if in transfer mode
+                  if (transferMode != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Categories cannot be transfer destinations. Select a pocket instead.',
+                        ),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
 
-            // Normal tap - show card details dialog
-            final budgetAsync = ref.read(activeBudgetProvider);
-            budgetAsync.whenData((budget) {
-              if (budget != null) {
-                final account = budget.accounts.firstWhere(
-                  (acc) => acc.id == accountId,
-                );
-                showDialog(
-                  context: context,
-                  builder: (context) => CardDetailsDialog(
-                    accountId: accountId,
-                    card: card_model.Card.category(
-                      id: id,
-                      name: name,
-                      icon: icon,
-                      budgetValue: budgetValue,
-                      currentValue: currentValue,
-                      color: color,
-                      isRecurring: isRecurring,
-                      dueDate: dueDate,
-                      destinationPocketId: null,
-                      destinationAccountId: null,
-                    ),
-                    account: account,
-                  ),
-                );
-              }
-            });
-          },
+                  // Normal tap - show card details dialog
+                  final budgetAsync = ref.read(activeBudgetProvider);
+                  budgetAsync.whenData((budget) {
+                    if (budget != null) {
+                      final account = budget.accounts.firstWhere(
+                        (acc) => acc.id == accountId,
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (context) => CardDetailsDialog(
+                          accountId: accountId,
+                          card: card_model.Card.category(
+                            id: id,
+                            name: name,
+                            icon: icon,
+                            budgetValue: budgetValue,
+                            currentValue: currentValue,
+                            color: color,
+                            isRecurring: isRecurring,
+                            dueDate: dueDate,
+                            destinationPocketId: null,
+                            destinationAccountId: null,
+                          ),
+                          account: account,
+                        ),
+                      );
+                    }
+                  });
+                },
           borderRadius: BorderRadius.circular(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

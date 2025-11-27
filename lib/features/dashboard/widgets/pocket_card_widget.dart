@@ -18,6 +18,7 @@ class PocketCardWidget extends ConsumerWidget {
   final String? color;
   final bool isDefault;
   final List<card_model.Card> cards;
+  final bool enableInteraction;
 
   const PocketCardWidget({
     super.key,
@@ -29,6 +30,7 @@ class PocketCardWidget extends ConsumerWidget {
     this.color,
     this.isDefault = false,
     required this.cards,
+    this.enableInteraction = true,
   });
 
   @override
@@ -48,59 +50,61 @@ class PocketCardWidget extends ConsumerWidget {
         ),
       ),
       child: InkWell(
-        onTap: () {
-          // If in transfer mode, this pocket is the destination
-          if (transferMode != null) {
-            final destinationCard = card_model.Card.pocket(
-              id: id,
-              name: name,
-              icon: icon,
-              balance: balance,
-              color: color,
-            );
+        onTap: !enableInteraction
+            ? null
+            : () {
+                // If in transfer mode, this pocket is the destination
+                if (transferMode != null) {
+                  final destinationCard = card_model.Card.pocket(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance,
+                    color: color,
+                  );
 
-            // Hide the snackbar
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  // Hide the snackbar
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-            // Exit transfer mode
-            ref.read(transferModeProvider.notifier).exitTransferMode();
+                  // Exit transfer mode
+                  ref.read(transferModeProvider.notifier).exitTransferMode();
 
-            // Show transfer dialog with pre-selected source and destination
-            showDialog(
-              context: context,
-              builder: (context) => TransferFundsDialog(
-                sourceAccountId: transferMode.accountId,
-                destinationAccountId: accountId,
-                sourceCard: transferMode.sourceCard,
-                destinationCard: destinationCard,
-              ),
-            );
-          } else {
-            // Normal tap - show card details dialog
-            final budgetAsync = ref.read(activeBudgetProvider);
-            budgetAsync.whenData((budget) {
-              if (budget != null) {
-                final account = budget.accounts.firstWhere(
-                  (acc) => acc.id == accountId,
-                );
-                showDialog(
-                  context: context,
-                  builder: (context) => CardDetailsDialog(
-                    accountId: accountId,
-                    card: card_model.Card.pocket(
-                      id: id,
-                      name: name,
-                      icon: icon,
-                      balance: balance,
-                      color: color,
+                  // Show transfer dialog with pre-selected source and destination
+                  showDialog(
+                    context: context,
+                    builder: (context) => TransferFundsDialog(
+                      sourceAccountId: transferMode.accountId,
+                      destinationAccountId: accountId,
+                      sourceCard: transferMode.sourceCard,
+                      destinationCard: destinationCard,
                     ),
-                    account: account,
-                  ),
-                );
-              }
-            });
-          }
-        },
+                  );
+                } else {
+                  // Normal tap - show card details dialog
+                  final budgetAsync = ref.read(activeBudgetProvider);
+                  budgetAsync.whenData((budget) {
+                    if (budget != null) {
+                      final account = budget.accounts.firstWhere(
+                        (acc) => acc.id == accountId,
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (context) => CardDetailsDialog(
+                          accountId: accountId,
+                          card: card_model.Card.pocket(
+                            id: id,
+                            name: name,
+                            icon: icon,
+                            balance: balance,
+                            color: color,
+                          ),
+                          account: account,
+                        ),
+                      );
+                    }
+                  });
+                }
+              },
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
