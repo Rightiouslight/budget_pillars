@@ -372,7 +372,31 @@ The Riverpod controllers (`AsyncNotifier` classes) must implement the following 
   - The "Save Changes" button should only be enabled when at least one category's budget has been changed from its original value.
   - On submit, the controller should provide a list of _only the changed categories_ to the main dashboard controller, which will then update the `MonthlyBudget` and save it to Firestore.
 
-### Phase 6: Collaboration
+### Phase 6: Notification System
+
+- [ ] **Feature Goal**: Implement a silent notification system that tracks automatic transactions and system events without interrupting the user with toasts.
+- [ ] **Data Model**:
+  - Create a `BudgetNotification` model with fields: `id`, `type` (enum: automatic_payment, recurring_income, error, info), `title`, `message`, `timestamp`, `isRead`, and optional `relatedTransactionId`.
+  - Store notifications in the `MonthlyBudget` model as `List<BudgetNotification> notifications`.
+- [ ] **UI/Layout**:
+  - Add a bell icon to the app bar that displays a badge with the count of unread notifications.
+  - Create a notifications sheet/screen that displays all notifications for the current month.
+  - Each notification item should show an icon (based on type), title, message, and timestamp.
+  - Support "Mark as Read" and "Clear All" actions.
+- [ ] **Integration Points**:
+  - When automatic recurring expenses are processed, create notifications: "Auto-paid: {categoryName} - ${amount}".
+  - When recurring incomes are deposited, create notifications: "Income deposited: {description} - ${amount}".
+  - When automatic processing encounters errors (e.g., insufficient balance, missing pocket), create error notifications with details.
+  - When imports complete, create success/error notifications.
+- [ ] **State Management**:
+  - Create a `NotificationController` that manages notification CRUD operations.
+  - Provide a computed provider for `unreadNotificationCount`.
+  - Automatic processing should run silently and only add notifications to the list.
+- [ ] **Error Handling**:
+  - If an individual recurring transaction fails during automatic processing, skip it, log the error in a notification, and continue processing other items.
+  - Ensure the batch update still succeeds for all valid transactions.
+
+### Phase 7: Collaboration
 
 - [ ] Implement the full budget sharing and invitation UI and logic.
 - [ ] Implement the UI for switching between active budgets via the `ActiveBudgetProvider`.
