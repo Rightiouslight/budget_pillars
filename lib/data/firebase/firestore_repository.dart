@@ -91,7 +91,9 @@ class FirestoreRepository {
         .snapshots()
         .map((snapshot) {
           if (!snapshot.exists || snapshot.data() == null) {
-            print('⚠️  Firestore: No settings document found for user: $userId');
+            print(
+              '⚠️  Firestore: No settings document found for user: $userId',
+            );
             print('   Returning null (not default settings)');
             return null; // Return null instead of default settings
           }
