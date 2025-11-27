@@ -322,15 +322,7 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
           OutlinedButton(
             onPressed: _showMonthPicker,
             child: Text(
-              monthDisplayName
-                  .split(' ')
-                  .map((word) {
-                    if (word.length > 3) {
-                      return '${word.substring(0, 3)} ${word.substring(word.length - 4)}';
-                    }
-                    return word;
-                  })
-                  .join(' '),
+              monthDisplayName,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
