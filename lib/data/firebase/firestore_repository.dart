@@ -91,13 +91,16 @@ class FirestoreRepository {
         .snapshots()
         .map((snapshot) {
           if (!snapshot.exists || snapshot.data() == null) {
-            return const UserSettings();
+            print('⚠️  Firestore: No settings document found for user: $userId');
+            print('   Returning null (not default settings)');
+            return null; // Return null instead of default settings
           }
           try {
+            print('✅ Firestore: Settings loaded for user: $userId');
             return UserSettings.fromJson(snapshot.data()!);
           } catch (e) {
-            print('Error parsing UserSettings: $e');
-            return const UserSettings();
+            print('❌ Error parsing UserSettings: $e');
+            return null; // Return null on error instead of default settings
           }
         });
   }

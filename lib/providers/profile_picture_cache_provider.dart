@@ -21,7 +21,11 @@ class ProfilePictureCacheController {
     final user = _ref.read(currentUserProvider);
     if (user == null) return;
 
-    final settings = _ref.read(userSettingsProvider).value;
+    // Wait for settings to load from Firestore
+    final settingsAsync = _ref.read(userSettingsProvider);
+    if (settingsAsync is! AsyncData) return; // Don't proceed if still loading
+
+    final settings = settingsAsync.value;
     if (settings == null) return;
 
     // If we already have a cached picture, no need to download again
@@ -35,8 +39,15 @@ class ProfilePictureCacheController {
       final base64Image = await downloadAndCacheProfilePicture(user.photoURL);
 
       if (base64Image != null) {
+        // Read settings again to ensure we have the latest data
+        final latestSettingsAsync = _ref.read(userSettingsProvider);
+        if (latestSettingsAsync is! AsyncData) return;
+
+        final latestSettings = latestSettingsAsync.value;
+        if (latestSettings == null) return;
+
         final repository = _ref.read(firestoreRepositoryProvider);
-        final updatedSettings = settings.copyWith(
+        final updatedSettings = latestSettings.copyWith(
           cachedProfilePicture: base64Image,
         );
         await repository.saveUserSettings(user.uid, updatedSettings);
@@ -49,15 +60,26 @@ class ProfilePictureCacheController {
     final user = _ref.read(currentUserProvider);
     if (user == null) return;
 
-    final settings = _ref.read(userSettingsProvider).value;
+    // Wait for settings to load from Firestore
+    final settingsAsync = _ref.read(userSettingsProvider);
+    if (settingsAsync is! AsyncData) return; // Don't proceed if still loading
+
+    final settings = settingsAsync.value;
     if (settings == null) return;
 
     if (user.photoURL != null && user.photoURL!.isNotEmpty) {
       final base64Image = await downloadAndCacheProfilePicture(user.photoURL);
 
       if (base64Image != null) {
+        // Read settings again to ensure we have the latest data
+        final latestSettingsAsync = _ref.read(userSettingsProvider);
+        if (latestSettingsAsync is! AsyncData) return;
+
+        final latestSettings = latestSettingsAsync.value;
+        if (latestSettings == null) return;
+
         final repository = _ref.read(firestoreRepositoryProvider);
-        final updatedSettings = settings.copyWith(
+        final updatedSettings = latestSettings.copyWith(
           cachedProfilePicture: base64Image,
         );
         await repository.saveUserSettings(user.uid, updatedSettings);
