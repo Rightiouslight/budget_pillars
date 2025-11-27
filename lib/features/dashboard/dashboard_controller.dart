@@ -9,6 +9,7 @@ import '../../data/models/recurring_income.dart';
 import '../../data/models/budget_notification.dart';
 import '../../providers/active_budget_provider.dart';
 import '../../providers/user_settings_provider.dart';
+import '../../providers/budget_override_provider.dart';
 import 'automatic_transaction_processor.dart';
 
 /// Provider for the dashboard controller
@@ -1075,63 +1076,93 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
 
   // ===== REORDERING OPERATIONS =====
 
-  /// Reorder accounts horizontally
+  /// Reorder accounts horizontally with optimistic update
   Future<void> reorderAccounts({
     required int oldIndex,
     required int newIndex,
   }) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final budget = await _getCurrentBudget();
-      if (budget == null) return;
+    // Get current budget synchronously from the stream provider
+    final currentBudget = _ref.read(activeBudgetProvider).value;
+    if (currentBudget == null) return;
 
-      final accounts = List<Account>.from(budget.accounts);
+    final accounts = List<Account>.from(currentBudget.accounts);
 
-      // Adjust newIndex if moving down
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
+    // Adjust newIndex if moving down
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
 
-      // Reorder accounts
-      final account = accounts.removeAt(oldIndex);
-      accounts.insert(newIndex, account);
+    // Reorder accounts
+    final account = accounts.removeAt(oldIndex);
+    accounts.insert(newIndex, account);
 
-      final updatedBudget = budget.copyWith(accounts: accounts);
+    final updatedBudget = currentBudget.copyWith(accounts: accounts);
+
+    // Set optimistic override immediately (prevents jumping)
+    _ref.read(budgetOverrideProvider.notifier).state = updatedBudget;
+
+    // Save to Firebase in background
+    try {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
-    });
+      
+      // Clear override after successful save
+      // Small delay to ensure Firestore stream has updated
+      await Future.delayed(const Duration(milliseconds: 100));
+      _ref.read(budgetOverrideProvider.notifier).state = null;
+    } catch (e, st) {
+      // Clear override and revert on error
+      _ref.read(budgetOverrideProvider.notifier).state = null;
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 
-  /// Reorder cards within an account
+  /// Reorder cards within an account with optimistic update
   Future<void> reorderCards({
     required int accountIndex,
     required int oldIndex,
     required int newIndex,
   }) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final budget = await _getCurrentBudget();
-      if (budget == null || accountIndex >= budget.accounts.length) return;
+    // Get current budget synchronously from the stream provider
+    final currentBudget = _ref.read(activeBudgetProvider).value;
+    if (currentBudget == null || accountIndex >= currentBudget.accounts.length) return;
 
-      final accounts = List<Account>.from(budget.accounts);
-      final account = accounts[accountIndex];
-      final cards = List<Card>.from(account.cards);
+    final accounts = List<Account>.from(currentBudget.accounts);
+    final account = accounts[accountIndex];
+    final cards = List<Card>.from(account.cards);
 
-      // Adjust newIndex if moving down
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
+    // Adjust newIndex if moving down
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
 
-      // Reorder cards
-      final card = cards.removeAt(oldIndex);
-      cards.insert(newIndex, card);
+    // Reorder cards
+    final card = cards.removeAt(oldIndex);
+    cards.insert(newIndex, card);
 
-      // Update account with reordered cards
-      final updatedAccount = account.copyWith(cards: cards);
-      accounts[accountIndex] = updatedAccount;
+    // Update account with reordered cards
+    final updatedAccount = account.copyWith(cards: cards);
+    accounts[accountIndex] = updatedAccount;
 
-      final updatedBudget = budget.copyWith(accounts: accounts);
+    final updatedBudget = currentBudget.copyWith(accounts: accounts);
+
+    // Set optimistic override immediately (prevents jumping)
+    _ref.read(budgetOverrideProvider.notifier).state = updatedBudget;
+
+    // Save to Firebase in background
+    try {
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
-    });
+      
+      // Clear override after successful save
+      // Small delay to ensure Firestore stream has updated
+      await Future.delayed(const Duration(milliseconds: 100));
+      _ref.read(budgetOverrideProvider.notifier).state = null;
+    } catch (e, st) {
+      // Clear override and revert on error
+      _ref.read(budgetOverrideProvider.notifier).state = null;
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 
   /// Update multiple category budgets at once (from Budget Planner)

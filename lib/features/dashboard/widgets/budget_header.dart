@@ -12,9 +12,6 @@ import '../../notifications/notifications_sheet.dart';
 import '../dialogs/add_account_dialog.dart';
 import '../dialogs/view_transactions_dialog.dart';
 
-/// Provider for reorder accounts mode state
-final reorderAccountsModeProvider = StateProvider<bool>((ref) => false);
-
 class BudgetHeader extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
   const BudgetHeader({super.key});
@@ -183,7 +180,6 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
     final user = ref.watch(currentUserProvider);
     final budgetInfo = ref.watch(activeBudgetInfoProvider);
     final monthDisplayName = ref.watch(monthDisplayNameProvider);
-    final isReorderingAccounts = ref.watch(reorderAccountsModeProvider);
     final budget = ref.watch(activeBudgetProvider).value;
     final hasBudget = budget != null && budget.accounts.isNotEmpty;
 
@@ -288,61 +284,49 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
       centerTitle: false,
       actions: [
         // Notifications Bell Icon
-        if (!isReorderingAccounts)
-          Consumer(
-            builder: (context, ref, child) {
-              final unreadCount = ref.watch(unreadNotificationCountProvider);
+        Consumer(
+          builder: (context, ref, child) {
+            final unreadCount = ref.watch(unreadNotificationCountProvider);
 
-              return IconButton(
-                icon: Badge(
-                  isLabelVisible: unreadCount > 0,
-                  label: Text('$unreadCount'),
-                  child: const Icon(Icons.notifications_outlined),
-                ),
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) => const NotificationsSheet(),
-                  );
-                },
-                tooltip: 'Notifications',
-              );
-            },
-          ),
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: unreadCount > 0,
+                label: Text('$unreadCount'),
+                child: const Icon(Icons.notifications_outlined),
+              ),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => const NotificationsSheet(),
+                );
+              },
+              tooltip: 'Notifications',
+            );
+          },
+        ),
         // Month Navigation (center of AppBar)
-        if (!isReorderingAccounts) ...[
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              ref.read(activeBudgetInfoProvider.notifier).previousMonth();
-            },
-            tooltip: 'Previous Month',
+        IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () {
+            ref.read(activeBudgetInfoProvider.notifier).previousMonth();
+          },
+          tooltip: 'Previous Month',
+        ),
+        OutlinedButton(
+          onPressed: _showMonthPicker,
+          child: Text(
+            monthDisplayName,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          OutlinedButton(
-            onPressed: _showMonthPicker,
-            child: Text(
-              monthDisplayName,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              ref.read(activeBudgetInfoProvider.notifier).nextMonth();
-            },
-            tooltip: 'Next Month',
-          ),
-        ] else ...[
-          // Reordering mode - show Done button
-          FilledButton.icon(
-            onPressed: () {
-              ref.read(reorderAccountsModeProvider.notifier).state = false;
-            },
-            icon: const Icon(Icons.check_circle, size: 18),
-            label: const Text('Done Reordering'),
-          ),
-        ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.chevron_right),
+          onPressed: () {
+            ref.read(activeBudgetInfoProvider.notifier).nextMonth();
+          },
+          tooltip: 'Next Month',
+        ),
         const SizedBox(width: 8),
         // User Menu Dropdown
         PopupMenuButton<String>(
@@ -439,19 +423,6 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
               ),
               onTap: () {
                 context.push('/settings');
-              },
-            ),
-            PopupMenuItem<String>(
-              value: 'reorder',
-              child: const Row(
-                children: [
-                  Icon(Icons.reorder, size: 16),
-                  SizedBox(width: 8),
-                  Text('Reorder Accounts'),
-                ],
-              ),
-              onTap: () {
-                ref.read(reorderAccountsModeProvider.notifier).state = true;
               },
             ),
             if (hasBudget && isOwnBudget)

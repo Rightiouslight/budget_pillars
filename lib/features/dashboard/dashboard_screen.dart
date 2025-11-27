@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/active_budget_provider.dart';
+import '../../providers/budget_override_provider.dart';
 import 'widgets/account_board_widget.dart';
 import 'widgets/budget_header.dart';
 import 'dialogs/add_account_dialog.dart';
@@ -26,7 +27,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final budgetAsync = ref.watch(activeBudgetProvider);
+    final budgetAsync = ref.watch(effectiveBudgetProvider);
     final budgetInfo = ref.watch(activeBudgetInfoProvider);
     final monthDisplayName = ref.watch(monthDisplayNameProvider);
 
@@ -118,8 +119,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildBudgetView(BuildContext context, WidgetRef ref, budget) {
-    final isReorderingAccounts = ref.watch(reorderAccountsModeProvider);
-
     if (budget.accounts.isEmpty) {
       return _buildEmptyBudget(
         context,
@@ -148,13 +147,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemCount: budget.accounts.length,
       onReorder: (oldIndex, newIndex) {
-        if (isReorderingAccounts) {
-          ref
-              .read(dashboardControllerProvider.notifier)
-              .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
-        }
+        ref
+            .read(dashboardControllerProvider.notifier)
+            .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
       },
-      buildDefaultDragHandles: isReorderingAccounts,
+      buildDefaultDragHandles: true,
       proxyDecorator: (child, index, animation) {
         return AnimatedBuilder(
           animation: animation,
@@ -176,30 +173,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           margin: EdgeInsets.only(
             right: i < budget.accounts.length - 1 ? 16 : 0,
           ),
-          child: Stack(
-            children: [
-              AccountBoardWidget(
-                account: budget.accounts[i],
-                accountIndex: i,
-                totalAccounts: budget.accounts.length,
-              ),
-              if (isReorderingAccounts)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.drag_handle,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-            ],
+          child: AccountBoardWidget(
+            account: budget.accounts[i],
+            accountIndex: i,
+            totalAccounts: budget.accounts.length,
           ),
         );
       },

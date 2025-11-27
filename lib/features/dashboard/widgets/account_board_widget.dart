@@ -155,9 +155,6 @@ class AccountBoardWidget extends ConsumerWidget {
                         case 'planner':
                           _showBudgetPlannerDialog(context, ref);
                           break;
-                        case 'reorder':
-                          // TODO: Implement reorder mode
-                          break;
                         case 'edit':
                           _showEditAccountDialog(context);
                           break;
@@ -174,17 +171,6 @@ class AccountBoardWidget extends ConsumerWidget {
                             Icon(Icons.calculate_outlined, size: 18),
                             SizedBox(width: 12),
                             Text('Budget Planner'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuDivider(),
-                      const PopupMenuItem(
-                        value: 'reorder',
-                        child: Row(
-                          children: [
-                            Icon(Icons.reorder, size: 18),
-                            SizedBox(width: 12),
-                            Text('Reorder Items'),
                           ],
                         ),
                       ),
