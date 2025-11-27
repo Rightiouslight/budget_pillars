@@ -494,11 +494,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 12),
                 Card(
                   elevation: 0,
-                  color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.errorContainer.withOpacity(0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.error.withOpacity(0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.error.withOpacity(0.5),
                       width: 1,
                     ),
                   ),
@@ -517,9 +521,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'Delete Current Month Budget',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -527,19 +530,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Text(
                           'Permanently delete all data for ${ref.watch(monthDisplayNameProvider)}. '
                           'This cannot be undone.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () => _showDeleteConfirmation(context, ref),
+                            onPressed: () =>
+                                _showDeleteConfirmation(context, ref),
                             icon: const Icon(Icons.delete_forever),
                             label: const Text('Delete This Month\'s Budget'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.error,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error,
                               side: BorderSide(
                                 color: Theme.of(context).colorScheme.error,
                               ),
@@ -561,7 +570,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     final monthName = ref.read(monthDisplayNameProvider);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -589,25 +598,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               final navigator = Navigator.of(context);
               final messenger = ScaffoldMessenger.of(context);
               final theme = Theme.of(context);
-              
+
               navigator.pop(); // Close confirmation dialog
-              
+
               // Show loading indicator
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
               );
-              
+
               try {
                 await ref
                     .read(dashboardControllerProvider.notifier)
                     .deleteCurrentMonthBudget();
-                
+
                 navigator.pop(); // Close loading dialog
-                
+
                 // Show snackbar
                 messenger.showSnackBar(
                   SnackBar(
@@ -616,13 +624,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     duration: const Duration(seconds: 2),
                   ),
                 );
-                
+
                 // Small delay then close settings
                 await Future.delayed(const Duration(milliseconds: 100));
                 navigator.pop(); // Close settings screen
               } catch (e) {
                 navigator.pop(); // Close loading dialog
-                
+
                 messenger.showSnackBar(
                   SnackBar(
                     content: Text('Error deleting budget: $e'),
