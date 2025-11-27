@@ -8,11 +8,7 @@ class NotificationItem extends ConsumerWidget {
   final BudgetNotification notification;
   final VoidCallback? onTap;
 
-  const NotificationItem({
-    super.key,
-    required this.notification,
-    this.onTap,
-  });
+  const NotificationItem({super.key, required this.notification, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,15 +22,13 @@ class NotificationItem extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
         color: colorScheme.error,
-        child: Icon(
-          Icons.delete,
-          color: colorScheme.onError,
-        ),
+        child: Icon(Icons.delete, color: colorScheme.onError),
       ),
       onDismissed: (direction) {
-        ref.read(notificationControllerProvider.notifier)
+        ref
+            .read(notificationControllerProvider.notifier)
             .deleteNotification(notification.id);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Notification deleted'),
@@ -45,7 +39,8 @@ class NotificationItem extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           if (!notification.isRead) {
-            ref.read(notificationControllerProvider.notifier)
+            ref
+                .read(notificationControllerProvider.notifier)
                 .markAsRead(notification.id);
           }
           onTap?.call();
@@ -57,10 +52,7 @@ class NotificationItem extends ConsumerWidget {
                 ? Colors.transparent
                 : colorScheme.primaryContainer.withOpacity(0.1),
             border: Border(
-              bottom: BorderSide(
-                color: colorScheme.outlineVariant,
-                width: 1,
-              ),
+              bottom: BorderSide(color: colorScheme.outlineVariant, width: 1),
             ),
           ),
           child: Row(
@@ -123,7 +115,9 @@ class NotificationItem extends ConsumerWidget {
                     Text(
                       _formatTimestamp(notification.timestamp),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(
+                          0.7,
+                        ),
                       ),
                     ),
                   ],

@@ -8,8 +8,8 @@ import '../../providers/active_budget_provider.dart';
 /// Provider for managing budget notifications
 final notificationControllerProvider =
     StateNotifierProvider<NotificationController, AsyncValue<void>>((ref) {
-  return NotificationController(ref);
-});
+      return NotificationController(ref);
+    });
 
 /// Controller for managing budget notifications
 class NotificationController extends StateNotifier<AsyncValue<void>> {
@@ -17,8 +17,7 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
 
   NotificationController(this._ref) : super(const AsyncValue.data(null));
 
-  FirestoreRepository get _repository =>
-      _ref.read(firestoreRepositoryProvider);
+  FirestoreRepository get _repository => _ref.read(firestoreRepositoryProvider);
 
   String get _userId => _ref.read(authRepositoryProvider).currentUser!.uid;
   String get _monthKey => _ref.read(currentMonthKeyProvider);
@@ -42,7 +41,9 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
         return notif;
       }).toList();
 
-      final updatedBudget = budget.copyWith(notifications: updatedNotifications);
+      final updatedBudget = budget.copyWith(
+        notifications: updatedNotifications,
+      );
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
@@ -58,7 +59,9 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
         return notif.copyWith(isRead: true);
       }).toList();
 
-      final updatedBudget = budget.copyWith(notifications: updatedNotifications);
+      final updatedBudget = budget.copyWith(
+        notifications: updatedNotifications,
+      );
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
@@ -86,7 +89,9 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
           .where((notif) => notif.id != notificationId)
           .toList();
 
-      final updatedBudget = budget.copyWith(notifications: updatedNotifications);
+      final updatedBudget = budget.copyWith(
+        notifications: updatedNotifications,
+      );
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
@@ -95,7 +100,7 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
 /// Provider for the count of unread notifications
 final unreadNotificationCountProvider = Provider<int>((ref) {
   final budgetAsync = ref.watch(activeBudgetProvider);
-  
+
   return budgetAsync.when(
     data: (budget) {
       if (budget == null) return 0;
@@ -109,7 +114,7 @@ final unreadNotificationCountProvider = Provider<int>((ref) {
 /// Provider for all notifications (sorted by timestamp, newest first)
 final allNotificationsProvider = Provider<List<BudgetNotification>>((ref) {
   final budgetAsync = ref.watch(activeBudgetProvider);
-  
+
   return budgetAsync.when(
     data: (budget) {
       if (budget == null) return [];

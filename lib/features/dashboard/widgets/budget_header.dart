@@ -292,7 +292,7 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
           Consumer(
             builder: (context, ref, child) {
               final unreadCount = ref.watch(unreadNotificationCountProvider);
-              
+
               return IconButton(
                 icon: Badge(
                   isLabelVisible: unreadCount > 0,

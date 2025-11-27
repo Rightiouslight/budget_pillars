@@ -39,10 +39,7 @@ class NotificationsSheet extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Text(
-                      'Notifications',
-                      style: theme.textTheme.titleLarge,
-                    ),
+                    Text('Notifications', style: theme.textTheme.titleLarge),
                     if (unreadCount > 0) ...[
                       const SizedBox(width: 8),
                       Container(
@@ -80,18 +77,25 @@ class NotificationsSheet extends ConsumerWidget {
                               ),
                               onTap: () {
                                 ref
-                                    .read(notificationControllerProvider.notifier)
+                                    .read(
+                                      notificationControllerProvider.notifier,
+                                    )
                                     .markAllAsRead();
                               },
                             ),
                           PopupMenuItem(
                             child: Row(
                               children: [
-                                Icon(Icons.clear_all, color: theme.colorScheme.error),
+                                Icon(
+                                  Icons.clear_all,
+                                  color: theme.colorScheme.error,
+                                ),
                                 const SizedBox(width: 12),
                                 Text(
                                   'Clear all',
-                                  style: TextStyle(color: theme.colorScheme.error),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                  ),
                                 ),
                               ],
                             ),
