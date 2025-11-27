@@ -73,4 +73,33 @@ class DateUtils {
       return DateTime(today.year, today.month, day);
     }
   }
+
+  /// Checks if the current date is on or after the due date (date-only comparison, ignoring time).
+  ///
+  /// This is useful for determining if a recurring transaction should be processed.
+  ///
+  /// Example:
+  /// ```dart
+  /// final dueDate = DateTime(2025, 11, 15, 10, 30); // Nov 15, 10:30 AM
+  /// final today = DateTime(2025, 11, 15, 23, 45);   // Nov 15, 11:45 PM
+  /// DateUtils.isDueOrOverdue(dueDate, today); // true (same day)
+  ///
+  /// final tomorrow = DateTime(2025, 11, 16, 8, 0);
+  /// DateUtils.isDueOrOverdue(dueDate, tomorrow); // true (overdue)
+  ///
+  /// final yesterday = DateTime(2025, 11, 14, 20, 0);
+  /// DateUtils.isDueOrOverdue(dueDate, yesterday); // false (not yet due)
+  /// ```
+  static bool isDueOrOverdue(DateTime dueDate, DateTime currentDate) {
+    // Strip time components for date-only comparison
+    final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+    final currentDateOnly = DateTime(
+      currentDate.year,
+      currentDate.month,
+      currentDate.day,
+    );
+
+    return currentDateOnly.isAfter(dueDateOnly) ||
+        currentDateOnly.isAtSameMomentAs(dueDateOnly);
+  }
 }

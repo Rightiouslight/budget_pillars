@@ -29,6 +29,8 @@ mixin _$MonthlyBudget {
       throw _privateConstructorUsedError;
   Map<String, bool> get processedRecurringIncomes =>
       throw _privateConstructorUsedError;
+  List<BudgetNotification> get notifications =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this MonthlyBudget to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -53,6 +55,7 @@ abstract class $MonthlyBudgetCopyWith<$Res> {
     List<RecurringIncome> recurringIncomes,
     Map<String, bool> autoTransactionsProcessed,
     Map<String, bool> processedRecurringIncomes,
+    List<BudgetNotification> notifications,
   });
 }
 
@@ -76,6 +79,7 @@ class _$MonthlyBudgetCopyWithImpl<$Res, $Val extends MonthlyBudget>
     Object? recurringIncomes = null,
     Object? autoTransactionsProcessed = null,
     Object? processedRecurringIncomes = null,
+    Object? notifications = null,
   }) {
     return _then(
       _value.copyWith(
@@ -99,6 +103,10 @@ class _$MonthlyBudgetCopyWithImpl<$Res, $Val extends MonthlyBudget>
                 ? _value.processedRecurringIncomes
                 : processedRecurringIncomes // ignore: cast_nullable_to_non_nullable
                       as Map<String, bool>,
+            notifications: null == notifications
+                ? _value.notifications
+                : notifications // ignore: cast_nullable_to_non_nullable
+                      as List<BudgetNotification>,
           )
           as $Val,
     );
@@ -120,6 +128,7 @@ abstract class _$$MonthlyBudgetImplCopyWith<$Res>
     List<RecurringIncome> recurringIncomes,
     Map<String, bool> autoTransactionsProcessed,
     Map<String, bool> processedRecurringIncomes,
+    List<BudgetNotification> notifications,
   });
 }
 
@@ -142,6 +151,7 @@ class __$$MonthlyBudgetImplCopyWithImpl<$Res>
     Object? recurringIncomes = null,
     Object? autoTransactionsProcessed = null,
     Object? processedRecurringIncomes = null,
+    Object? notifications = null,
   }) {
     return _then(
       _$MonthlyBudgetImpl(
@@ -165,6 +175,10 @@ class __$$MonthlyBudgetImplCopyWithImpl<$Res>
             ? _value._processedRecurringIncomes
             : processedRecurringIncomes // ignore: cast_nullable_to_non_nullable
                   as Map<String, bool>,
+        notifications: null == notifications
+            ? _value._notifications
+            : notifications // ignore: cast_nullable_to_non_nullable
+                  as List<BudgetNotification>,
       ),
     );
   }
@@ -179,11 +193,13 @@ class _$MonthlyBudgetImpl implements _MonthlyBudget {
     final List<RecurringIncome> recurringIncomes = const [],
     final Map<String, bool> autoTransactionsProcessed = const {},
     final Map<String, bool> processedRecurringIncomes = const {},
+    final List<BudgetNotification> notifications = const [],
   }) : _accounts = accounts,
        _transactions = transactions,
        _recurringIncomes = recurringIncomes,
        _autoTransactionsProcessed = autoTransactionsProcessed,
-       _processedRecurringIncomes = processedRecurringIncomes;
+       _processedRecurringIncomes = processedRecurringIncomes,
+       _notifications = notifications;
 
   factory _$MonthlyBudgetImpl.fromJson(Map<String, dynamic> json) =>
       _$$MonthlyBudgetImplFromJson(json);
@@ -234,9 +250,18 @@ class _$MonthlyBudgetImpl implements _MonthlyBudget {
     return EqualUnmodifiableMapView(_processedRecurringIncomes);
   }
 
+  final List<BudgetNotification> _notifications;
+  @override
+  @JsonKey()
+  List<BudgetNotification> get notifications {
+    if (_notifications is EqualUnmodifiableListView) return _notifications;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_notifications);
+  }
+
   @override
   String toString() {
-    return 'MonthlyBudget(accounts: $accounts, transactions: $transactions, recurringIncomes: $recurringIncomes, autoTransactionsProcessed: $autoTransactionsProcessed, processedRecurringIncomes: $processedRecurringIncomes)';
+    return 'MonthlyBudget(accounts: $accounts, transactions: $transactions, recurringIncomes: $recurringIncomes, autoTransactionsProcessed: $autoTransactionsProcessed, processedRecurringIncomes: $processedRecurringIncomes, notifications: $notifications)';
   }
 
   @override
@@ -260,6 +285,10 @@ class _$MonthlyBudgetImpl implements _MonthlyBudget {
             const DeepCollectionEquality().equals(
               other._processedRecurringIncomes,
               _processedRecurringIncomes,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._notifications,
+              _notifications,
             ));
   }
 
@@ -272,6 +301,7 @@ class _$MonthlyBudgetImpl implements _MonthlyBudget {
     const DeepCollectionEquality().hash(_recurringIncomes),
     const DeepCollectionEquality().hash(_autoTransactionsProcessed),
     const DeepCollectionEquality().hash(_processedRecurringIncomes),
+    const DeepCollectionEquality().hash(_notifications),
   );
 
   /// Create a copy of MonthlyBudget
@@ -295,6 +325,7 @@ abstract class _MonthlyBudget implements MonthlyBudget {
     final List<RecurringIncome> recurringIncomes,
     final Map<String, bool> autoTransactionsProcessed,
     final Map<String, bool> processedRecurringIncomes,
+    final List<BudgetNotification> notifications,
   }) = _$MonthlyBudgetImpl;
 
   factory _MonthlyBudget.fromJson(Map<String, dynamic> json) =
@@ -310,6 +341,8 @@ abstract class _MonthlyBudget implements MonthlyBudget {
   Map<String, bool> get autoTransactionsProcessed;
   @override
   Map<String, bool> get processedRecurringIncomes;
+  @override
+  List<BudgetNotification> get notifications;
 
   /// Create a copy of MonthlyBudget
   /// with the given fields replaced by the non-null parameter values.

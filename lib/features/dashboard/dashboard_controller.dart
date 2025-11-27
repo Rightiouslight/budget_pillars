@@ -6,7 +6,10 @@ import '../../data/models/account.dart';
 import '../../data/models/card.dart';
 import '../../data/models/transaction.dart';
 import '../../data/models/recurring_income.dart';
+import '../../data/models/budget_notification.dart';
 import '../../providers/active_budget_provider.dart';
+import '../../providers/user_settings_provider.dart';
+import 'automatic_transaction_processor.dart';
 
 /// Provider for the dashboard controller
 final dashboardControllerProvider =
@@ -243,11 +246,13 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
         budget.recurringIncomes,
       );
 
+      RecurringIncome newOrUpdatedIncome;
+
       if (id != null) {
         // Update existing recurring income
         final index = recurringIncomes.indexWhere((income) => income.id == id);
         if (index != -1) {
-          recurringIncomes[index] = RecurringIncome(
+          newOrUpdatedIncome = RecurringIncome(
             id: id,
             description: description,
             amount: amount,
@@ -255,10 +260,13 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
             pocketId: pocketId,
             dayOfMonth: dayOfMonth,
           );
+          recurringIncomes[index] = newOrUpdatedIncome;
+        } else {
+          return; // Income not found
         }
       } else {
         // Add new recurring income
-        final newIncome = RecurringIncome(
+        newOrUpdatedIncome = RecurringIncome(
           id: 'rec_inc_${DateTime.now().millisecondsSinceEpoch}',
           description: description,
           amount: amount,
@@ -266,10 +274,76 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
           pocketId: pocketId,
           dayOfMonth: dayOfMonth,
         );
-        recurringIncomes.add(newIncome);
+        recurringIncomes.add(newOrUpdatedIncome);
       }
 
-      final updatedBudget = budget.copyWith(recurringIncomes: recurringIncomes);
+      var updatedBudget = budget.copyWith(recurringIncomes: recurringIncomes);
+
+      // If dayOfMonth is 99 (immediate), process the income now
+      if (id == null && dayOfMonth == 99) {
+        // Find the account and pocket
+        final accountIndex = updatedBudget.accounts.indexWhere(
+          (a) => a.id == accountId,
+        );
+        if (accountIndex != -1) {
+          final account = updatedBudget.accounts[accountIndex];
+          final pocketIndex = account.cards.indexWhere(
+            (c) => c.id == pocketId && c is PocketCard,
+          );
+
+          if (pocketIndex != -1) {
+            final pocket = account.cards[pocketIndex] as PocketCard;
+
+            // Update pocket balance
+            final updatedPocket = pocket.copyWith(
+              balance: pocket.balance + amount,
+            );
+
+            final updatedCards = List<Card>.from(account.cards);
+            updatedCards[pocketIndex] = updatedPocket;
+
+            final updatedAccount = account.copyWith(cards: updatedCards);
+            final updatedAccounts = List<Account>.from(updatedBudget.accounts);
+            updatedAccounts[accountIndex] = updatedAccount;
+
+            // Create transaction
+            final transaction = Transaction(
+              id: 'txn_${DateTime.now().millisecondsSinceEpoch}_immediate_${newOrUpdatedIncome.id}',
+              amount: amount,
+              description: description,
+              date: DateTime.now(),
+              accountId: accountId,
+              accountName: account.name,
+              categoryId: pocketId,
+              categoryName: 'Income to ${pocket.name}',
+              sourcePocketId: pocketId,
+            );
+
+            // Create notification
+            final notification = BudgetNotification(
+              id: 'notif_${DateTime.now().millisecondsSinceEpoch}',
+              type: NotificationType.recurringIncome,
+              title: 'Income Deposited',
+              message:
+                  '$description: \$${amount.toStringAsFixed(2)} → ${pocket.name}',
+              timestamp: DateTime.now(),
+              relatedTransactionId: transaction.id,
+            );
+
+            // Update budget with transaction, processed flag, and notification
+            updatedBudget = updatedBudget.copyWith(
+              accounts: updatedAccounts,
+              transactions: [transaction, ...updatedBudget.transactions],
+              processedRecurringIncomes: {
+                ...updatedBudget.processedRecurringIncomes,
+                newOrUpdatedIncome.id: true,
+              },
+              notifications: [notification, ...updatedBudget.notifications],
+            );
+          }
+        }
+      }
+
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
   }
@@ -288,6 +362,42 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       final updatedBudget = budget.copyWith(recurringIncomes: recurringIncomes);
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
+  }
+
+  /// Process all due automatic transactions (recurring expenses and incomes)
+  ///
+  /// This method should be called when:
+  /// - Budget loads for the first time
+  /// - App starts
+  /// - Month changes
+  ///
+  /// It will silently process all due transactions and create notifications.
+  Future<void> processAutomaticTransactions() async {
+    // Don't show loading state - this runs silently in the background
+    final budget = await _getCurrentBudget();
+    if (budget == null) return;
+
+    // Get month start date from settings
+    final settings = await _ref.read(userSettingsProvider.future);
+
+    // Import the processor
+    final result = await Future(() {
+      return AutomaticTransactionProcessor.processAutomaticTransactions(
+        budget: budget,
+        monthStartDate: settings.monthStartDate,
+      );
+    });
+
+    // Only save if there were changes
+    if (result.hasChanges || result.hasErrors) {
+      await _repository.saveBudget(_userId, _monthKey, result.updatedBudget);
+
+      // Force reload the budget to reflect changes
+      state = const AsyncValue.loading();
+      state = await AsyncValue.guard(() async {
+        // The budget will be reloaded by the provider
+      });
+    }
   }
 
   // ===== POCKET OPERATIONS =====

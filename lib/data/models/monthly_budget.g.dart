@@ -29,6 +29,13 @@ _$MonthlyBudgetImpl _$$MonthlyBudgetImplFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as bool),
           ) ??
           const {},
+      notifications:
+          (json['notifications'] as List<dynamic>?)
+              ?.map(
+                (e) => BudgetNotification.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$MonthlyBudgetImplToJson(
@@ -39,4 +46,5 @@ Map<String, dynamic> _$$MonthlyBudgetImplToJson(
   'recurringIncomes': instance.recurringIncomes.map((e) => e.toJson()).toList(),
   'autoTransactionsProcessed': instance.autoTransactionsProcessed,
   'processedRecurringIncomes': instance.processedRecurringIncomes,
+  'notifications': instance.notifications.map((e) => e.toJson()).toList(),
 };
