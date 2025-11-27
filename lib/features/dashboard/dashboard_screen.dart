@@ -22,7 +22,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     // Process automatic payments on dashboard load
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(autoPaymentServiceProvider).processIfNeeded();
+      if (mounted) {
+        ref.read(autoPaymentServiceProvider).processIfNeeded();
+      }
     });
   }
 

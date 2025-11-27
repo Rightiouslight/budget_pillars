@@ -1256,18 +1256,80 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     required bool keepBalances,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    try {
+      // Check if we're importing into the current active month
+      final isCurrentMonth = _ref.read(isViewingCurrentActiveMonthProvider);
+
+      // Process recurring incomes with dayOfMonth == 99 (immediate) ONLY if current month
+      final newTransactions = <Transaction>[];
+      final processedIncomes = <String, bool>{};
+      final incomeAdjustments =
+          <String, double>{}; // accountId_pocketId -> amount
+
+      // Only process immediate incomes if importing into the current active month
+      if (isCurrentMonth) {
+        // Calculate income adjustments for immediate incomes
+        for (final income in previousBudget.recurringIncomes) {
+          if (income.dayOfMonth == 99) {
+            final key = '${income.accountId}_${income.pocketId}';
+            incomeAdjustments[key] =
+                (incomeAdjustments[key] ?? 0.0) + income.amount;
+
+            // Create transaction record
+            final now = DateTime.now();
+            final account = previousBudget.accounts.firstWhere(
+              (a) => a.id == income.accountId,
+            );
+            final pocket = account.cards.firstWhere(
+              (c) =>
+                  c.whenOrNull(
+                    pocket: (id, _, __, ___, ____) => id == income.pocketId,
+                  ) !=
+                  null,
+            );
+
+            newTransactions.add(
+              Transaction(
+                id: 'txn_${now.millisecondsSinceEpoch}_${income.id}',
+                amount: income.amount,
+                description: income.description ?? 'Recurring income',
+                date: now,
+                accountId: account.id,
+                accountName: account.name,
+                categoryId: income.pocketId ?? '',
+                categoryName:
+                    pocket.whenOrNull(
+                      pocket: (_, name, __, ___, ____) => 'Income to $name',
+                    ) ??
+                    'Income',
+                sourcePocketId: income.pocketId,
+              ),
+            );
+
+            processedIncomes[income.id] = true;
+          }
+        }
+      }
+
       // Copy accounts and process cards
       final newAccounts = previousBudget.accounts.map((account) {
         final newCards = account.cards.map((card) {
           return card.when(
             pocket: (id, name, icon, balance, color) {
-              // Reset balance if user chose to start from zero
+              // Check if this pocket has immediate income (only if current month)
+              final key = '${account.id}_$id';
+              final incomeAmount = incomeAdjustments[key] ?? 0.0;
+
+              // Calculate final balance
+              final finalBalance = keepBalances
+                  ? balance + incomeAmount
+                  : incomeAmount;
+
               return Card.pocket(
                 id: id,
                 name: name,
                 icon: icon,
-                balance: keepBalances ? balance : 0.0,
+                balance: finalBalance,
                 color: color,
               );
             },
@@ -1304,60 +1366,6 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
         return account.copyWith(cards: newCards);
       }).toList();
 
-      // Process recurring incomes with dayOfMonth == 99 (immediate)
-      final newTransactions = <Transaction>[];
-      final processedIncomes = <String, bool>{};
-
-      for (final income in previousBudget.recurringIncomes) {
-        if (income.dayOfMonth == 99) {
-          // Find the account and pocket
-          final account = newAccounts.firstWhere(
-            (a) => a.id == income.accountId,
-          );
-          final pocketIndex = account.cards.indexWhere(
-            (c) =>
-                c.whenOrNull(
-                  pocket: (id, _, __, ___, ____) => id == income.pocketId,
-                ) !=
-                null,
-          );
-
-          if (pocketIndex != -1) {
-            final pocket = account.cards[pocketIndex];
-            pocket.whenOrNull(
-              pocket: (id, name, icon, balance, color) {
-                // Add income to pocket balance
-                final updatedPocket = Card.pocket(
-                  id: id,
-                  name: name,
-                  icon: icon,
-                  balance: balance + income.amount,
-                  color: color,
-                );
-                account.cards[pocketIndex] = updatedPocket;
-
-                // Create transaction record
-                final now = DateTime.now();
-                newTransactions.add(
-                  Transaction(
-                    id: 'txn_${now.millisecondsSinceEpoch}_${income.id}',
-                    amount: income.amount,
-                    description: income.description ?? 'Recurring income',
-                    date: now,
-                    accountId: account.id,
-                    accountName: account.name,
-                    categoryId: id,
-                    categoryName: 'Income to $name',
-                  ),
-                );
-
-                processedIncomes[income.id] = true;
-              },
-            );
-          }
-        }
-      }
-
       // Create the new budget
       final newBudget = MonthlyBudget(
         accounts: newAccounts,
@@ -1368,13 +1376,17 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       );
 
       await _repository.saveBudget(_userId, _monthKey, newBudget);
-    });
+      state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
   }
 
   /// Create an empty budget
   Future<void> createEmptyBudget() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    try {
       final emptyBudget = MonthlyBudget(
         accounts: [],
         transactions: [],
@@ -1384,15 +1396,23 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       );
 
       await _repository.saveBudget(_userId, _monthKey, emptyBudget);
-    });
+      state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
   }
 
   /// Create a demo budget with sample data
   Future<void> createDemoBudget(MonthlyBudget demoBudget) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    try {
       await _repository.saveBudget(_userId, _monthKey, demoBudget);
-    });
+      state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
   }
 
   /// Delete the current month's budget

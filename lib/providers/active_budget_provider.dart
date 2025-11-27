@@ -180,3 +180,26 @@ final monthDisplayNameProvider = Provider<String>((ref) {
 
   return '${monthNames[month - 1]} $year';
 });
+
+/// Provider to check if the currently viewed month is the active current month
+/// This is used to determine if automatic transactions should be processed
+final isViewingCurrentActiveMonthProvider = Provider<bool>((ref) {
+  final budgetInfo = ref.watch(activeBudgetInfoProvider);
+
+  if (budgetInfo == null) {
+    return false;
+  }
+
+  // Get the user's month start date setting
+  final monthStartDate = ref.watch(monthStartDateProvider);
+
+  // Calculate the current active month key based on effective date
+  final effectiveDate = budget_date_utils.DateUtils.getEffectiveInitialDate(
+    day: monthStartDate,
+  );
+  final currentMonthKey =
+      '${effectiveDate.year}-${effectiveDate.month.toString().padLeft(2, '0')}';
+
+  // Compare with the currently viewed month
+  return budgetInfo.monthKey == currentMonthKey;
+});

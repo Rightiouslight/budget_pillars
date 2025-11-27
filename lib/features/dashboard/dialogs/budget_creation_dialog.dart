@@ -77,7 +77,11 @@ class _BudgetCreationDialogState extends ConsumerState<BudgetCreationDialog> {
       }
 
       if (mounted) {
-        Navigator.of(context).pop();
+        // Add a small delay to ensure all frames are rendered before closing
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       _showError('Failed to create budget: $e');

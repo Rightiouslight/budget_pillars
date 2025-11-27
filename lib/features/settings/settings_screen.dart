@@ -602,6 +602,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               navigator.pop(); // Close confirmation dialog
 
               // Show loading indicator
+              if (!context.mounted) return;
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -627,7 +628,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // Small delay then close settings
                 await Future.delayed(const Duration(milliseconds: 100));
-                navigator.pop(); // Close settings screen
+                if (context.mounted) {
+                  navigator.pop(); // Close settings screen
+                }
               } catch (e) {
                 navigator.pop(); // Close loading dialog
 
