@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/widgets/icon_picker_dialog.dart';
+import '../../../core/widgets/color_picker_dialog.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog for adding or editing a pocket
@@ -214,44 +215,117 @@ class _AddPocketDialogState extends ConsumerState<AddPocketDialog> {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _colorOptions.map((color) {
-                  final isSelected = color == _selectedColor;
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedColor = color;
-                      });
+                children: [
+                  ..._colorOptions.map((color) {
+                    final isSelected = color == _selectedColor;
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedColor = color;
+                        });
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: color != null
+                              ? Color(
+                                  int.parse(color.substring(1), radix: 16) +
+                                      0xFF000000,
+                                )
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                          border: Border.all(
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline,
+                            width: isSelected ? 3 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: color == null
+                            ? Icon(
+                                Icons.clear,
+                                size: 20,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              )
+                            : null,
+                      ),
+                    );
+                  }),
+                  // Custom color picker button
+                  InkWell(
+                    onTap: () async {
+                      // Parse current color or use default
+                      Color? initialColor;
+                      if (_selectedColor != null &&
+                          !_colorOptions.contains(_selectedColor)) {
+                        try {
+                          initialColor = Color(
+                            int.parse(_selectedColor!.substring(1), radix: 16) +
+                                0xFF000000,
+                          );
+                        } catch (e) {
+                          initialColor = null;
+                        }
+                      }
+
+                      final selectedHex = await showDialog<String>(
+                        context: context,
+                        builder: (context) => ColorPickerDialog(
+                          initialColor: initialColor,
+                          title: 'Pick Custom Color',
+                        ),
+                      );
+
+                      if (selectedHex != null) {
+                        setState(() {
+                          _selectedColor = selectedHex;
+                        });
+                      }
                     },
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: color != null
+                        color:
+                            _selectedColor != null &&
+                                !_colorOptions.contains(_selectedColor)
                             ? Color(
-                                int.parse(color.substring(1), radix: 16) +
+                                int.parse(
+                                      _selectedColor!.substring(1),
+                                      radix: 16,
+                                    ) +
                                     0xFF000000,
                               )
-                            : Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
+                            : Theme.of(context).colorScheme.surface,
                         border: Border.all(
-                          color: isSelected
+                          color:
+                              _selectedColor != null &&
+                                  !_colorOptions.contains(_selectedColor)
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.outline,
-                          width: isSelected ? 3 : 1,
+                          width:
+                              _selectedColor != null &&
+                                  !_colorOptions.contains(_selectedColor)
+                              ? 3
+                              : 1,
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: color == null
-                          ? Icon(
-                              Icons.clear,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            )
-                          : null,
+                      child: Icon(
+                        Icons.colorize,
+                        size: 20,
+                        color:
+                            _selectedColor != null &&
+                                !_colorOptions.contains(_selectedColor)
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
             ],
           ),
