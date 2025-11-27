@@ -1,4 +1,3 @@
-
 class BudgetPeriod {
   final DateTime start;
   final DateTime end;
@@ -8,11 +7,8 @@ class BudgetPeriod {
 
 class DateUtils {
   /// Calculates the start and end dates for a budget period.
-  static BudgetPeriod getBudgetPeriod({
-    required int monthStartDate,
-    DateTime? referenceDate,
-  }) {
-    final now = referenceDate ?? DateTime.now();
+  static BudgetPeriod getBudgetPeriod({required int monthStartDate}) {
+    final now = DateTime.now();
     final year = now.year;
     final month = now.month;
 
@@ -22,13 +18,21 @@ class DateUtils {
       startDate = DateTime(startDate.year, startDate.month - 1, startDate.day);
     }
 
-    DateTime endDate = DateTime(startDate.year, startDate.month + 1, startDate.day);
+    DateTime endDate = DateTime(
+      startDate.year,
+      startDate.month + 1,
+      startDate.day,
+    );
     // Go to the day before the next period starts.
     endDate = endDate.subtract(const Duration(days: 1));
 
     // To be fully inclusive, we go to the end of the last day of the budget period.
     return BudgetPeriod(
-      start: DateTime(startDate.year, startDate.month, startDate.day), // Time is 00:00:00
+      start: DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      ), // Time is 00:00:00
       end: DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59, 999),
     );
   }
@@ -36,13 +40,9 @@ class DateUtils {
   /// Calculates the specific date for a recurring transaction within a given budget period.
   static DateTime getDueDateForPeriod({
     required int dueDate,
-    required DateTime displayMonth,
     required int monthStartDate,
   }) {
-    final budgetPeriod = getBudgetPeriod(
-      monthStartDate: monthStartDate,
-      referenceDate: displayMonth,
-    );
+    final budgetPeriod = getBudgetPeriod(monthStartDate: monthStartDate);
     final year = budgetPeriod.start.year;
     final month = budgetPeriod.start.month;
 
@@ -60,7 +60,11 @@ class DateUtils {
 
   static DateTime getEffectiveInitialDate({required int day}) {
     final today = DateTime.now();
-    final budgetStartDateForCurrentMonth = DateTime(today.year, today.month, day);
+    final budgetStartDateForCurrentMonth = DateTime(
+      today.year,
+      today.month,
+      day,
+    );
 
     // isAfter or isAtSameMomentAs
     if (!today.isBefore(budgetStartDateForCurrentMonth) && day >= 15) {

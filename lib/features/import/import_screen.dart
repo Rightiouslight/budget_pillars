@@ -249,7 +249,6 @@ class _ImportScreenState extends ConsumerState<ImportScreen>
     final monthStartDate = ref.read(monthStartDateProvider);
     final budgetPeriod = budget_date_utils.DateUtils.getBudgetPeriod(
       monthStartDate: monthStartDate,
-      referenceDate: DateTime.now(),
     );
 
     // Create set of existing transactions for duplicate detection
