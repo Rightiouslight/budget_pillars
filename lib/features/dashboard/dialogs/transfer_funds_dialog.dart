@@ -6,13 +6,15 @@ import '../dashboard_controller.dart';
 
 /// Dialog for transferring funds between pockets/categories
 class TransferFundsDialog extends ConsumerStatefulWidget {
-  final String accountId;
+  final String sourceAccountId;
+  final String destinationAccountId;
   final models.Card sourceCard; // Pre-selected source
   final models.Card destinationCard; // Pre-selected destination (pocket)
 
   const TransferFundsDialog({
     super.key,
-    required this.accountId,
+    required this.sourceAccountId,
+    required this.destinationAccountId,
     required this.sourceCard,
     required this.destinationCard,
   });
@@ -190,10 +192,10 @@ class _TransferFundsDialogState extends ConsumerState<TransferFundsDialog> {
       await ref
           .read(dashboardControllerProvider.notifier)
           .transferFunds(
-            sourceAccountId: widget.accountId,
+            sourceAccountId: widget.sourceAccountId,
             sourceCardId: _sourceCardId,
             isSourcePocket: _isSourcePocket,
-            destinationAccountId: widget.accountId,
+            destinationAccountId: widget.destinationAccountId,
             destinationPocketId: _destinationPocketId,
             amount: amount,
             description: description.isEmpty ? 'Transfer' : description,

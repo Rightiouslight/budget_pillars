@@ -69,7 +69,8 @@ class PocketCardWidget extends ConsumerWidget {
             showDialog(
               context: context,
               builder: (context) => TransferFundsDialog(
-                accountId: accountId,
+                sourceAccountId: transferMode.accountId,
+                destinationAccountId: accountId,
                 sourceCard: transferMode.sourceCard,
                 destinationCard: destinationCard,
               ),
