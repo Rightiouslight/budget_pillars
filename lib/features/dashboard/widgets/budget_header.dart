@@ -7,6 +7,8 @@ import '../../../providers/user_settings_provider.dart';
 import '../../../data/firebase/auth_repository.dart';
 import '../../../utils/profile_picture_cache.dart';
 import '../../auth/auth_controller.dart';
+import '../../notifications/notification_controller.dart';
+import '../../notifications/notifications_sheet.dart';
 import '../dialogs/add_account_dialog.dart';
 import '../dialogs/view_transactions_dialog.dart';
 
@@ -285,6 +287,29 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
       ),
       centerTitle: false,
       actions: [
+        // Notifications Bell Icon
+        if (!isReorderingAccounts)
+          Consumer(
+            builder: (context, ref, child) {
+              final unreadCount = ref.watch(unreadNotificationCountProvider);
+              
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => const NotificationsSheet(),
+                  );
+                },
+                tooltip: 'Notifications',
+              );
+            },
+          ),
         // Month Navigation (center of AppBar)
         if (!isReorderingAccounts) ...[
           IconButton(
