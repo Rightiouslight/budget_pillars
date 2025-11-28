@@ -138,26 +138,57 @@ class ViewTransactionsDialog extends ConsumerWidget {
                         }
                       }
 
-                      final isNegative = transaction.amount < 0;
+                      final isTransfer = transaction.categoryId == 'transfer';
+                      final isIncome = transaction.categoryId == 'income';
+
                       final formattedAmount = NumberFormat.currency(
                         symbol: '\$',
                         decimalDigits: 2,
                       ).format(transaction.amount.abs());
 
+                      // Determine amount color and prefix
+                      Color amountColor;
+                      String amountPrefix;
+                      if (isTransfer) {
+                        // Transfers: normal text color, no prefix
+                        amountColor = Theme.of(context).colorScheme.onSurface;
+                        amountPrefix = '';
+                      } else if (isIncome) {
+                        // Income: green with + prefix
+                        amountColor = Colors.green;
+                        amountPrefix = '+';
+                      } else {
+                        // Expenses: red with - prefix
+                        amountColor = Theme.of(context).colorScheme.error;
+                        amountPrefix = '-';
+                      }
+
+                      // Determine icon background color
+                      Color iconBgColor;
+                      Color iconColor;
+                      if (isTransfer) {
+                        iconBgColor = Theme.of(
+                          context,
+                        ).colorScheme.secondaryContainer;
+                        iconColor = Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer;
+                      } else if (isIncome) {
+                        iconBgColor = Colors.green.withOpacity(0.2);
+                        iconColor = Colors.green;
+                      } else {
+                        iconBgColor = Theme.of(
+                          context,
+                        ).colorScheme.errorContainer;
+                        iconColor = Theme.of(
+                          context,
+                        ).colorScheme.onErrorContainer;
+                      }
+
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: isNegative
-                              ? Theme.of(context).colorScheme.errorContainer
-                              : Theme.of(context).colorScheme.primaryContainer,
-                          child: Icon(
-                            cardIcon,
-                            color: isNegative
-                                ? Theme.of(context).colorScheme.onErrorContainer
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer,
-                            size: 20,
-                          ),
+                          backgroundColor: iconBgColor,
+                          child: Icon(cardIcon, color: iconColor, size: 20),
                         ),
                         title: Text(
                           transaction.description.isNotEmpty
@@ -170,12 +201,10 @@ class ViewTransactionsDialog extends ConsumerWidget {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         trailing: Text(
-                          '${isNegative ? '-' : '+'}$formattedAmount',
+                          '$amountPrefix$formattedAmount',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: isNegative
-                                    ? Theme.of(context).colorScheme.error
-                                    : Theme.of(context).colorScheme.primary,
+                                color: amountColor,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),

@@ -121,6 +121,9 @@ class CategoryCardWidget extends ConsumerWidget {
           onDoubleTap: !enableInteraction
               ? null
               : () => _showAddExpenseDialog(context),
+          onLongPress: !enableInteraction
+              ? null
+              : () => _showCompactMenu(context, ref),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
@@ -201,31 +204,34 @@ class CategoryCardWidget extends ConsumerWidget {
 
                 // Action buttons row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // Expense button
-                    InkWell(
-                      onTap: () => _showAddExpenseDialog(context),
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: Icon(
-                          Icons.add_circle_outline,
-                          size: buttonIconSize,
-                          color: Theme.of(context).colorScheme.primary,
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showAddExpenseDialog(context),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Icon(
+                            Icons.add_circle_outline,
+                            size: buttonIconSize,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
                     // Transfer button
-                    InkWell(
-                      onTap: () => _showTransferDialog(context, ref),
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: Icon(
-                          Icons.swap_horiz,
-                          size: buttonIconSize,
-                          color: Theme.of(context).colorScheme.primary,
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showTransferDialog(context, ref),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Icon(
+                            Icons.swap_horiz,
+                            size: buttonIconSize,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
@@ -649,6 +655,51 @@ class CategoryCardWidget extends ConsumerWidget {
           },
         ),
         duration: const Duration(seconds: 10),
+      ),
+    );
+  }
+
+  void _showCompactMenu(BuildContext context, WidgetRef ref) {
+    final remaining = budgetValue - currentValue;
+    final canQuickPay = remaining > 0 && isRecurring;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (canQuickPay)
+              ListTile(
+                leading: const Icon(Icons.check_circle_outline),
+                title: const Text('Quick Pay'),
+                subtitle: Text(
+                  'Pay remaining \$${remaining.toStringAsFixed(2)}',
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _handleQuickPay(context, ref);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit Category'),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditDialog(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteConfirmation(context);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

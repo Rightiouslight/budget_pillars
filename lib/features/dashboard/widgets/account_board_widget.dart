@@ -70,7 +70,7 @@ class AccountBoardWidget extends ConsumerWidget {
       children: [
         // Account Header with toolbar
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             border: Border(
@@ -83,26 +83,26 @@ class AccountBoardWidget extends ConsumerWidget {
             children: [
               // Account Icon
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   _getValidIcon(account.icon),
-                  size: 20,
+                  size: 18,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
               // Account Name
               Expanded(
                 child: Text(
                   account.name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -115,9 +115,14 @@ class AccountBoardWidget extends ConsumerWidget {
                   Tooltip(
                     message: 'Add Income',
                     child: IconButton(
-                      icon: const Icon(Icons.attach_money, size: 20),
+                      icon: const Icon(Icons.attach_money, size: 18),
                       onPressed: () => _showAddIncomeDialog(context),
                       visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ),
 
@@ -125,10 +130,15 @@ class AccountBoardWidget extends ConsumerWidget {
                   Tooltip(
                     message: 'Recurring Incomes',
                     child: IconButton(
-                      icon: const Icon(Icons.event_repeat, size: 20),
+                      icon: const Icon(Icons.event_repeat, size: 18),
                       onPressed: () =>
                           _showRecurringIncomesDialog(context, ref),
                       visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ),
 
@@ -136,9 +146,14 @@ class AccountBoardWidget extends ConsumerWidget {
                   Tooltip(
                     message: 'Add Pocket',
                     child: IconButton(
-                      icon: const Icon(Icons.folder_outlined, size: 20),
+                      icon: const Icon(Icons.folder_outlined, size: 18),
                       onPressed: () => _showAddPocketDialog(context),
                       visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ),
 
@@ -146,15 +161,20 @@ class AccountBoardWidget extends ConsumerWidget {
                   Tooltip(
                     message: 'Add Category',
                     child: IconButton(
-                      icon: const Icon(Icons.add, size: 20),
+                      icon: const Icon(Icons.add, size: 18),
                       onPressed: () => _showAddCategoryDialog(context),
                       visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ),
 
                   // More Menu
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_horiz, size: 20),
+                    icon: const Icon(Icons.more_horiz, size: 18),
                     padding: EdgeInsets.zero,
                     onSelected: (value) {
                       switch (value) {
@@ -243,7 +263,7 @@ class AccountBoardWidget extends ConsumerWidget {
         Expanded(
           child: Container(
             color: Theme.of(context).colorScheme.surfaceContainerLow,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               children: [
                 // Summary Card
@@ -251,19 +271,22 @@ class AccountBoardWidget extends ConsumerWidget {
                   elevation: 0,
                   color: Theme.of(context).colorScheme.surface,
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     child: Column(
                       children: [
                         _SummaryRow(
                           label: 'Total in Pockets',
                           amount: totalInPockets,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         _SummaryRow(
                           label: 'Current Budget',
                           amount: currentBudget,
                         ),
-                        const Divider(height: 16),
+                        const Divider(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -272,12 +295,12 @@ class AccountBoardWidget extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Total Funds',
-                                  style: Theme.of(context).textTheme.bodyMedium
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 Text(
                                   'Available',
-                                  style: Theme.of(context).textTheme.bodySmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: Theme.of(
                                           context,
@@ -291,12 +314,12 @@ class AccountBoardWidget extends ConsumerWidget {
                               children: [
                                 Text(
                                   '\$${totalFunds.toStringAsFixed(2)}',
-                                  style: Theme.of(context).textTheme.bodyMedium
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 Text(
                                   '\$${availableToBudget.toStringAsFixed(2)}',
-                                  style: Theme.of(context).textTheme.bodySmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: availableToBudget >= 0
                                             ? Colors.green
@@ -313,7 +336,7 @@ class AccountBoardWidget extends ConsumerWidget {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Cards List/Grid
                 Expanded(
@@ -912,13 +935,13 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         Text(
           '\$${amount.toStringAsFixed(2)}',
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
     );

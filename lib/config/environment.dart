@@ -4,7 +4,7 @@ enum Environment { development, production }
 /// Configuration settings for the current environment
 class EnvironmentConfig {
   // Change this to switch between dev and prod
-  static const Environment current = Environment.development;
+  static const Environment current = Environment.production;
 
   static bool get isDevelopment => current == Environment.development;
   static bool get isProduction => current == Environment.production;

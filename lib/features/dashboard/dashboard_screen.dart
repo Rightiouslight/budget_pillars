@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/active_budget_provider.dart';
@@ -135,7 +136,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final cardWidth = screenWidth > 1200
         ? 400.0 // Desktop: fixed width cards
-        : screenWidth > 600
+        : screenWidth > 450
         ? 380.0 // Tablet: fixed width
         : screenWidth * 0.9; // Mobile: 90% width
 
@@ -145,44 +146,53 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         MediaQuery.of(context).padding.top -
         32;
 
-    return ReorderableListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      itemCount: budget.accounts.length,
-      onReorder: (oldIndex, newIndex) {
-        ref
-            .read(dashboardControllerProvider.notifier)
-            .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
-      },
-      buildDefaultDragHandles: true,
-      proxyDecorator: (child, index, animation) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            return Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              child: child,
-            );
-          },
-          child: child,
-        );
-      },
-      itemBuilder: (context, i) {
-        return Container(
-          key: ValueKey(budget.accounts[i].id),
-          width: cardWidth,
-          height: cardHeight,
-          margin: EdgeInsets.only(
-            right: i < budget.accounts.length - 1 ? 16 : 0,
-          ),
-          child: AccountBoardWidget(
-            account: budget.accounts[i],
-            accountIndex: i,
-            totalAccounts: budget.accounts.length,
-          ),
-        );
-      },
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+        },
+      ),
+      child: ReorderableListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        itemCount: budget.accounts.length,
+        onReorder: (oldIndex, newIndex) {
+          ref
+              .read(dashboardControllerProvider.notifier)
+              .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
+        },
+        buildDefaultDragHandles: true,
+        proxyDecorator: (child, index, animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              return Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(12),
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+        itemBuilder: (context, i) {
+          return Container(
+            key: ValueKey(budget.accounts[i].id),
+            width: cardWidth,
+            height: cardHeight,
+            margin: EdgeInsets.only(
+              right: i < budget.accounts.length - 1 ? 16 : 0,
+            ),
+            child: AccountBoardWidget(
+              account: budget.accounts[i],
+              accountIndex: i,
+              totalAccounts: budget.accounts.length,
+            ),
+          );
+        },
+      ),
     );
   }
 }

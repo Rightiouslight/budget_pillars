@@ -222,29 +222,30 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
                 ),
               ),
               // TODO: Add shared budgets when collaboration is implemented
-              const PopupMenuDivider(),
-              const PopupMenuItem<String>(
-                value: 'invitations',
-                child: Row(
-                  children: [
-                    Icon(Icons.mail, size: 16),
-                    SizedBox(width: 8),
-                    Text('Invitations'),
-                    // TODO: Add badge for invitation count
-                  ],
-                ),
-              ),
-              if (isOwnBudget)
-                const PopupMenuItem<String>(
-                  value: 'share',
-                  child: Row(
-                    children: [
-                      Icon(Icons.share, size: 16),
-                      SizedBox(width: 8),
-                      Text('Share & Manage Access'),
-                    ],
-                  ),
-                ),
+              // Hidden for now - will decide to remove completely later
+              // const PopupMenuDivider(),
+              // const PopupMenuItem<String>(
+              //   value: 'invitations',
+              //   child: Row(
+              //     children: [
+              //       Icon(Icons.mail, size: 16),
+              //       SizedBox(width: 8),
+              //       Text('Invitations'),
+              //       // TODO: Add badge for invitation count
+              //     ],
+              //   ),
+              // ),
+              // if (isOwnBudget)
+              //   const PopupMenuItem<String>(
+              //     value: 'share',
+              //     child: Row(
+              //       children: [
+              //         Icon(Icons.share, size: 16),
+              //         SizedBox(width: 8),
+              //         Text('Share & Manage Access'),
+              //       ],
+              //     ),
+              //   ),
             ],
             onSelected: (value) {
               if (value == 'invitations') {
