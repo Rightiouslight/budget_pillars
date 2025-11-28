@@ -725,7 +725,7 @@ const { toast } = useToast();
             updateCurrentBudget(budget => {
                 const account = budget.accounts.find(a => a.id === accountId);
                 if (!account?.cards) return budget;
-                const pocket = account.cards.find(p => p.id === pocketId && p.type === 'pocket') as Pocket | undefined;
+                const pocket = account.cards.find(p => p.id === pocketId && c.type === 'pocket') as Pocket | undefined;
                 if (pocket) pocket.balance -= amount;
                 budget.transactions.unshift({ id: `txn_${Date.now()}`, amount, description: description || `Expense`, date, accountId, accountName: account.name, categoryId: pocketId, categoryName: `Expense: ${pocketName}`, sourcePocketId: pocketId });
                 return budget;
@@ -904,15 +904,36 @@ const { toast } = useToast();
         if (!currentBudget) return;
         const account = accounts.find(a => a.id === accountId);
         if (!account || !account.cards) return;
+
         const dataToExport = {
-            pockets: account.cards.filter(c => c.type === 'pocket').map(({ name, icon, color }) => ({ name, icon, color: color || getRandomColor() })),
-            categories: account.cards.filter(c => c.type === 'category').map(c => { const cat = c as Category; return { name: cat.name, icon: cat.icon, budgetValue: cat.budgetValue, isRecurring: !!cat.isRecurring, color: cat.color || getRandomColor() } })
+            pockets: account.cards
+                .filter((c): c is Pocket => c.type === 'pocket')
+                .map(({ name, icon, color }) => ({
+                    name,
+                    icon,
+                    color: color || getRandomColor()
+                })),
+            categories: account.cards
+                .filter((c): c is Category => c.type === 'category')
+                .map(cat => ({
+                    name: cat.name,
+                    icon: cat.icon,
+                    budgetValue: cat.budgetValue,
+                    isRecurring: !!cat.isRecurring,
+                    dueDate: cat.dueDate,
+                    destinationPocketId: cat.destinationPocketId,
+                    destinationAccountId: cat.destinationAccountId,
+                    color: cat.color || getRandomColor()
+                }))
         };
+
         const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `budgetpillars_export_${account.name.replace(/\s/g, '_')}.json`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
         toast({ title: `Exported data for ${account.name}` });
     };
@@ -930,24 +951,59 @@ const { toast } = useToast();
             try {
                 const importedData = JSON.parse(e.target?.result as string);
                 if (!importedData.pockets || !importedData.categories) throw new Error("Invalid format");
+
                 updateCurrentBudget(budget => {
                     const account = budget.accounts.find(a => a.id === importingToAccountId);
                     if (!account?.cards) return budget;
-                    importedData.pockets.forEach((p: any) => {
+
+                    importedData.pockets.forEach((p: Partial<Pocket>) => {
                         const existing = account.cards.find(c => c.type === 'pocket' && c.name === p.name) as Pocket | undefined;
-                        if (existing) { existing.icon = p.icon; existing.color = p.color || getRandomColor(); }
-                        else account.cards.push({ type: 'pocket', id: `pocket_${Date.now()}_${Math.random()}`, name: p.name, icon: p.icon, balance: 0, color: p.color || getRandomColor() });
+                        if (existing) {
+                            existing.icon = p.icon || 'Wallet';
+                            existing.color = p.color || getRandomColor();
+                        } else {
+                            account.cards.push({
+                                type: 'pocket',
+                                id: `pocket_${Date.now()}_${Math.random()}`,
+                                name: p.name || 'New Pocket',
+                                icon: p.icon || 'Wallet',
+                                balance: 0,
+                                color: p.color || getRandomColor()
+                            });
+                        }
                     });
-                    importedData.categories.forEach((c: any) => {
+
+                    importedData.categories.forEach((c: Partial<Category>) => {
                         const existing = account.cards.find(card => card.type === 'category' && card.name === c.name) as Category | undefined;
-                        if (existing) { existing.budgetValue = c.budgetValue; existing.icon = c.icon; existing.isRecurring = !!c.isRecurring; existing.color = c.color || getRandomColor(); }
-                        else account.cards.push({ type: 'category', id: `cat_${Date.now()}_${Math.random()}`, name: c.name, icon: c.icon, budgetValue: c.budgetValue, isRecurring: !!c.isRecurring, currentValue: 0, color: c.color || getRandomColor() });
+                        const newCategoryData = {
+                            name: c.name || 'New Category',
+                            icon: c.icon || 'ShoppingCart',
+                            budgetValue: c.budgetValue || 0,
+                            isRecurring: !!c.isRecurring,
+                            dueDate: c.dueDate,
+                            destinationPocketId: c.destinationPocketId,
+                            destinationAccountId: c.destinationAccountId,
+                            color: c.color || getRandomColor()
+                        };
+
+                        if (existing) {
+                            Object.assign(existing, newCategoryData);
+                        } else {
+                            account.cards.push({
+                                type: 'category',
+                                id: `cat_${Date.now()}_${Math.random()}`,
+                                ...newCategoryData,
+                                currentValue: 0,
+                             });
+                        }
                     });
                     return budget;
                 });
+
                 toast({ title: "Data Imported Successfully" });
             } catch (error) {
-                toast({ title: "Import Failed", variant: "destructive" });
+                console.error("Import error:", error);
+                toast({ title: "Import Failed", description: "The imported file has an invalid format.", variant: "destructive" });
             } finally {
                 setImportingToAccountId(null);
                 if (fileInputRef.current) fileInputRef.current.value = "";

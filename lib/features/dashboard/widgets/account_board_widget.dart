@@ -1,5 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../../../data/models/account.dart';
 import '../dialogs/add_account_dialog.dart';
 import '../dialogs/add_pocket_dialog.dart';
@@ -155,6 +160,12 @@ class AccountBoardWidget extends ConsumerWidget {
                         case 'planner':
                           _showBudgetPlannerDialog(context, ref);
                           break;
+                        case 'export':
+                          _handleExportAccountData(context, ref);
+                          break;
+                        case 'import':
+                          _handleImportAccountData(context, ref);
+                          break;
                         case 'edit':
                           _showEditAccountDialog(context);
                           break;
@@ -171,6 +182,27 @@ class AccountBoardWidget extends ConsumerWidget {
                             Icon(Icons.calculate_outlined, size: 18),
                             SizedBox(width: 12),
                             Text('Budget Planner'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      const PopupMenuItem(
+                        value: 'export',
+                        child: Row(
+                          children: [
+                            Icon(Icons.download_outlined, size: 18),
+                            SizedBox(width: 12),
+                            Text('Export Data'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'import',
+                        child: Row(
+                          children: [
+                            Icon(Icons.upload_outlined, size: 18),
+                            SizedBox(width: 12),
+                            Text('Import Data'),
                           ],
                         ),
                       ),
@@ -491,6 +523,224 @@ class AccountBoardWidget extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleExportAccountData(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    try {
+      final controller = ref.read(dashboardControllerProvider.notifier);
+      final jsonData = await controller.exportAccountData(account.id);
+
+      if (jsonData == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to export account data')),
+          );
+        }
+        return;
+      }
+
+      // Ask user how they want to export
+      if (!context.mounted) return;
+
+      final exportChoice = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Export Account Data'),
+          content: const Text('How would you like to export the data?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('clipboard'),
+              child: const Text('Copy to Clipboard'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop('file'),
+              child: const Text('Save to File'),
+            ),
+          ],
+        ),
+      );
+
+      if (exportChoice == null || !context.mounted) return;
+
+      if (exportChoice == 'clipboard') {
+        await Clipboard.setData(ClipboardData(text: jsonData));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Export data for ${account.name} copied to clipboard',
+              ),
+            ),
+          );
+        }
+      } else if (exportChoice == 'file') {
+        final fileName =
+            'budgetpillars_export_${account.name.replaceAll(' ', '_')}.json';
+
+        try {
+          final directory = await getDownloadsDirectory();
+          if (directory != null) {
+            final file = File('${directory.path}/$fileName');
+            await file.writeAsString(jsonData);
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Exported ${account.name} to Downloads/$fileName',
+                  ),
+                ),
+              );
+            }
+          } else {
+            throw Exception('Could not access Downloads directory');
+          }
+        } catch (e) {
+          // Fallback: Copy to clipboard if file save fails
+          await Clipboard.setData(ClipboardData(text: jsonData));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Could not save file. Data copied to clipboard instead.',
+                ),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+      }
+    }
+  }
+
+  Future<void> _handleImportAccountData(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    try {
+      // Try to pick a file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        withData: true,
+      );
+
+      String? jsonData;
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.bytes != null) {
+          jsonData = utf8.decode(file.bytes!);
+        } else if (file.path != null) {
+          final fileContent = File(file.path!);
+          jsonData = await fileContent.readAsString();
+        }
+      } else {
+        // If file picker cancelled, try clipboard as fallback
+        final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+        if (clipboardData?.text != null && clipboardData!.text!.isNotEmpty) {
+          // Show dialog to ask if user wants to import from clipboard
+          if (context.mounted) {
+            final useClipboard = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Import from Clipboard?'),
+                content: const Text(
+                  'No file selected. Would you like to import from clipboard?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Import'),
+                  ),
+                ],
+              ),
+            );
+
+            if (useClipboard == true) {
+              jsonData = clipboardData.text;
+            }
+          }
+        }
+      }
+
+      if (jsonData == null || jsonData.isEmpty) {
+        return;
+      }
+
+      // Ask user if they want to include balances
+      if (context.mounted) {
+        final includeBalances = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Import Pocket Balances?'),
+            content: const Text(
+              'Do you want to import the pocket balances from the file?\n\n'
+              'Yes - Replace current balances with imported values\n'
+              'No - Keep current balances and only import structure',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No (Keep Current)'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Yes (Import Balances)'),
+              ),
+            ],
+          ),
+        );
+
+        if (includeBalances == null) {
+          // User cancelled
+          return;
+        }
+
+        // Import the data
+        final controller = ref.read(dashboardControllerProvider.notifier);
+        await controller.importAccountData(
+          account.id,
+          jsonData,
+          includeBalances: includeBalances,
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                includeBalances
+                    ? 'Data imported successfully with balances'
+                    : 'Data imported successfully (balances preserved)',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+      }
+    }
   }
 
   IconData _getValidIcon(String icon) {

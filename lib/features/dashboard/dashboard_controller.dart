@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/firebase/auth_repository.dart';
 import '../../data/firebase/firestore_repository.dart';
@@ -1583,5 +1584,184 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(error, stackTrace);
       rethrow; // Re-throw so the caller knows it failed
     }
+  }
+
+  // ===== IMPORT/EXPORT OPERATIONS =====
+
+  /// Export account data (pockets and categories) as JSON string
+  /// Returns null if account not found
+  Future<String?> exportAccountData(String accountId) async {
+    try {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return null;
+
+      final account = budget.accounts.firstWhere(
+        (a) => a.id == accountId,
+        orElse: () => throw Exception('Account not found'),
+      );
+
+      // Extract pockets (including balance)
+      final pockets = account.cards.where((card) => card is PocketCard).map((
+        card,
+      ) {
+        final pocket = card as PocketCard;
+        return {
+          'name': pocket.name,
+          'icon': pocket.icon,
+          'balance': pocket.balance,
+          'color':
+              pocket.color ??
+              '#${(0x1000000 + (0xffffff * (pocket.name.hashCode % 100) / 100).toInt()).toRadixString(16).substring(1)}',
+        };
+      }).toList();
+
+      // Extract categories (excluding id and currentValue)
+      final categories = account.cards.where((card) => card is CategoryCard).map((
+        card,
+      ) {
+        final category = card as CategoryCard;
+        return {
+          'name': category.name,
+          'icon': category.icon,
+          'budgetValue': category.budgetValue,
+          'isRecurring': category.isRecurring,
+          'dueDate': category.dueDate,
+          'destinationPocketId': category.destinationPocketId,
+          'destinationAccountId': category.destinationAccountId,
+          'color':
+              category.color ??
+              '#${(0x1000000 + (0xffffff * (category.name.hashCode % 100) / 100).toInt()).toRadixString(16).substring(1)}',
+        };
+      }).toList();
+
+      final exportData = {'pockets': pockets, 'categories': categories};
+
+      // Convert to JSON string with pretty print
+      const encoder = JsonEncoder.withIndent('  ');
+      return encoder.convert(exportData);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /// Import account data from JSON string
+  /// Merges with existing cards - updates matching names or adds new ones
+  /// [includeBalances] - if true, imports pocket balances from the JSON
+  Future<void> importAccountData(
+    String accountId,
+    String jsonData, {
+    required bool includeBalances,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      // Parse JSON
+      final Map<String, dynamic> importedData = jsonDecode(jsonData);
+
+      if (!importedData.containsKey('pockets') ||
+          !importedData.containsKey('categories')) {
+        throw Exception('Invalid import format');
+      }
+
+      final accountIndex = budget.accounts.indexWhere((a) => a.id == accountId);
+      if (accountIndex == -1) return;
+
+      final account = budget.accounts[accountIndex];
+      final updatedCards = List<Card>.from(account.cards);
+
+      // Import pockets
+      final pocketsList = importedData['pockets'] as List;
+      for (var pocketData in pocketsList) {
+        final pocketName = pocketData['name'] as String;
+        final importedBalance =
+            (pocketData['balance'] as num?)?.toDouble() ?? 0.0;
+
+        // Check if pocket with this name already exists
+        final existingIndex = updatedCards.indexWhere(
+          (card) => card is PocketCard && card.name == pocketName,
+        );
+
+        if (existingIndex != -1) {
+          // Update existing pocket
+          final existing = updatedCards[existingIndex] as PocketCard;
+          updatedCards[existingIndex] = Card.pocket(
+            id: existing.id,
+            name: pocketName,
+            icon: pocketData['icon'] as String? ?? 'Wallet',
+            balance: includeBalances ? importedBalance : existing.balance,
+            color: pocketData['color'] as String?,
+          );
+        } else {
+          // Add new pocket
+          updatedCards.add(
+            Card.pocket(
+              id: 'pocket_${DateTime.now().millisecondsSinceEpoch}_${pocketName.hashCode}',
+              name: pocketName,
+              icon: pocketData['icon'] as String? ?? 'Wallet',
+              balance: includeBalances ? importedBalance : 0.0,
+              color: pocketData['color'] as String?,
+            ),
+          );
+        }
+      }
+
+      // Import categories
+      final categoriesList = importedData['categories'] as List;
+      for (var categoryData in categoriesList) {
+        final categoryName = categoryData['name'] as String;
+
+        // Check if category with this name already exists
+        final existingIndex = updatedCards.indexWhere(
+          (card) => card is CategoryCard && card.name == categoryName,
+        );
+
+        if (existingIndex != -1) {
+          // Update existing category (preserve currentValue, clear destination pocket)
+          final existing = updatedCards[existingIndex] as CategoryCard;
+          updatedCards[existingIndex] = Card.category(
+            id: existing.id,
+            name: categoryName,
+            icon: categoryData['icon'] as String? ?? 'ShoppingCart',
+            budgetValue:
+                (categoryData['budgetValue'] as num?)?.toDouble() ?? 0.0,
+            currentValue: existing.currentValue,
+            color: categoryData['color'] as String?,
+            isRecurring: categoryData['isRecurring'] as bool? ?? false,
+            dueDate: categoryData['dueDate'] as int?,
+            destinationPocketId:
+                null, // Clear destination pocket - may not exist
+            destinationAccountId: null,
+          );
+        } else {
+          // Add new category (no destination pocket)
+          updatedCards.add(
+            Card.category(
+              id: 'cat_${DateTime.now().millisecondsSinceEpoch}_${categoryName.hashCode}',
+              name: categoryName,
+              icon: categoryData['icon'] as String? ?? 'ShoppingCart',
+              budgetValue:
+                  (categoryData['budgetValue'] as num?)?.toDouble() ?? 0.0,
+              currentValue: 0.0,
+              color: categoryData['color'] as String?,
+              isRecurring: categoryData['isRecurring'] as bool? ?? false,
+              dueDate: categoryData['dueDate'] as int?,
+              destinationPocketId:
+                  null, // Don't import destination - pocket may not exist
+              destinationAccountId: null,
+            ),
+          );
+        }
+      }
+
+      // Update the account with the new cards
+      final updatedAccount = account.copyWith(cards: updatedCards);
+      final updatedAccounts = List<Account>.from(budget.accounts);
+      updatedAccounts[accountIndex] = updatedAccount;
+
+      final updatedBudget = budget.copyWith(accounts: updatedAccounts);
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
   }
 }
