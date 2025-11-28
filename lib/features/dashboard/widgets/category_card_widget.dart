@@ -51,7 +51,7 @@ class CategoryCardWidget extends ConsumerWidget {
         : 0.0;
     final isOverBudget = currentValue > budgetValue;
     final transferMode = ref.watch(transferModeProvider);
-    
+
     // Get view preference
     final settings = ref.watch(userSettingsProvider).value;
     final isMobile = MediaQuery.of(context).size.width < 600;
@@ -61,10 +61,25 @@ class CategoryCardWidget extends ConsumerWidget {
     final isCompact = viewPreference == 'compact';
 
     if (isCompact) {
-      return _buildCompactView(context, ref, cardColor, remaining, progress, transferMode != null);
+      return _buildCompactView(
+        context,
+        ref,
+        cardColor,
+        remaining,
+        progress,
+        transferMode != null,
+      );
     }
-    
-    return _buildFullView(context, ref, cardColor, remaining, progress, isOverBudget, transferMode != null);
+
+    return _buildFullView(
+      context,
+      ref,
+      cardColor,
+      remaining,
+      progress,
+      isOverBudget,
+      transferMode != null,
+    );
   }
 
   Widget _buildCompactView(
@@ -76,60 +91,76 @@ class CategoryCardWidget extends ConsumerWidget {
     bool isTransferMode,
   ) {
     final isOverBudget = currentValue > budgetValue;
-    
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    // Larger sizes for 2-column mobile layout
+    final circleSize = isMobile ? 44.0 : 36.0;
+    final innerCircleSize = isMobile ? 34.0 : 28.0;
+    final iconSize = isMobile ? 18.0 : 14.0;
+    final buttonIconSize = isMobile ? 20.0 : 16.0;
+    final textStyle = isMobile
+        ? Theme.of(context).textTheme.bodySmall
+        : Theme.of(context).textTheme.labelSmall;
+
     return Opacity(
       opacity: isTransferMode ? 0.5 : 1.0,
       child: Card(
         elevation: 1,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
         ),
         child: InkWell(
           onTap: !enableInteraction
               ? null
               : () => _handleCardTap(context, ref, isTransferMode),
-          onDoubleTap: !enableInteraction ? null : () => _showAddExpenseDialog(context),
+          onDoubleTap: !enableInteraction
+              ? null
+              : () => _showAddExpenseDialog(context),
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // Name
                 Text(
                   name,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: textStyle?.copyWith(fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 2),
-                
+
                 // Circular progress with icon
                 SizedBox(
-                  width: 36,
-                  height: 36,
+                  width: circleSize,
+                  height: circleSize,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       // Background circle
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: circleSize,
+                        height: circleSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
                         ),
                       ),
                       // Progress indicator
                       SizedBox(
-                        width: 36,
-                        height: 36,
+                        width: circleSize,
+                        height: circleSize,
                         child: CircularProgressIndicator(
                           value: progress,
-                          strokeWidth: 2.5,
+                          strokeWidth: isMobile ? 3.0 : 2.5,
                           backgroundColor: Colors.transparent,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             cardColor ?? Theme.of(context).colorScheme.primary,
@@ -138,8 +169,8 @@ class CategoryCardWidget extends ConsumerWidget {
                       ),
                       // Inner white circle
                       Container(
-                        width: 28,
-                        height: 28,
+                        width: innerCircleSize,
+                        height: innerCircleSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Theme.of(context).colorScheme.surface,
@@ -148,25 +179,26 @@ class CategoryCardWidget extends ConsumerWidget {
                       // Icon
                       Icon(
                         _getValidIcon(icon),
-                        size: 14,
-                        color: cardColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: iconSize,
+                        color:
+                            cardColor ??
+                            Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 2),
-                
+
                 // Remaining amount
                 Text(
                   '\$${remaining.abs().toStringAsFixed(0)}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: textStyle?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isOverBudget ? Colors.red : Theme.of(context).colorScheme.onSurface,
+                    color: isOverBudget
+                        ? Colors.red
+                        : Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                
-                const SizedBox(height: 2),
-                
+
                 // Action buttons row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -179,7 +211,7 @@ class CategoryCardWidget extends ConsumerWidget {
                         padding: const EdgeInsets.all(2),
                         child: Icon(
                           Icons.add_circle_outline,
-                          size: 16,
+                          size: buttonIconSize,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
@@ -192,7 +224,7 @@ class CategoryCardWidget extends ConsumerWidget {
                         padding: const EdgeInsets.all(2),
                         child: Icon(
                           Icons.swap_horiz,
-                          size: 16,
+                          size: buttonIconSize,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
@@ -207,7 +239,11 @@ class CategoryCardWidget extends ConsumerWidget {
     );
   }
 
-  void _handleCardTap(BuildContext context, WidgetRef ref, bool isTransferMode) {
+  void _handleCardTap(
+    BuildContext context,
+    WidgetRef ref,
+    bool isTransferMode,
+  ) {
     // Categories cannot be transfer destinations, show message if in transfer mode
     if (isTransferMode) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -260,7 +296,6 @@ class CategoryCardWidget extends ConsumerWidget {
     bool isOverBudget,
     bool isTransferMode,
   ) {
-
     return Opacity(
       // Reduce opacity when in transfer mode to show it's not a valid destination
       opacity: isTransferMode ? 0.5 : 1.0,

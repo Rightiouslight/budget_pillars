@@ -705,7 +705,7 @@ class AccountBoardWidget extends ConsumerWidget {
         if (isCompact) {
           // 2 columns for mobile (<600), 3 columns for tablets
           final crossAxisCount = screenWidth < 600 ? 2 : 3;
-          
+
           return GridView.builder(
             padding: EdgeInsets.zero,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -730,33 +730,34 @@ class AccountBoardWidget extends ConsumerWidget {
                     cards: account.cards,
                   );
                 },
-                category: (
-                  id,
-                  name,
-                  icon,
-                  budgetValue,
-                  currentValue,
-                  color,
-                  isRecurring,
-                  dueDate,
-                  destinationPocketId,
-                  destinationAccountId,
-                ) {
-                  return CategoryCardWidget(
-                    accountId: account.id,
-                    id: id,
-                    name: name,
-                    icon: icon,
-                    budgetValue: budgetValue,
-                    currentValue: currentValue,
-                    color: color,
-                    isRecurring: isRecurring,
-                    dueDate: dueDate,
-                    destinationPocketId: destinationPocketId,
-                    destinationAccountId: destinationAccountId,
-                    cards: account.cards,
-                  );
-                },
+                category:
+                    (
+                      id,
+                      name,
+                      icon,
+                      budgetValue,
+                      currentValue,
+                      color,
+                      isRecurring,
+                      dueDate,
+                      destinationPocketId,
+                      destinationAccountId,
+                    ) {
+                      return CategoryCardWidget(
+                        accountId: account.id,
+                        id: id,
+                        name: name,
+                        icon: icon,
+                        budgetValue: budgetValue,
+                        currentValue: currentValue,
+                        color: color,
+                        isRecurring: isRecurring,
+                        dueDate: dueDate,
+                        destinationPocketId: destinationPocketId,
+                        destinationAccountId: destinationAccountId,
+                        cards: account.cards,
+                      );
+                    },
               );
             },
           );
@@ -792,33 +793,34 @@ class AccountBoardWidget extends ConsumerWidget {
                       cards: account.cards,
                     );
                   },
-                  category: (
-                    id,
-                    name,
-                    icon,
-                    budgetValue,
-                    currentValue,
-                    color,
-                    isRecurring,
-                    dueDate,
-                    destinationPocketId,
-                    destinationAccountId,
-                  ) {
-                    return CategoryCardWidget(
-                      accountId: account.id,
-                      id: id,
-                      name: name,
-                      icon: icon,
-                      budgetValue: budgetValue,
-                      currentValue: currentValue,
-                      color: color,
-                      isRecurring: isRecurring,
-                      dueDate: dueDate,
-                      destinationPocketId: destinationPocketId,
-                      destinationAccountId: destinationAccountId,
-                      cards: account.cards,
-                    );
-                  },
+                  category:
+                      (
+                        id,
+                        name,
+                        icon,
+                        budgetValue,
+                        currentValue,
+                        color,
+                        isRecurring,
+                        dueDate,
+                        destinationPocketId,
+                        destinationAccountId,
+                      ) {
+                        return CategoryCardWidget(
+                          accountId: account.id,
+                          id: id,
+                          name: name,
+                          icon: icon,
+                          budgetValue: budgetValue,
+                          currentValue: currentValue,
+                          color: color,
+                          isRecurring: isRecurring,
+                          dueDate: dueDate,
+                          destinationPocketId: destinationPocketId,
+                          destinationAccountId: destinationAccountId,
+                          cards: account.cards,
+                        );
+                      },
                 ),
               );
             },
@@ -862,33 +864,34 @@ class AccountBoardWidget extends ConsumerWidget {
                 cards: account.cards,
               );
             },
-            category: (
-              id,
-              name,
-              icon,
-              budgetValue,
-              currentValue,
-              color,
-              isRecurring,
-              dueDate,
-              destinationPocketId,
-              destinationAccountId,
-            ) {
-              return CategoryCardWidget(
-                accountId: account.id,
-                id: id,
-                name: name,
-                icon: icon,
-                budgetValue: budgetValue,
-                currentValue: currentValue,
-                color: color,
-                isRecurring: isRecurring,
-                dueDate: dueDate,
-                destinationPocketId: destinationPocketId,
-                destinationAccountId: destinationAccountId,
-                cards: account.cards,
-              );
-            },
+            category:
+                (
+                  id,
+                  name,
+                  icon,
+                  budgetValue,
+                  currentValue,
+                  color,
+                  isRecurring,
+                  dueDate,
+                  destinationPocketId,
+                  destinationAccountId,
+                ) {
+                  return CategoryCardWidget(
+                    accountId: account.id,
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    budgetValue: budgetValue,
+                    currentValue: currentValue,
+                    color: color,
+                    isRecurring: isRecurring,
+                    dueDate: dueDate,
+                    destinationPocketId: destinationPocketId,
+                    destinationAccountId: destinationAccountId,
+                    cards: account.cards,
+                  );
+                },
           ),
         );
       },

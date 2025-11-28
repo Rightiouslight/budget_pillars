@@ -38,7 +38,7 @@ class PocketCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cardColor = color != null ? _parseColor(color!) : null;
     final transferMode = ref.watch(transferModeProvider);
-    
+
     // Get view preference
     final settings = ref.watch(userSettingsProvider).value;
     final isMobile = MediaQuery.of(context).size.width < 600;
@@ -46,19 +46,40 @@ class PocketCardWidget extends ConsumerWidget {
         ? (settings?.viewPreferences?.mobile ?? 'full')
         : (settings?.viewPreferences?.desktop ?? 'full');
     final isCompact = viewPreference == 'compact';
-    
+
     // Transfer mode states
     final isTransferActive = transferMode != null;
-    final isSelf = isTransferActive && transferMode.sourceCard.when(
-      pocket: (pId, _, __, ___, ____) => pId == id,
-      category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => false,
-    );
+    final isSelf =
+        isTransferActive &&
+        transferMode.sourceCard.when(
+          pocket: (pId, _, __, ___, ____) => pId == id,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) => false,
+        );
     final isTarget = isTransferActive && !isSelf;
 
     if (isCompact) {
-      return _buildCompactView(context, ref, cardColor, isTransferActive, isSelf, isTarget);
+      return _buildCompactView(
+        context,
+        ref,
+        cardColor,
+        isTransferActive,
+        isSelf,
+        isTarget,
+      );
     }
-    
+
     return _buildFullView(context, ref, cardColor, transferMode);
   }
 
@@ -70,10 +91,22 @@ class PocketCardWidget extends ConsumerWidget {
     bool isSelf,
     bool isTarget,
   ) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    // Larger sizes for 2-column mobile layout
+    final circleSize = isMobile ? 44.0 : 36.0;
+    final iconSize = isMobile ? 18.0 : 14.0;
+    final starSize = isMobile ? 12.0 : 10.0;
+    final buttonIconSize = isMobile ? 20.0 : 16.0;
+    final textStyle = isMobile
+        ? Theme.of(context).textTheme.bodySmall
+        : Theme.of(context).textTheme.labelSmall;
+
     return Opacity(
       opacity: isTransferActive && !isTarget && !isSelf ? 0.5 : 1.0,
       child: Card(
         elevation: 1,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: isSelf
@@ -82,49 +115,55 @@ class PocketCardWidget extends ConsumerWidget {
                   width: 2,
                 )
               : isTarget
-                  ? BorderSide(
-                      color: Theme.of(context).colorScheme.secondary,
-                      width: 2,
-                    )
-                  : BorderSide.none,
+              ? BorderSide(
+                  color: Theme.of(context).colorScheme.secondary,
+                  width: 2,
+                )
+              : BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
         ),
         child: InkWell(
           onTap: !enableInteraction
               ? null
               : () => _handleCardTap(context, ref, isTransferActive, isSelf),
-          onDoubleTap: !enableInteraction ? null : () => _showAddExpenseDialog(context),
+          onDoubleTap: !enableInteraction
+              ? null
+              : () => _showAddExpenseDialog(context),
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // Name
                 Text(
                   name,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: textStyle?.copyWith(fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 2),
-                
+
                 // Icon circle
                 Stack(
                   children: [
                     Container(
-                      width: 36,
-                      height: 36,
+                      width: circleSize,
+                      height: circleSize,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                       ),
                       child: Icon(
                         _getValidIcon(icon),
-                        size: 14,
-                        color: cardColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: iconSize,
+                        color:
+                            cardColor ??
+                            Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     // Default star indicator
@@ -134,25 +173,24 @@ class PocketCardWidget extends ConsumerWidget {
                         top: 0,
                         child: Icon(
                           Icons.star,
-                          size: 10,
+                          size: starSize,
                           color: Colors.amber.shade600,
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 2),
-                
+
                 // Balance
                 Text(
                   '\$${balance.toStringAsFixed(0)}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: textStyle?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: balance >= 0 ? Theme.of(context).colorScheme.onSurface : Colors.red,
+                    color: balance >= 0
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Colors.red,
                   ),
                 ),
-                
-                const SizedBox(height: 2),
-                
+
                 // Action buttons row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -165,7 +203,7 @@ class PocketCardWidget extends ConsumerWidget {
                         padding: const EdgeInsets.all(2),
                         child: Icon(
                           Icons.add_circle_outline,
-                          size: 16,
+                          size: buttonIconSize,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
@@ -178,7 +216,7 @@ class PocketCardWidget extends ConsumerWidget {
                         padding: const EdgeInsets.all(2),
                         child: Icon(
                           Icons.swap_horiz,
-                          size: 16,
+                          size: buttonIconSize,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
@@ -193,9 +231,14 @@ class PocketCardWidget extends ConsumerWidget {
     );
   }
 
-  void _handleCardTap(BuildContext context, WidgetRef ref, bool isTransferActive, bool isSelf) {
+  void _handleCardTap(
+    BuildContext context,
+    WidgetRef ref,
+    bool isTransferActive,
+    bool isSelf,
+  ) {
     final transferMode = ref.read(transferModeProvider);
-    
+
     // If in transfer mode and this is a valid target
     if (isTransferActive && !isSelf && transferMode != null) {
       final destinationCard = card_model.Card.pocket(
@@ -224,7 +267,7 @@ class PocketCardWidget extends ConsumerWidget {
       );
       return;
     }
-    
+
     // If transfer source is self, cancel transfer
     if (isSelf) {
       ref.read(transferModeProvider.notifier).exitTransferMode();
@@ -264,10 +307,24 @@ class PocketCardWidget extends ConsumerWidget {
     TransferModeState? transferMode,
   ) {
     final isTransferActive = transferMode != null;
-    final isSelf = isTransferActive && transferMode.sourceCard.when(
-      pocket: (pId, _, __, ___, ____) => pId == id,
-      category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => false,
-    );
+    final isSelf =
+        isTransferActive &&
+        transferMode.sourceCard.when(
+          pocket: (pId, _, __, ___, ____) => pId == id,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) => false,
+        );
 
     return Card(
       elevation: 2,
