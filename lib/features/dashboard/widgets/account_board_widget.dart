@@ -373,6 +373,10 @@ class AccountBoardWidget extends ConsumerWidget {
                                         color: color,
                                         isRecurring: isRecurring,
                                         dueDate: dueDate,
+                                        destinationPocketId:
+                                            destinationPocketId,
+                                        destinationAccountId:
+                                            destinationAccountId,
                                         cards: account.cards,
                                       );
                                     },

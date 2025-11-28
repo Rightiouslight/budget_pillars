@@ -977,19 +977,177 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       }
 
       // Check if this is a sinking fund (has destination pocket)
-      if (destinationPocketId != null) {
-        // Transfer to destination pocket instead of expense
-        final targetAccountId = destinationAccountId ?? accountId;
+      if (destinationPocketId != null && destinationAccountId != null) {
+        // Sinking fund transfer - update category, source pocket, and destination pocket
+        final targetAccountId = destinationAccountId;
 
-        await transferFunds(
-          sourceAccountId: accountId,
-          sourceCardId: account.defaultPocketId,
-          isSourcePocket: true,
-          destinationAccountId: targetAccountId,
-          destinationPocketId: destinationPocketId!,
-          amount: remainingAmount,
-          description: 'Sinking Fund: $categoryName',
+        // Find default pocket (source)
+        final defaultPocket = account.cards.firstWhere(
+          (card) => card.when(
+            pocket: (id, _, __, ___, ____) => id == account.defaultPocketId,
+            category:
+                (
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                ) => false,
+          ),
         );
+
+        String sourcePocketName = '';
+        defaultPocket.when(
+          pocket: (_, name, __, ___, ____) => sourcePocketName = name,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) {},
+        );
+
+        // Find destination pocket
+        final destAccount = budget.accounts.firstWhere(
+          (a) => a.id == targetAccountId,
+        );
+        final destPocketCard = destAccount.cards.firstWhere(
+          (card) => card.when(
+            pocket: (id, _, __, ___, ____) => id == destinationPocketId,
+            category:
+                (
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                ) => false,
+          ),
+        );
+
+        String destPocketName = '';
+        destPocketCard.when(
+          pocket: (_, name, __, ___, ____) => destPocketName = name,
+          category:
+              (
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+                __________,
+              ) {},
+        );
+
+        // Update all affected cards
+        final updatedAccounts = budget.accounts.map((acc) {
+          final updatedCards = acc.cards.map((card) {
+            return card.when(
+              pocket: (id, name, icon, balance, color) {
+                // Update source pocket (default pocket of source account)
+                if (acc.id == accountId && id == account.defaultPocketId) {
+                  return Card.pocket(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance - remainingAmount,
+                    color: color,
+                  );
+                }
+                // Update destination pocket
+                if (acc.id == targetAccountId && id == destinationPocketId) {
+                  return Card.pocket(
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance + remainingAmount,
+                    color: color,
+                  );
+                }
+                return card;
+              },
+              category:
+                  (
+                    id,
+                    name,
+                    icon,
+                    budgetValue,
+                    currentValue,
+                    color,
+                    isRecurring,
+                    dueDate,
+                    destPocketId,
+                    destAcctId,
+                  ) {
+                    // Update the category's currentValue
+                    if (acc.id == accountId && id == categoryId) {
+                      return Card.category(
+                        id: id,
+                        name: name,
+                        icon: icon,
+                        budgetValue: budgetValue,
+                        currentValue: currentValue + remainingAmount,
+                        color: color,
+                        isRecurring: isRecurring,
+                        dueDate: dueDate,
+                        destinationPocketId: destPocketId,
+                        destinationAccountId: destAcctId,
+                      );
+                    }
+                    return card;
+                  },
+            );
+          }).toList();
+          return acc.copyWith(cards: updatedCards);
+        }).toList();
+
+        // Create transaction for sinking fund transfer
+        final transaction = Transaction(
+          id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
+          amount: remainingAmount,
+          description: 'Auto-transfer for $categoryName',
+          date: DateTime.now(),
+          accountId: accountId,
+          accountName: account.name,
+          categoryId: account.defaultPocketId,
+          categoryName: 'Transfer: $sourcePocketName → $destPocketName',
+          sourcePocketId: account.defaultPocketId,
+          targetAccountId: targetAccountId,
+          targetPocketId: destinationPocketId,
+          targetPocketName: destPocketName,
+        );
+
+        final updatedBudget = budget.copyWith(
+          accounts: updatedAccounts,
+          transactions: [transaction, ...budget.transactions],
+          autoTransactionsProcessed: {
+            ...budget.autoTransactionsProcessed,
+            categoryId: true,
+          },
+        );
+
+        await _repository.saveBudget(_userId, _monthKey, updatedBudget);
       } else {
         // Regular expense
         await addExpense(

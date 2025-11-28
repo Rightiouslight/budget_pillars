@@ -19,6 +19,8 @@ class CategoryCardWidget extends ConsumerWidget {
   final String? color;
   final bool isRecurring;
   final int? dueDate;
+  final String? destinationPocketId;
+  final String? destinationAccountId;
   final List<card_model.Card> cards;
   final bool enableInteraction;
 
@@ -33,6 +35,8 @@ class CategoryCardWidget extends ConsumerWidget {
     this.color,
     this.isRecurring = false,
     this.dueDate,
+    this.destinationPocketId,
+    this.destinationAccountId,
     required this.cards,
     this.enableInteraction = true,
   });
@@ -358,6 +362,8 @@ class CategoryCardWidget extends ConsumerWidget {
         initialColor: color,
         initialIsRecurring: isRecurring,
         initialDueDate: dueDate,
+        initialDestinationPocketId: destinationPocketId,
+        initialDestinationAccountId: destinationAccountId,
       ),
     );
   }
