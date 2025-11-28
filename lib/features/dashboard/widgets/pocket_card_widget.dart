@@ -8,6 +8,7 @@ import '../providers/transfer_mode_provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
 import '../../../providers/active_budget_provider.dart';
+import '../../../providers/user_settings_provider.dart';
 
 class PocketCardWidget extends ConsumerWidget {
   final String accountId;
@@ -37,6 +38,236 @@ class PocketCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cardColor = color != null ? _parseColor(color!) : null;
     final transferMode = ref.watch(transferModeProvider);
+    
+    // Get view preference
+    final settings = ref.watch(userSettingsProvider).value;
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final viewPreference = isMobile
+        ? (settings?.viewPreferences?.mobile ?? 'full')
+        : (settings?.viewPreferences?.desktop ?? 'full');
+    final isCompact = viewPreference == 'compact';
+    
+    // Transfer mode states
+    final isTransferActive = transferMode != null;
+    final isSelf = isTransferActive && transferMode.sourceCard.when(
+      pocket: (pId, _, __, ___, ____) => pId == id,
+      category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => false,
+    );
+    final isTarget = isTransferActive && !isSelf;
+
+    if (isCompact) {
+      return _buildCompactView(context, ref, cardColor, isTransferActive, isSelf, isTarget);
+    }
+    
+    return _buildFullView(context, ref, cardColor, transferMode);
+  }
+
+  Widget _buildCompactView(
+    BuildContext context,
+    WidgetRef ref,
+    Color? cardColor,
+    bool isTransferActive,
+    bool isSelf,
+    bool isTarget,
+  ) {
+    return Opacity(
+      opacity: isTransferActive && !isTarget && !isSelf ? 0.5 : 1.0,
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: isSelf
+              ? BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                )
+              : isTarget
+                  ? BorderSide(
+                      color: Theme.of(context).colorScheme.secondary,
+                      width: 2,
+                    )
+                  : BorderSide.none,
+        ),
+        child: InkWell(
+          onTap: !enableInteraction
+              ? null
+              : () => _handleCardTap(context, ref, isTransferActive, isSelf),
+          onDoubleTap: !enableInteraction ? null : () => _showAddExpenseDialog(context),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Name
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2),
+                
+                // Icon circle
+                Stack(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      ),
+                      child: Icon(
+                        _getValidIcon(icon),
+                        size: 14,
+                        color: cardColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    // Default star indicator
+                    if (isDefault)
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        child: Icon(
+                          Icons.star,
+                          size: 10,
+                          color: Colors.amber.shade600,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                
+                // Balance
+                Text(
+                  '\$${balance.toStringAsFixed(0)}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: balance >= 0 ? Theme.of(context).colorScheme.onSurface : Colors.red,
+                  ),
+                ),
+                
+                const SizedBox(height: 2),
+                
+                // Action buttons row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Expense button
+                    InkWell(
+                      onTap: () => _showAddExpenseDialog(context),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          Icons.add_circle_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    // Transfer button
+                    InkWell(
+                      onTap: () => _showTransferDialog(context, ref),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          Icons.swap_horiz,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleCardTap(BuildContext context, WidgetRef ref, bool isTransferActive, bool isSelf) {
+    final transferMode = ref.read(transferModeProvider);
+    
+    // If in transfer mode and this is a valid target
+    if (isTransferActive && !isSelf && transferMode != null) {
+      final destinationCard = card_model.Card.pocket(
+        id: id,
+        name: name,
+        icon: icon,
+        balance: balance,
+        color: color,
+      );
+
+      // Hide the snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      // Exit transfer mode
+      ref.read(transferModeProvider.notifier).exitTransferMode();
+
+      // Show transfer dialog with pre-selected source and destination
+      showDialog(
+        context: context,
+        builder: (context) => TransferFundsDialog(
+          sourceAccountId: transferMode.accountId,
+          destinationAccountId: accountId,
+          sourceCard: transferMode.sourceCard,
+          destinationCard: destinationCard,
+        ),
+      );
+      return;
+    }
+    
+    // If transfer source is self, cancel transfer
+    if (isSelf) {
+      ref.read(transferModeProvider.notifier).exitTransferMode();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      return;
+    }
+
+    // Normal tap - show card details dialog
+    final budgetAsync = ref.read(activeBudgetProvider);
+    budgetAsync.whenData((budget) {
+      if (budget != null) {
+        final account = budget.accounts.firstWhere(
+          (acc) => acc.id == accountId,
+        );
+        showDialog(
+          context: context,
+          builder: (context) => CardDetailsDialog(
+            accountId: accountId,
+            card: card_model.Card.pocket(
+              id: id,
+              name: name,
+              icon: icon,
+              balance: balance,
+              color: color,
+            ),
+            account: account,
+          ),
+        );
+      }
+    });
+  }
+
+  Widget _buildFullView(
+    BuildContext context,
+    WidgetRef ref,
+    Color? cardColor,
+    TransferModeState? transferMode,
+  ) {
+    final isTransferActive = transferMode != null;
+    final isSelf = isTransferActive && transferMode.sourceCard.when(
+      pocket: (pId, _, __, ___, ____) => pId == id,
+      category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => false,
+    );
 
     return Card(
       elevation: 2,
@@ -52,59 +283,7 @@ class PocketCardWidget extends ConsumerWidget {
       child: InkWell(
         onTap: !enableInteraction
             ? null
-            : () {
-                // If in transfer mode, this pocket is the destination
-                if (transferMode != null) {
-                  final destinationCard = card_model.Card.pocket(
-                    id: id,
-                    name: name,
-                    icon: icon,
-                    balance: balance,
-                    color: color,
-                  );
-
-                  // Hide the snackbar
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-                  // Exit transfer mode
-                  ref.read(transferModeProvider.notifier).exitTransferMode();
-
-                  // Show transfer dialog with pre-selected source and destination
-                  showDialog(
-                    context: context,
-                    builder: (context) => TransferFundsDialog(
-                      sourceAccountId: transferMode.accountId,
-                      destinationAccountId: accountId,
-                      sourceCard: transferMode.sourceCard,
-                      destinationCard: destinationCard,
-                    ),
-                  );
-                } else {
-                  // Normal tap - show card details dialog
-                  final budgetAsync = ref.read(activeBudgetProvider);
-                  budgetAsync.whenData((budget) {
-                    if (budget != null) {
-                      final account = budget.accounts.firstWhere(
-                        (acc) => acc.id == accountId,
-                      );
-                      showDialog(
-                        context: context,
-                        builder: (context) => CardDetailsDialog(
-                          accountId: accountId,
-                          card: card_model.Card.pocket(
-                            id: id,
-                            name: name,
-                            icon: icon,
-                            balance: balance,
-                            color: color,
-                          ),
-                          account: account,
-                        ),
-                      );
-                    }
-                  });
-                }
-              },
+            : () => _handleCardTap(context, ref, isTransferActive, isSelf),
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -13,6 +13,7 @@ import '../dialogs/add_income_dialog.dart';
 import '../dialogs/recurring_incomes_dialog.dart';
 import '../dashboard_controller.dart';
 import '../../../providers/active_budget_provider.dart';
+import '../../../providers/user_settings_provider.dart';
 import '../../budget_planner/budget_planner_dialog.dart';
 import 'pocket_card_widget.dart';
 import 'category_card_widget.dart';
@@ -314,7 +315,7 @@ class AccountBoardWidget extends ConsumerWidget {
 
                 const SizedBox(height: 16),
 
-                // Cards List
+                // Cards List/Grid
                 Expanded(
                   child: account.cards.isEmpty
                       ? Center(
@@ -351,71 +352,7 @@ class AccountBoardWidget extends ConsumerWidget {
                             ],
                           ),
                         )
-                      : ReorderableListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: account.cards.length,
-                          onReorder: (oldIndex, newIndex) {
-                            ref
-                                .read(dashboardControllerProvider.notifier)
-                                .reorderCards(
-                                  accountIndex: accountIndex,
-                                  oldIndex: oldIndex,
-                                  newIndex: newIndex,
-                                );
-                          },
-                          itemBuilder: (context, index) {
-                            final card = account.cards[index];
-
-                            return Padding(
-                              key: ValueKey('card_${account.id}_$index'),
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: card.when(
-                                pocket: (id, name, icon, balance, color) {
-                                  return PocketCardWidget(
-                                    accountId: account.id,
-                                    id: id,
-                                    name: name,
-                                    icon: icon,
-                                    balance: balance,
-                                    color: color,
-                                    isDefault: id == account.defaultPocketId,
-                                    cards: account.cards,
-                                  );
-                                },
-                                category:
-                                    (
-                                      id,
-                                      name,
-                                      icon,
-                                      budgetValue,
-                                      currentValue,
-                                      color,
-                                      isRecurring,
-                                      dueDate,
-                                      destinationPocketId,
-                                      destinationAccountId,
-                                    ) {
-                                      return CategoryCardWidget(
-                                        accountId: account.id,
-                                        id: id,
-                                        name: name,
-                                        icon: icon,
-                                        budgetValue: budgetValue,
-                                        currentValue: currentValue,
-                                        color: color,
-                                        isRecurring: isRecurring,
-                                        dueDate: dueDate,
-                                        destinationPocketId:
-                                            destinationPocketId,
-                                        destinationAccountId:
-                                            destinationAccountId,
-                                        cards: account.cards,
-                                      );
-                                    },
-                              ),
-                            );
-                          },
-                        ),
+                      : _buildCardsView(context, ref),
                 ),
               ],
             ),
@@ -751,6 +688,211 @@ class AccountBoardWidget extends ConsumerWidget {
     }
     // Return default icon if not found
     return AppIcons.defaultAccountIcon.iconData;
+  }
+
+  Widget _buildCardsView(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final settingsAsync = ref.watch(userSettingsProvider);
+
+    return settingsAsync.when(
+      data: (settings) {
+        final viewPrefs = settings.viewPreferences;
+        final viewPref = screenWidth < 600
+            ? viewPrefs?.mobile
+            : viewPrefs?.desktop;
+        final isCompact = viewPref == 'compact';
+
+        if (isCompact) {
+          // 2 columns for mobile (<600), 3 columns for tablets
+          final crossAxisCount = screenWidth < 600 ? 2 : 3;
+          
+          return GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: account.cards.length,
+            itemBuilder: (context, index) {
+              final card = account.cards[index];
+              return card.when(
+                pocket: (id, name, icon, balance, color) {
+                  return PocketCardWidget(
+                    accountId: account.id,
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    balance: balance,
+                    color: color,
+                    isDefault: id == account.defaultPocketId,
+                    cards: account.cards,
+                  );
+                },
+                category: (
+                  id,
+                  name,
+                  icon,
+                  budgetValue,
+                  currentValue,
+                  color,
+                  isRecurring,
+                  dueDate,
+                  destinationPocketId,
+                  destinationAccountId,
+                ) {
+                  return CategoryCardWidget(
+                    accountId: account.id,
+                    id: id,
+                    name: name,
+                    icon: icon,
+                    budgetValue: budgetValue,
+                    currentValue: currentValue,
+                    color: color,
+                    isRecurring: isRecurring,
+                    dueDate: dueDate,
+                    destinationPocketId: destinationPocketId,
+                    destinationAccountId: destinationAccountId,
+                    cards: account.cards,
+                  );
+                },
+              );
+            },
+          );
+        } else {
+          return ReorderableListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: account.cards.length,
+            onReorder: (oldIndex, newIndex) {
+              ref
+                  .read(dashboardControllerProvider.notifier)
+                  .reorderCards(
+                    accountIndex: accountIndex,
+                    oldIndex: oldIndex,
+                    newIndex: newIndex,
+                  );
+            },
+            itemBuilder: (context, index) {
+              final card = account.cards[index];
+
+              return Padding(
+                key: ValueKey('card_${account.id}_$index'),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: card.when(
+                  pocket: (id, name, icon, balance, color) {
+                    return PocketCardWidget(
+                      accountId: account.id,
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      balance: balance,
+                      color: color,
+                      isDefault: id == account.defaultPocketId,
+                      cards: account.cards,
+                    );
+                  },
+                  category: (
+                    id,
+                    name,
+                    icon,
+                    budgetValue,
+                    currentValue,
+                    color,
+                    isRecurring,
+                    dueDate,
+                    destinationPocketId,
+                    destinationAccountId,
+                  ) {
+                    return CategoryCardWidget(
+                      accountId: account.id,
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      budgetValue: budgetValue,
+                      currentValue: currentValue,
+                      color: color,
+                      isRecurring: isRecurring,
+                      dueDate: dueDate,
+                      destinationPocketId: destinationPocketId,
+                      destinationAccountId: destinationAccountId,
+                      cards: account.cards,
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        }
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => _buildDefaultListView(ref),
+    );
+  }
+
+  Widget _buildDefaultListView(WidgetRef ref) {
+    return ReorderableListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: account.cards.length,
+      onReorder: (oldIndex, newIndex) {
+        ref
+            .read(dashboardControllerProvider.notifier)
+            .reorderCards(
+              accountIndex: accountIndex,
+              oldIndex: oldIndex,
+              newIndex: newIndex,
+            );
+      },
+      itemBuilder: (context, index) {
+        final card = account.cards[index];
+
+        return Padding(
+          key: ValueKey('card_${account.id}_$index'),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: card.when(
+            pocket: (id, name, icon, balance, color) {
+              return PocketCardWidget(
+                accountId: account.id,
+                id: id,
+                name: name,
+                icon: icon,
+                balance: balance,
+                color: color,
+                isDefault: id == account.defaultPocketId,
+                cards: account.cards,
+              );
+            },
+            category: (
+              id,
+              name,
+              icon,
+              budgetValue,
+              currentValue,
+              color,
+              isRecurring,
+              dueDate,
+              destinationPocketId,
+              destinationAccountId,
+            ) {
+              return CategoryCardWidget(
+                accountId: account.id,
+                id: id,
+                name: name,
+                icon: icon,
+                budgetValue: budgetValue,
+                currentValue: currentValue,
+                color: color,
+                isRecurring: isRecurring,
+                dueDate: dueDate,
+                destinationPocketId: destinationPocketId,
+                destinationAccountId: destinationAccountId,
+                cards: account.cards,
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }
 

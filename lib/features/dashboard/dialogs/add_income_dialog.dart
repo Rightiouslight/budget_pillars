@@ -231,12 +231,14 @@ class _AddIncomeDialogState extends ConsumerState<AddIncomeDialog> {
             ),
           );
         } else {
+          // Not a duplicate - auto-submit the transaction
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Income data loaded from clipboard'),
+              content: Text('Income added from clipboard'),
               duration: Duration(seconds: 2),
             ),
           );
+          await _submit();
         }
       }
     } catch (e) {

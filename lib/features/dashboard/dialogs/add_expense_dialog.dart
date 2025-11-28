@@ -258,12 +258,14 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             ),
           );
         } else {
+          // Not a duplicate - auto-submit the transaction
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Transaction data loaded from clipboard'),
+              content: Text('Transaction added from clipboard'),
               duration: Duration(seconds: 2),
             ),
           );
+          await _submit();
         }
       }
     } catch (e) {

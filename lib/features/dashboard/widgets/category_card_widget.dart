@@ -8,6 +8,7 @@ import '../providers/transfer_mode_provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
 import '../../../providers/active_budget_provider.dart';
+import '../../../providers/user_settings_provider.dart';
 
 class CategoryCardWidget extends ConsumerWidget {
   final String accountId;
@@ -50,10 +51,219 @@ class CategoryCardWidget extends ConsumerWidget {
         : 0.0;
     final isOverBudget = currentValue > budgetValue;
     final transferMode = ref.watch(transferModeProvider);
+    
+    // Get view preference
+    final settings = ref.watch(userSettingsProvider).value;
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final viewPreference = isMobile
+        ? (settings?.viewPreferences?.mobile ?? 'full')
+        : (settings?.viewPreferences?.desktop ?? 'full');
+    final isCompact = viewPreference == 'compact';
+
+    if (isCompact) {
+      return _buildCompactView(context, ref, cardColor, remaining, progress, transferMode != null);
+    }
+    
+    return _buildFullView(context, ref, cardColor, remaining, progress, isOverBudget, transferMode != null);
+  }
+
+  Widget _buildCompactView(
+    BuildContext context,
+    WidgetRef ref,
+    Color? cardColor,
+    double remaining,
+    double progress,
+    bool isTransferMode,
+  ) {
+    final isOverBudget = currentValue > budgetValue;
+    
+    return Opacity(
+      opacity: isTransferMode ? 0.5 : 1.0,
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          onTap: !enableInteraction
+              ? null
+              : () => _handleCardTap(context, ref, isTransferMode),
+          onDoubleTap: !enableInteraction ? null : () => _showAddExpenseDialog(context),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Name
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2),
+                
+                // Circular progress with icon
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Background circle
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                      ),
+                      // Progress indicator
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 2.5,
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            cardColor ?? Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      // Inner white circle
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.surface,
+                        ),
+                      ),
+                      // Icon
+                      Icon(
+                        _getValidIcon(icon),
+                        size: 14,
+                        color: cardColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                
+                // Remaining amount
+                Text(
+                  '\$${remaining.abs().toStringAsFixed(0)}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isOverBudget ? Colors.red : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                
+                const SizedBox(height: 2),
+                
+                // Action buttons row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Expense button
+                    InkWell(
+                      onTap: () => _showAddExpenseDialog(context),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          Icons.add_circle_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    // Transfer button
+                    InkWell(
+                      onTap: () => _showTransferDialog(context, ref),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          Icons.swap_horiz,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleCardTap(BuildContext context, WidgetRef ref, bool isTransferMode) {
+    // Categories cannot be transfer destinations, show message if in transfer mode
+    if (isTransferMode) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Categories cannot be transfer destinations. Select a pocket instead.',
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Normal tap - show card details dialog
+    final budgetAsync = ref.read(activeBudgetProvider);
+    budgetAsync.whenData((budget) {
+      if (budget != null) {
+        final account = budget.accounts.firstWhere(
+          (acc) => acc.id == accountId,
+        );
+        showDialog(
+          context: context,
+          builder: (context) => CardDetailsDialog(
+            accountId: accountId,
+            card: card_model.Card.category(
+              id: id,
+              name: name,
+              icon: icon,
+              budgetValue: budgetValue,
+              currentValue: currentValue,
+              color: color,
+              isRecurring: isRecurring,
+              dueDate: dueDate,
+              destinationPocketId: null,
+              destinationAccountId: null,
+            ),
+            account: account,
+          ),
+        );
+      }
+    });
+  }
+
+  Widget _buildFullView(
+    BuildContext context,
+    WidgetRef ref,
+    Color? cardColor,
+    double remaining,
+    double progress,
+    bool isOverBudget,
+    bool isTransferMode,
+  ) {
 
     return Opacity(
       // Reduce opacity when in transfer mode to show it's not a valid destination
-      opacity: transferMode != null ? 0.5 : 1.0,
+      opacity: isTransferMode ? 0.5 : 1.0,
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -66,49 +276,7 @@ class CategoryCardWidget extends ConsumerWidget {
         child: InkWell(
           onTap: !enableInteraction
               ? null
-              : () {
-                  // Categories cannot be transfer destinations, show message if in transfer mode
-                  if (transferMode != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Categories cannot be transfer destinations. Select a pocket instead.',
-                        ),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    return;
-                  }
-
-                  // Normal tap - show card details dialog
-                  final budgetAsync = ref.read(activeBudgetProvider);
-                  budgetAsync.whenData((budget) {
-                    if (budget != null) {
-                      final account = budget.accounts.firstWhere(
-                        (acc) => acc.id == accountId,
-                      );
-                      showDialog(
-                        context: context,
-                        builder: (context) => CardDetailsDialog(
-                          accountId: accountId,
-                          card: card_model.Card.category(
-                            id: id,
-                            name: name,
-                            icon: icon,
-                            budgetValue: budgetValue,
-                            currentValue: currentValue,
-                            color: color,
-                            isRecurring: isRecurring,
-                            dueDate: dueDate,
-                            destinationPocketId: null,
-                            destinationAccountId: null,
-                          ),
-                          account: account,
-                        ),
-                      );
-                    }
-                  });
-                },
+              : () => _handleCardTap(context, ref, isTransferMode),
           borderRadius: BorderRadius.circular(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
