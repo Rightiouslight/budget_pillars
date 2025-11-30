@@ -11,6 +11,7 @@ import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_category_dialog.dart';
 import '../dialogs/add_income_dialog.dart';
 import '../dialogs/recurring_incomes_dialog.dart';
+import '../dialogs/import_from_sms_dialog.dart';
 import '../dashboard_controller.dart';
 import '../../../providers/active_budget_provider.dart';
 import '../../../providers/user_settings_provider.dart';
@@ -187,6 +188,9 @@ class AccountBoardWidget extends ConsumerWidget {
                         case 'import':
                           _handleImportAccountData(context, ref);
                           break;
+                        case 'import_sms':
+                          _showImportFromSmsDialog(context);
+                          break;
                         case 'edit':
                           _showEditAccountDialog(context);
                           break;
@@ -224,6 +228,16 @@ class AccountBoardWidget extends ConsumerWidget {
                             Icon(Icons.upload_outlined, size: 18),
                             SizedBox(width: 12),
                             Text('Import Data'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'import_sms',
+                        child: Row(
+                          children: [
+                            Icon(Icons.sms_outlined, size: 18),
+                            SizedBox(width: 12),
+                            Text('Import from SMS'),
                           ],
                         ),
                       ),
@@ -456,6 +470,13 @@ class AccountBoardWidget extends ConsumerWidget {
         initialName: account.name,
         initialIcon: account.icon,
       ),
+    );
+  }
+
+  void _showImportFromSmsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ImportFromSmsDialog(account: account),
     );
   }
 

@@ -20,6 +20,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Currency? _selectedCurrency;
   app_theme.Theme? _selectedTheme;
   ViewPreferences? _selectedViewPreferences;
+  String? _smsImportNumber;
+  final TextEditingController _smsNumberController = TextEditingController();
 
   @override
   void initState() {
@@ -33,9 +35,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _selectedTheme = settings.theme;
           _selectedViewPreferences =
               settings.viewPreferences ?? const ViewPreferences();
+          _smsImportNumber = settings.smsImportNumber;
+          _smsNumberController.text = settings.smsImportNumber;
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _smsNumberController.dispose();
+    super.dispose();
   }
 
   Future<void> _autoSaveSettings() async {
@@ -50,10 +60,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       currency: _selectedCurrency,
       theme: _selectedTheme,
       viewPreferences: _selectedViewPreferences,
+      smsImportNumber: _smsImportNumber ?? '',
     );
 
     print(
-      '💾 Saving settings: theme=${_selectedTheme?.name}/${_selectedTheme?.appearance}, currency=${_selectedCurrency?.code}',
+      '💾 Saving settings: theme=${_selectedTheme?.name}/${_selectedTheme?.appearance}, currency=${_selectedCurrency?.code}, smsNumber=${_smsImportNumber}',
     );
 
     try {
@@ -474,6 +485,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 Text(
                   'The day of the month your budget period starts.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // SMS Import Number Section
+                Text(
+                  'SMS Import Number',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _smsNumberController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    hintText: 'e.g., +1234567890 or Bank Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  onChanged: (value) {
+                    setState(() {
+                      _smsImportNumber = value;
+                    });
+                    _autoSaveSettings();
+                  },
+                ),
+                Text(
+                  'The phone number or sender name to import SMS transactions from.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

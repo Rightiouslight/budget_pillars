@@ -29,6 +29,7 @@ mixin _$UserSettings {
       throw _privateConstructorUsedError; // Deprecated - use viewPreferences instead
   List<ImportProfile> get importProfiles => throw _privateConstructorUsedError;
   ViewPreferences? get viewPreferences => throw _privateConstructorUsedError;
+  String get smsImportNumber => throw _privateConstructorUsedError;
 
   /// Serializes this UserSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,6 +55,7 @@ abstract class $UserSettingsCopyWith<$Res> {
     bool isCompactView,
     List<ImportProfile> importProfiles,
     ViewPreferences? viewPreferences,
+    String smsImportNumber,
   });
 
   $CurrencyCopyWith<$Res>? get currency;
@@ -82,6 +84,7 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
     Object? isCompactView = null,
     Object? importProfiles = null,
     Object? viewPreferences = freezed,
+    Object? smsImportNumber = null,
   }) {
     return _then(
       _value.copyWith(
@@ -109,6 +112,10 @@ class _$UserSettingsCopyWithImpl<$Res, $Val extends UserSettings>
                 ? _value.viewPreferences
                 : viewPreferences // ignore: cast_nullable_to_non_nullable
                       as ViewPreferences?,
+            smsImportNumber: null == smsImportNumber
+                ? _value.smsImportNumber
+                : smsImportNumber // ignore: cast_nullable_to_non_nullable
+                      as String,
           )
           as $Val,
     );
@@ -173,6 +180,7 @@ abstract class _$$UserSettingsImplCopyWith<$Res>
     bool isCompactView,
     List<ImportProfile> importProfiles,
     ViewPreferences? viewPreferences,
+    String smsImportNumber,
   });
 
   @override
@@ -203,6 +211,7 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
     Object? isCompactView = null,
     Object? importProfiles = null,
     Object? viewPreferences = freezed,
+    Object? smsImportNumber = null,
   }) {
     return _then(
       _$UserSettingsImpl(
@@ -230,6 +239,10 @@ class __$$UserSettingsImplCopyWithImpl<$Res>
             ? _value.viewPreferences
             : viewPreferences // ignore: cast_nullable_to_non_nullable
                   as ViewPreferences?,
+        smsImportNumber: null == smsImportNumber
+            ? _value.smsImportNumber
+            : smsImportNumber // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -245,6 +258,7 @@ class _$UserSettingsImpl implements _UserSettings {
     this.isCompactView = false,
     final List<ImportProfile> importProfiles = const [],
     this.viewPreferences,
+    this.smsImportNumber = '',
   }) : _importProfiles = importProfiles;
 
   factory _$UserSettingsImpl.fromJson(Map<String, dynamic> json) =>
@@ -274,6 +288,9 @@ class _$UserSettingsImpl implements _UserSettings {
 
   @override
   final ViewPreferences? viewPreferences;
+  @override
+  @JsonKey()
+  final String smsImportNumber;
 
   @override
   bool operator ==(Object other) {
@@ -292,7 +309,9 @@ class _$UserSettingsImpl implements _UserSettings {
               _importProfiles,
             ) &&
             (identical(other.viewPreferences, viewPreferences) ||
-                other.viewPreferences == viewPreferences));
+                other.viewPreferences == viewPreferences) &&
+            (identical(other.smsImportNumber, smsImportNumber) ||
+                other.smsImportNumber == smsImportNumber));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -305,6 +324,7 @@ class _$UserSettingsImpl implements _UserSettings {
     isCompactView,
     const DeepCollectionEquality().hash(_importProfiles),
     viewPreferences,
+    smsImportNumber,
   );
 
   /// Create a copy of UserSettings
@@ -329,6 +349,7 @@ abstract class _UserSettings implements UserSettings {
     final bool isCompactView,
     final List<ImportProfile> importProfiles,
     final ViewPreferences? viewPreferences,
+    final String smsImportNumber,
   }) = _$UserSettingsImpl;
 
   factory _UserSettings.fromJson(Map<String, dynamic> json) =
@@ -346,6 +367,8 @@ abstract class _UserSettings implements UserSettings {
   List<ImportProfile> get importProfiles;
   @override
   ViewPreferences? get viewPreferences;
+  @override
+  String get smsImportNumber;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.

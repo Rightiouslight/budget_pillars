@@ -26,6 +26,7 @@ _$UserSettingsImpl _$$UserSettingsImplFromJson(Map<String, dynamic> json) =>
           : ViewPreferences.fromJson(
               json['viewPreferences'] as Map<String, dynamic>,
             ),
+      smsImportNumber: json['smsImportNumber'] as String? ?? '',
     );
 
 Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
@@ -36,4 +37,5 @@ Map<String, dynamic> _$$UserSettingsImplToJson(_$UserSettingsImpl instance) =>
       'isCompactView': instance.isCompactView,
       'importProfiles': instance.importProfiles.map((e) => e.toJson()).toList(),
       'viewPreferences': instance.viewPreferences?.toJson(),
+      'smsImportNumber': instance.smsImportNumber,
     };

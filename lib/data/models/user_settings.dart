@@ -18,6 +18,7 @@ class UserSettings with _$UserSettings {
     bool isCompactView, // Deprecated - use viewPreferences instead
     @Default([]) List<ImportProfile> importProfiles,
     ViewPreferences? viewPreferences,
+    @Default('') String smsImportNumber, // Phone number for SMS import
   }) = _UserSettings;
 
   factory UserSettings.fromJson(Map<String, dynamic> json) =>
