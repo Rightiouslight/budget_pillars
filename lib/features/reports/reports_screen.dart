@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../providers/active_budget_provider.dart';
+import '../../core/constants/app_icons.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -411,9 +412,17 @@ class ReportsScreen extends ConsumerWidget {
           final isOverBudget = category['actual'] > category['budget'];
 
           return ListTile(
-            leading: Text(
-              category['icon'],
-              style: const TextStyle(fontSize: 32),
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                _getValidIcon(category['icon']),
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
             ),
             title: Text(category['name']),
             subtitle: Column(
@@ -457,5 +466,15 @@ class ReportsScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  IconData _getValidIcon(String icon) {
+    // Try to parse icon as codePoint
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidCategoryIcon(codePoint)) {
+      return AppIcons.getCategoryIconData(codePoint);
+    }
+    // Return default icon if not found
+    return AppIcons.defaultCategoryIcon.iconData;
   }
 }

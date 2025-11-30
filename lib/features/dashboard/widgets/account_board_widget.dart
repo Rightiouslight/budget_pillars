@@ -12,6 +12,7 @@ import '../dialogs/add_category_dialog.dart';
 import '../dialogs/add_income_dialog.dart';
 import '../dialogs/recurring_incomes_dialog.dart';
 import '../dialogs/import_from_sms_dialog.dart';
+import '../dialogs/account_transactions_dialog.dart';
 import '../dashboard_controller.dart';
 import '../../../providers/active_budget_provider.dart';
 import '../../../providers/user_settings_provider.dart';
@@ -179,6 +180,9 @@ class AccountBoardWidget extends ConsumerWidget {
                     padding: EdgeInsets.zero,
                     onSelected: (value) {
                       switch (value) {
+                        case 'view_transactions':
+                          _showAccountTransactionsDialog(context);
+                          break;
                         case 'planner':
                           _showBudgetPlannerDialog(context, ref);
                           break;
@@ -200,6 +204,17 @@ class AccountBoardWidget extends ConsumerWidget {
                       }
                     },
                     itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'view_transactions',
+                        child: Row(
+                          children: [
+                            Icon(Icons.receipt_long, size: 18),
+                            SizedBox(width: 12),
+                            Text('View Transactions'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
                       const PopupMenuItem(
                         value: 'planner',
                         child: Row(
@@ -477,6 +492,13 @@ class AccountBoardWidget extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => ImportFromSmsDialog(account: account),
+    );
+  }
+
+  void _showAccountTransactionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AccountTransactionsDialog(account: account),
     );
   }
 

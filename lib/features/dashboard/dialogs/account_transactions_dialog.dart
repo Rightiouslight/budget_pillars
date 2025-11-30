@@ -1,112 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/card.dart' as card_model;
+import 'package:intl/intl.dart';
 import '../../../data/models/account.dart';
 import '../../../data/models/transaction.dart';
 import '../../../providers/active_budget_provider.dart';
-import '../providers/transfer_mode_provider.dart';
-import '../widgets/pocket_card_widget.dart';
-import '../widgets/category_card_widget.dart';
 import '../dashboard_controller.dart';
-import 'package:intl/intl.dart';
 
-class CardDetailsDialog extends ConsumerWidget {
-  final String accountId;
-  final card_model.Card card;
+/// Dialog to view all transactions for a specific account
+class AccountTransactionsDialog extends ConsumerWidget {
   final Account account;
 
-  const CardDetailsDialog({
-    super.key,
-    required this.accountId,
-    required this.card,
-    required this.account,
-  });
+  const AccountTransactionsDialog({super.key, required this.account});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgetAsync = ref.watch(activeBudgetProvider);
 
-    // Listen for transfer mode changes and close dialog when transfer mode is entered
-    ref.listen<TransferModeState?>(transferModeProvider, (previous, next) {
-      // If transfer mode was just entered (previous was null, next is not null)
-      if (previous == null && next != null) {
-        Navigator.of(context).pop();
-      }
-    });
-
     return Dialog(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 600,
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
-        ),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.8,
+        padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card at the top (no Hero animation)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: card.when(
-                pocket: (id, name, icon, balance, color) {
-                  return PocketCardWidget(
-                    accountId: accountId,
-                    id: id,
-                    name: name,
-                    icon: icon,
-                    balance: balance,
-                    color: color,
-                    isDefault: id == account.defaultPocketId,
-                    cards: account.cards,
-                    enableInteraction: false,
-                  );
-                },
-                category:
-                    (
-                      id,
-                      name,
-                      icon,
-                      budgetValue,
-                      currentValue,
-                      color,
-                      isRecurring,
-                      dueDate,
-                      destinationPocketId,
-                      destinationAccountId,
-                    ) {
-                      return CategoryCardWidget(
-                        accountId: accountId,
-                        id: id,
-                        name: name,
-                        icon: icon,
-                        budgetValue: budgetValue,
-                        currentValue: currentValue,
-                        color: color,
-                        isRecurring: isRecurring,
-                        dueDate: dueDate,
-                        cards: account.cards,
-                        enableInteraction: false,
-                      );
-                    },
-              ),
-            ),
-
-            const Divider(height: 1),
-
-            // Transaction history header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.list, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Transaction History',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+            // Header
+            Row(
+              children: [
+                Icon(
+                  _getValidIcon(account.icon),
+                  size: 24,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      Text(
+                        'All Transactions',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
+            const Divider(),
 
             // Transactions list
             Expanded(
@@ -116,55 +67,44 @@ class CardDetailsDialog extends ConsumerWidget {
                     return const Center(child: Text('No budget data'));
                   }
 
-                  // Filter transactions for this card
-                  final cardTransactions = budget.transactions.where((txn) {
-                    // For categories: match categoryId
-                    // For pockets: match sourcePocketId or targetPocketId
-                    return card.when(
-                      pocket: (id, _, __, ___, ____) =>
-                          txn.sourcePocketId == id || txn.targetPocketId == id,
-                      category:
-                          (
-                            id,
-                            _,
-                            __,
-                            ___,
-                            ____,
-                            _____,
-                            ______,
-                            _______,
-                            ________,
-                            _________,
-                          ) => txn.categoryId == id,
-                    );
-                  }).toList();
+                  // Filter transactions for this account
+                  final accountTransactions = budget.transactions
+                      .where((txn) => txn.accountId == account.id)
+                      .toList();
 
-                  if (cardTransactions.isEmpty) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.history, size: 48, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'No transactions yet',
-                              style: TextStyle(color: Colors.grey),
+                  if (accountTransactions.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 64,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No transactions yet',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: cardTransactions.length,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: accountTransactions.length,
                     separatorBuilder: (context, index) =>
                         const Divider(height: 1),
                     itemBuilder: (context, index) {
-                      final txn = cardTransactions[index];
+                      final txn = accountTransactions[index];
                       return Dismissible(
                         key: Key(txn.id),
                         direction: DismissDirection.endToStart,
@@ -220,7 +160,7 @@ class CardDetailsDialog extends ConsumerWidget {
                           color: Theme.of(context).colorScheme.error,
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
-                        child: _TransactionTile(transaction: txn, card: card),
+                        child: _TransactionTile(transaction: txn),
                       );
                     },
                   );
@@ -231,14 +171,12 @@ class CardDetailsDialog extends ConsumerWidget {
             ),
 
             // Close button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
-                ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
               ),
             ),
           ],
@@ -246,52 +184,61 @@ class CardDetailsDialog extends ConsumerWidget {
       ),
     );
   }
+
+  IconData _getValidIcon(String? iconString) {
+    if (iconString == null || iconString.isEmpty) {
+      return Icons.account_balance_wallet;
+    }
+    try {
+      final codePoint = int.parse(iconString);
+      return IconData(codePoint, fontFamily: 'MaterialIcons');
+    } catch (e) {
+      return Icons.account_balance_wallet;
+    }
+  }
 }
 
 class _TransactionTile extends StatelessWidget {
   final Transaction transaction;
-  final card_model.Card card;
 
-  const _TransactionTile({required this.transaction, required this.card});
+  const _TransactionTile({required this.transaction});
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
 
-    // Determine if this is incoming or outgoing for this card
-    final isIncoming = card.when(
-      pocket: (id, _, __, ___, ____) => transaction.targetPocketId == id,
-      category:
-          (id, _, __, ___, ____, _____, ______, _______, ________, _________) =>
-              false,
-    );
-
-    // Determine the transaction type and other party
+    // Determine transaction type
     String transactionType;
-    String? otherParty;
+    String? subtitle;
+    bool isIncoming = false;
 
-    if (transaction.targetPocketId != null &&
+    if (transaction.categoryId == 'income') {
+      transactionType = 'Income';
+      subtitle = transaction.targetPocketName ?? '';
+      isIncoming = true;
+    } else if (transaction.targetPocketId != null &&
         transaction.sourcePocketId != null) {
-      // Transfer
-      transactionType = isIncoming ? 'Transfer In' : 'Transfer Out';
-      otherParty = isIncoming
-          ? 'From ${transaction.categoryName}'
-          : 'To ${transaction.targetPocketName}';
+      // Transfer between pockets
+      transactionType = 'Transfer';
+      subtitle =
+          'From ${transaction.categoryName} → ${transaction.targetPocketName}';
+      isIncoming = false;
     } else if (transaction.targetPocketId != null) {
       // Transfer from category to pocket (sinking fund)
-      transactionType = isIncoming ? 'Sinking Fund' : 'Expense';
-      otherParty = isIncoming
-          ? 'From ${transaction.categoryName}'
-          : transaction.categoryName;
+      transactionType = 'Sinking Fund';
+      subtitle =
+          '${transaction.categoryName} → ${transaction.targetPocketName}';
+      isIncoming = false;
     } else {
       // Regular expense
       transactionType = 'Expense';
-      otherParty = null;
+      subtitle = transaction.categoryName;
+      isIncoming = false;
     }
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: Container(
         width: 40,
         height: 40,
@@ -318,9 +265,9 @@ class _TransactionTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (otherParty != null) ...[
+          if (subtitle.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(otherParty, style: Theme.of(context).textTheme.bodySmall),
+            Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
           ],
           const SizedBox(height: 4),
           Row(

@@ -6,6 +6,7 @@ import '../../providers/active_budget_provider.dart';
 import '../../data/models/currency.dart';
 import '../../data/models/theme.dart' as app_theme;
 import '../../data/models/view_preferences.dart';
+import '../../data/firebase/auth_repository.dart';
 import '../dashboard/dashboard_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -525,6 +526,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(),
                 const SizedBox(height: 24),
 
+                // Account Security Section
+                Text(
+                  'Account Security',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => _showResetPasswordDialog(context, ref),
+                  icon: const Icon(Icons.lock_reset),
+                  label: const Text('Reset Password'),
+                ),
+                const SizedBox(height: 32),
+
+                const Divider(),
+                const SizedBox(height: 24),
+
                 // Danger Zone Section
                 Text(
                   'Danger Zone',
@@ -606,6 +625,78 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showResetPasswordDialog(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.read(currentUserProvider);
+    final email = currentUser?.email;
+
+    if (email == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No email address found')));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.lock_reset, size: 48),
+        title: const Text('Reset Password'),
+        content: Text(
+          'A password reset link will be sent to:\n\n$email\n\n'
+          'Please check your email and follow the instructions to reset your password.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              navigator.pop(); // Close dialog
+
+              // Show loading
+              if (!context.mounted) return;
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
+              );
+
+              try {
+                await ref
+                    .read(authRepositoryProvider)
+                    .sendPasswordResetEmail(email);
+
+                navigator.pop(); // Close loading
+
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Password reset email sent to $email'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                navigator.pop(); // Close loading
+
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Error: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Send Reset Link'),
+          ),
+        ],
       ),
     );
   }

@@ -287,7 +287,7 @@ class _AddCategoryDialogState extends ConsumerState<AddCategoryDialog> {
                         return 'Please enter a budget amount';
                       }
                       final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
+                      if (amount == null || amount < 0) {
                         return 'Please enter a valid amount';
                       }
                       return null;
