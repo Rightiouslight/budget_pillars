@@ -37,19 +37,45 @@ class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
 
   List<card_model.Card> get _filteredCategories {
     List<card_model.Card> categories = widget.categories
-        .where((card) => card.maybeWhen(
-              category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => true,
-              orElse: () => false,
-            ))
+        .where(
+          (card) => card.maybeWhen(
+            category:
+                (
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                ) => true,
+            orElse: () => false,
+          ),
+        )
         .toList();
 
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
       categories = categories.where((card) {
         return card.maybeWhen(
-          category: (_, name, __, ___, ____, _____, ______, _______, ________, _________) {
-            return name.toLowerCase().contains(_searchQuery.toLowerCase());
-          },
+          category:
+              (
+                _,
+                name,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                _______,
+                ________,
+                _________,
+              ) {
+                return name.toLowerCase().contains(_searchQuery.toLowerCase());
+              },
           orElse: () => false,
         );
       }).toList();
@@ -164,75 +190,103 @@ class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
                         final category = filteredCategories[index];
 
                         return category.when(
-                          pocket: (_, __, ___, ____, _____) => const SizedBox.shrink(),
-                          category: (id, name, icon, __, ___, color, ____, _____, ______, _______) {
-                            final isSelected = id == _selectedCategoryId;
-                            final iconCodePoint = int.tryParse(icon) ?? Icons.category.codePoint;
-                            final colorValue = color != null ? int.tryParse(color) : null;
-                            final categoryColor = colorValue != null 
-                                ? Color(colorValue) 
-                                : colorScheme.primary;
+                          pocket: (_, __, ___, ____, _____) =>
+                              const SizedBox.shrink(),
+                          category:
+                              (
+                                id,
+                                name,
+                                icon,
+                                __,
+                                ___,
+                                color,
+                                ____,
+                                _____,
+                                ______,
+                                _______,
+                              ) {
+                                final isSelected = id == _selectedCategoryId;
+                                final iconCodePoint =
+                                    int.tryParse(icon) ??
+                                    Icons.category.codePoint;
+                                final colorValue = color != null
+                                    ? int.tryParse(color)
+                                    : null;
+                                final categoryColor = colorValue != null
+                                    ? Color(colorValue)
+                                    : colorScheme.primary;
 
-                            return InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _selectedCategoryId = id;
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? colorScheme.primaryContainer
-                                      : colorScheme.surface,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? colorScheme.primary
-                                        : colorScheme.outline,
-                                    width: isSelected ? 2 : 1,
-                                  ),
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedCategoryId = id;
+                                    });
+                                  },
                                   borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Icon with color
-                                    Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        color: categoryColor.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        IconData(
-                                          iconCodePoint,
-                                          fontFamily: 'MaterialIcons',
-                                        ),
-                                        size: 20,
-                                        color: categoryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    // Category name
-                                    Text(
-                                      name,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? colorScheme.primaryContainer
+                                          : colorScheme.surface,
+                                      border: Border.all(
                                         color: isSelected
-                                            ? colorScheme.onPrimaryContainer
-                                            : colorScheme.onSurface,
+                                            ? colorScheme.primary
+                                            : colorScheme.outline,
+                                        width: isSelected ? 2 : 1,
                                       ),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        // Icon with color
+                                        Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: categoryColor.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            IconData(
+                                              iconCodePoint,
+                                              fontFamily: 'MaterialIcons',
+                                            ),
+                                            size: 20,
+                                            color: categoryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // Category name
+                                        Text(
+                                          name,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                                color: isSelected
+                                                    ? colorScheme
+                                                          .onPrimaryContainer
+                                                    : colorScheme.onSurface,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                         );
                       },
                     ),

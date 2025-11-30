@@ -15,10 +15,7 @@ import '../dashboard_controller.dart';
 class ImportFromSmsDialog extends ConsumerStatefulWidget {
   final Account account;
 
-  const ImportFromSmsDialog({
-    super.key,
-    required this.account,
-  });
+  const ImportFromSmsDialog({super.key, required this.account});
 
   @override
   ConsumerState<ImportFromSmsDialog> createState() =>
@@ -28,7 +25,7 @@ class ImportFromSmsDialog extends ConsumerStatefulWidget {
 class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
   final SmsQuery smsQuery = SmsQuery();
   final TextEditingController _phoneNumberController = TextEditingController();
-  
+
   List<_SmsTransaction> _transactions = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -39,7 +36,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
   void initState() {
     super.initState();
     _checkPermissions();
-    
+
     // Pre-populate phone number from settings
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final settingsAsync = ref.read(userSettingsProvider);
@@ -61,7 +58,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
     setState(() {
       _hasPermission = status.isGranted;
     });
-    
+
     if (!status.isGranted) {
       final result = await Permission.sms.request();
       setState(() {
@@ -89,7 +86,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
       final settings = settingsAsync.value;
       final monthStartDate = settings?.monthStartDate ?? 1;
       final currencyCode = settings?.currency?.code ?? 'USD';
-      
+
       // Get import profile for SMS parsing keywords
       final importProfile = settings?.importProfiles.isNotEmpty == true
           ? settings!.importProfiles.first
@@ -112,24 +109,28 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
       // Filter messages within budget period
       final messagesInPeriod = allMessages.where((msg) {
         final msgDate = msg.date ?? DateTime.now();
-        return msgDate.isAfter(budgetPeriod.start.subtract(const Duration(days: 1))) &&
-               msgDate.isBefore(budgetPeriod.end.add(const Duration(days: 1)));
+        return msgDate.isAfter(
+              budgetPeriod.start.subtract(const Duration(days: 1)),
+            ) &&
+            msgDate.isBefore(budgetPeriod.end.add(const Duration(days: 1)));
       }).toList();
 
       final transactions = <_SmsTransaction>[];
       final budgetAsync = ref.read(activeBudgetProvider);
-      
+
       budgetAsync.whenData((budget) {
         if (budget != null) {
           for (final message in messagesInPeriod) {
             final messageBody = message.body ?? '';
             if (messageBody.isEmpty) continue;
-            
+
             // Check if message contains the currency code
-            if (!messageBody.toUpperCase().contains(currencyCode.toUpperCase())) {
+            if (!messageBody.toUpperCase().contains(
+              currencyCode.toUpperCase(),
+            )) {
               continue;
             }
-            
+
             // Use the existing SMS parser
             final parsed = SmsParser.extractSMSData(
               message: messageBody,
@@ -137,16 +138,16 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
               startKeywordsString: startWords,
               stopKeywordsString: stopWords,
             );
-            
+
             // Only add if valid amount was extracted
             if (parsed.amount != 'N/A' && parsed.amount != '0.00') {
               final amount = double.tryParse(parsed.amount);
               if (amount == null || amount == 0) continue;
-              
-              final description = parsed.description != 'N/A' 
-                  ? parsed.description 
+
+              final description = parsed.description != 'N/A'
+                  ? parsed.description
                   : 'Transaction';
-              
+
               // Parse date or use message date
               DateTime transactionDate = message.date ?? DateTime.now();
               if (parsed.date != 'N/A') {
@@ -161,7 +162,9 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                         transactionDate = DateTime.parse(parsed.date);
                       } else {
                         // dd-MMM-yyyy format - use DateFormat
-                        transactionDate = DateFormat('dd-MMM-yyyy').parse(parsed.date);
+                        transactionDate = DateFormat(
+                          'dd-MMM-yyyy',
+                        ).parse(parsed.date);
                       }
                     }
                   }
@@ -169,22 +172,28 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                   // Use message date if parsing fails
                 }
               }
-              
-              // Check for duplicates
-              final isDuplicate = budget.transactions.any((t) =>
-                  t.description.toLowerCase().contains(description.toLowerCase()) &&
-                  t.amount.abs() == amount &&
-                  t.date.difference(transactionDate).inDays.abs() <= 1);
 
-              transactions.add(_SmsTransaction(
-                smsBody: messageBody,
-                date: transactionDate,
-                amount: -amount, // Negative for expenses
-                description: description,
-                isDuplicate: isDuplicate,
-                isSelected: !isDuplicate,
-                categoryId: null,
-              ));
+              // Check for duplicates
+              final isDuplicate = budget.transactions.any(
+                (t) =>
+                    t.description.toLowerCase().contains(
+                      description.toLowerCase(),
+                    ) &&
+                    t.amount.abs() == amount &&
+                    t.date.difference(transactionDate).inDays.abs() <= 1,
+              );
+
+              transactions.add(
+                _SmsTransaction(
+                  smsBody: messageBody,
+                  date: transactionDate,
+                  amount: -amount, // Negative for expenses
+                  description: description,
+                  isDuplicate: isDuplicate,
+                  isSelected: !isDuplicate,
+                  categoryId: null,
+                ),
+              );
             }
           }
         }
@@ -194,9 +203,11 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         _transactions = transactions;
         _isLoading = false;
         if (messagesInPeriod.isEmpty) {
-          _errorMessage = 'No messages found from this number in current budget period';
+          _errorMessage =
+              'No messages found from this number in current budget period';
         } else if (transactions.isEmpty) {
-          _errorMessage = 'No valid transactions found in ${messagesInPeriod.length} message(s). Make sure messages contain "$currencyCode".';
+          _errorMessage =
+              'No valid transactions found in ${messagesInPeriod.length} message(s). Make sure messages contain "$currencyCode".';
         }
       });
     } catch (e) {
@@ -216,7 +227,9 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
   }
 
   void _toggleAll() {
-    final allSelected = _transactions.every((t) => t.isSelected || t.isDuplicate);
+    final allSelected = _transactions.every(
+      (t) => t.isSelected || t.isDuplicate,
+    );
     setState(() {
       _transactions = _transactions.map((t) {
         if (!t.isDuplicate) {
@@ -241,9 +254,9 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         .toList();
 
     if (selectedTransactions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No transactions selected')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No transactions selected')));
       return;
     }
 
@@ -255,7 +268,9 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
     if (missingCategories.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please assign categories to all selected transactions'),
+          content: Text(
+            'Please assign categories to all selected transactions',
+          ),
         ),
       );
       return;
@@ -267,7 +282,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
 
     try {
       final controller = ref.read(dashboardControllerProvider.notifier);
-      
+
       for (final transaction in selectedTransactions) {
         await controller.addExpense(
           accountId: widget.account.id,
@@ -399,8 +414,13 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                 );
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.3),
                   child: Row(
                     children: [
                       Icon(
@@ -412,9 +432,12 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                       Expanded(
                         child: Text(
                           'Budget Period: ${DateFormat.MMMd().format(budgetPeriod.start)} - ${DateFormat.MMMd().format(budgetPeriod.end)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                              ),
                         ),
                       ),
                     ],
@@ -458,7 +481,10 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
             if (_transactions.isNotEmpty) ...[
               // Select all header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: Row(
                   children: [
@@ -480,7 +506,10 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
 
               // Show duplicates toggle
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Switch(
@@ -503,23 +532,27 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
               // Transaction list
               Expanded(
                 child: ListView.builder(
-                  itemCount: _showDuplicates 
-                      ? _transactions.length 
+                  itemCount: _showDuplicates
+                      ? _transactions.length
                       : _transactions.where((t) => !t.isDuplicate).length,
                   itemBuilder: (context, index) {
                     final visibleTransactions = _showDuplicates
                         ? _transactions
                         : _transactions.where((t) => !t.isDuplicate).toList();
-                    
+
                     return _TransactionItem(
                       transaction: visibleTransactions[index],
                       account: widget.account,
                       onToggle: () {
-                        final actualIndex = _transactions.indexOf(visibleTransactions[index]);
+                        final actualIndex = _transactions.indexOf(
+                          visibleTransactions[index],
+                        );
                         _toggleTransaction(actualIndex);
                       },
                       onCategoryChanged: (categoryId) {
-                        final actualIndex = _transactions.indexOf(visibleTransactions[index]);
+                        final actualIndex = _transactions.indexOf(
+                          visibleTransactions[index],
+                        );
                         _updateCategory(actualIndex, categoryId);
                       },
                     );
@@ -569,7 +602,24 @@ class _TransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final categories = account.cards
         .whereType<card_model.Card>()
-        .where((c) => c.maybeWhen(category: (_, __, ___, ____, _____, ______, _______, ________, _________, __________) => true, orElse: () => false))
+        .where(
+          (c) => c.maybeWhen(
+            category:
+                (
+                  _,
+                  __,
+                  ___,
+                  ____,
+                  _____,
+                  ______,
+                  _______,
+                  ________,
+                  _________,
+                  __________,
+                ) => true,
+            orElse: () => false,
+          ),
+        )
         .toList();
 
     return Card(
@@ -609,9 +659,9 @@ class _TransactionItem extends StatelessWidget {
                 Text(
                   '\$${transaction.amount.abs().toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -620,7 +670,10 @@ class _TransactionItem extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 48, top: 8),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(4),
@@ -664,7 +717,10 @@ class _TransactionItem extends StatelessWidget {
                     }
                   },
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     alignment: Alignment.centerLeft,
                   ),
                   child: Row(
@@ -673,58 +729,87 @@ class _TransactionItem extends StatelessWidget {
                         ...() {
                           final selectedCategory = categories.firstWhere(
                             (c) => c.maybeWhen(
-                              category: (id, _, __, ___, ____, _____, ______, _______, ________, _________) => id == transaction.categoryId,
+                              category:
+                                  (
+                                    id,
+                                    _,
+                                    __,
+                                    ___,
+                                    ____,
+                                    _____,
+                                    ______,
+                                    _______,
+                                    ________,
+                                    _________,
+                                  ) => id == transaction.categoryId,
                               orElse: () => false,
                             ),
                             orElse: () => categories.first,
                           );
-                          
+
                           return selectedCategory.maybeWhen(
-                            category: (_, name, icon, __, ___, color, ____, _____, ______, _______) {
-                              final iconCodePoint = int.tryParse(icon) ?? Icons.category.codePoint;
-                              final colorValue = color != null ? int.tryParse(color) : null;
-                              final categoryColor = colorValue != null 
-                                  ? Color(colorValue) 
-                                  : Theme.of(context).colorScheme.primary;
-                              
-                              return [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: categoryColor.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Icon(
-                                    IconData(iconCodePoint, fontFamily: 'MaterialIcons'),
-                                    size: 16,
-                                    color: categoryColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    name,
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ),
-                              ];
-                            },
+                            category:
+                                (
+                                  _,
+                                  name,
+                                  icon,
+                                  __,
+                                  ___,
+                                  color,
+                                  ____,
+                                  _____,
+                                  ______,
+                                  _______,
+                                ) {
+                                  final iconCodePoint =
+                                      int.tryParse(icon) ??
+                                      Icons.category.codePoint;
+                                  final colorValue = color != null
+                                      ? int.tryParse(color)
+                                      : null;
+                                  final categoryColor = colorValue != null
+                                      ? Color(colorValue)
+                                      : Theme.of(context).colorScheme.primary;
+
+                                  return [
+                                    Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        color: categoryColor.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        IconData(
+                                          iconCodePoint,
+                                          fontFamily: 'MaterialIcons',
+                                        ),
+                                        size: 16,
+                                        color: categoryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        name,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                    ),
+                                  ];
+                                },
                             orElse: () => [
                               const Icon(Icons.category_outlined, size: 20),
                               const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Select Category'),
-                              ),
+                              const Expanded(child: Text('Select Category')),
                             ],
                           );
                         }()
                       else ...[
                         const Icon(Icons.category_outlined, size: 20),
                         const SizedBox(width: 12),
-                        const Expanded(
-                          child: Text('Select Category'),
-                        ),
+                        const Expanded(child: Text('Select Category')),
                       ],
                       const Icon(Icons.arrow_drop_down, size: 20),
                     ],
