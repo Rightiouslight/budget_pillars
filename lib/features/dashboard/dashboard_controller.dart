@@ -904,6 +904,154 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     });
   }
 
+  /// Delete a transaction and revert all balance changes
+  /// Handles all transaction types: expenses, income, transfers, and sinking funds
+  Future<void> deleteTransaction(String transactionId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final budget = await _getCurrentBudget();
+      if (budget == null) return;
+
+      // Find the transaction to delete
+      final transactionIndex = budget.transactions.indexWhere(
+        (t) => t.id == transactionId,
+      );
+      if (transactionIndex == -1) return;
+
+      final transaction = budget.transactions[transactionIndex];
+
+      // Determine transaction type and revert balances accordingly
+      final updatedAccounts = budget.accounts.map((account) {
+        final updatedCards = account.cards.map((card) {
+          return card.when(
+            pocket: (id, name, icon, balance, color) {
+              // INCOME: Income to pocket - reduce pocket balance
+              if (transaction.categoryId == 'income' &&
+                  transaction.targetPocketId == id &&
+                  account.id == transaction.accountId) {
+                return Card.pocket(
+                  id: id,
+                  name: name,
+                  icon: icon,
+                  balance: balance - transaction.amount,
+                  color: color,
+                );
+              }
+
+              // TRANSFER OUT: Source pocket - restore balance
+              if (transaction.sourcePocketId == id &&
+                  account.id == transaction.accountId &&
+                  transaction.targetPocketId != null) {
+                return Card.pocket(
+                  id: id,
+                  name: name,
+                  icon: icon,
+                  balance: balance + transaction.amount,
+                  color: color,
+                );
+              }
+
+              // TRANSFER IN: Destination pocket - reduce balance
+              if (transaction.targetPocketId == id &&
+                  (account.id == transaction.targetAccountId ||
+                      (transaction.targetAccountId == null &&
+                          account.id == transaction.accountId))) {
+                return Card.pocket(
+                  id: id,
+                  name: name,
+                  icon: icon,
+                  balance: balance - transaction.amount,
+                  color: color,
+                );
+              }
+
+              // EXPENSE: Source pocket (default pocket) - restore balance
+              if (transaction.sourcePocketId == id &&
+                  account.id == transaction.accountId &&
+                  transaction.categoryId != 'income' &&
+                  transaction.targetPocketId == null) {
+                return Card.pocket(
+                  id: id,
+                  name: name,
+                  icon: icon,
+                  balance: balance + transaction.amount,
+                  color: color,
+                );
+              }
+
+              return card;
+            },
+            category:
+                (
+                  id,
+                  name,
+                  icon,
+                  budgetValue,
+                  currentValue,
+                  color,
+                  isRecurring,
+                  dueDate,
+                  destinationPocketId,
+                  destinationAccountId,
+                ) {
+                  // EXPENSE: Regular category expense - reduce currentValue
+                  if (transaction.categoryId == id &&
+                      account.id == transaction.accountId &&
+                      transaction.targetPocketId == null) {
+                    return Card.category(
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      budgetValue: budgetValue,
+                      currentValue: currentValue - transaction.amount,
+                      color: color,
+                      isRecurring: isRecurring,
+                      dueDate: dueDate,
+                      destinationPocketId: destinationPocketId,
+                      destinationAccountId: destinationAccountId,
+                    );
+                  }
+
+                  // REFUND/TRANSFER FROM CATEGORY: Source category - restore value
+                  if (transaction.categoryId == id &&
+                      account.id == transaction.accountId &&
+                      transaction.targetPocketId != null &&
+                      transaction.sourcePocketId == null) {
+                    return Card.category(
+                      id: id,
+                      name: name,
+                      icon: icon,
+                      budgetValue: budgetValue,
+                      currentValue: currentValue + transaction.amount,
+                      color: color,
+                      isRecurring: isRecurring,
+                      dueDate: dueDate,
+                      destinationPocketId: destinationPocketId,
+                      destinationAccountId: destinationAccountId,
+                    );
+                  }
+
+                  return card;
+                },
+          );
+        }).toList();
+        return account.copyWith(cards: updatedCards);
+      }).toList();
+
+      // Remove the transaction from the list
+      final updatedTransactions = budget.transactions
+          .where((t) => t.id != transactionId)
+          .toList();
+
+      final updatedBudget = budget.copyWith(
+        accounts: updatedAccounts,
+        transactions: updatedTransactions,
+      );
+
+      await _repository.saveBudget(_userId, _monthKey, updatedBudget);
+    });
+  }
+
   // ===== RECURRING EXPENSE OPERATIONS =====
 
   /// Quick Pay for a recurring category - pays the remaining budgeted amount

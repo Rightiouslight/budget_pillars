@@ -267,11 +267,11 @@ class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
                                         Text(
                                           name,
                                           textAlign: TextAlign.center,
-                                          maxLines: 2,
+                                          maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium
+                                              .bodySmall
                                               ?.copyWith(
                                                 fontWeight: isSelected
                                                     ? FontWeight.bold
