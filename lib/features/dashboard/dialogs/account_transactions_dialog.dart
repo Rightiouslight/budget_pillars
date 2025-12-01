@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../data/models/account.dart';
 import '../../../data/models/transaction.dart';
 import '../../../providers/active_budget_provider.dart';
+import '../../../core/constants/app_icons.dart';
 import '../dashboard_controller.dart';
 
 /// Dialog to view all transactions for a specific account
@@ -191,7 +192,8 @@ class AccountTransactionsDialog extends ConsumerWidget {
     }
     try {
       final codePoint = int.parse(iconString);
-      return IconData(codePoint, fontFamily: 'MaterialIcons');
+      // Use AppIcons helper to get proper IconData
+      return AppIcons.getCategoryIconData(codePoint);
     } catch (e) {
       return Icons.account_balance_wallet;
     }

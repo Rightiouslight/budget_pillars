@@ -181,7 +181,7 @@ class _AddPocketDialogState extends ConsumerState<AddPocketDialog> {
                   final selected = await showDialog<int>(
                     context: context,
                     builder: (context) => IconPickerDialog(
-                      availableIcons: AppIcons.pocketIcons,
+                      availableIcons: AppIcons.categoryIcons,
                       initialCodePoint: _selectedIconCodePoint,
                       title: 'Select Pocket Icon',
                     ),

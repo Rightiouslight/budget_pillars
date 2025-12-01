@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/models/card.dart' as card_model;
+import '../constants/app_icons.dart';
 
 /// Dialog for selecting a category with icon and name display
 class CategoryPickerDialog extends StatefulWidget {
@@ -209,6 +210,8 @@ class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
                                 final iconCodePoint =
                                     int.tryParse(icon) ??
                                     Icons.category.codePoint;
+                                final categoryIconData =
+                                    AppIcons.getCategoryIconData(iconCodePoint);
                                 final colorValue = color != null
                                     ? int.tryParse(color)
                                     : null;
@@ -254,10 +257,7 @@ class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
                                             ),
                                           ),
                                           child: Icon(
-                                            IconData(
-                                              iconCodePoint,
-                                              fontFamily: 'MaterialIcons',
-                                            ),
+                                            categoryIconData,
                                             size: 20,
                                             color: categoryColor,
                                           ),

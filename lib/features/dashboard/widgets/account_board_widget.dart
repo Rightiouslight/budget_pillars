@@ -804,8 +804,9 @@ class AccountBoardWidget extends ConsumerWidget {
                       ________,
                     ) => name,
               );
-              final cardIcon = card.when(
-                pocket: (id, _, icon, __, ___) => icon,
+              final cardIconData = card.when(
+                pocket: (id, _, icon, __, ___) =>
+                    AppIcons.getPocketIconData(int.tryParse(icon) ?? 0),
                 category:
                     (
                       id,
@@ -818,7 +819,7 @@ class AccountBoardWidget extends ConsumerWidget {
                       ______,
                       _______,
                       ________,
-                    ) => icon,
+                    ) => AppIcons.getCategoryIconData(int.tryParse(icon) ?? 0),
               );
               final cardColor = card.when(
                 pocket: (id, _, __, ___, color) => color,
@@ -914,10 +915,7 @@ class AccountBoardWidget extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
-                            IconData(
-                              int.tryParse(cardIcon) ?? 0xe88a,
-                              fontFamily: 'MaterialIcons',
-                            ),
+                            cardIconData,
                             color: Colors.white,
                             size: 20,
                           ),

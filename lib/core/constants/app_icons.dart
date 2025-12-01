@@ -648,7 +648,8 @@ class AppIcons {
 
   /// Check if icon codePoint is valid for pockets
   static bool isValidPocketIcon(int codePoint) {
-    return pocketIcons.any((icon) => icon.codePoint == codePoint);
+    // Allow any category icon for pockets (full icon library)
+    return categoryIcons.any((icon) => icon.codePoint == codePoint);
   }
 
   /// Check if icon codePoint is valid for categories
@@ -670,7 +671,8 @@ class AppIcons {
   /// Get IconData from codePoint for pockets
   static IconData getPocketIconData(int codePoint) {
     try {
-      return pocketIcons
+      // Use category icons (full icon library) for pockets
+      return categoryIcons
           .firstWhere((icon) => icon.codePoint == codePoint)
           .iconData;
     } catch (e) {

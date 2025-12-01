@@ -10,6 +10,7 @@ import '../../../providers/user_settings_provider.dart';
 import '../../../utils/date_utils.dart' as app_date_utils;
 import '../../../utils/sms_parser.dart';
 import '../../../core/widgets/category_picker_dialog.dart';
+import '../../../core/constants/app_icons.dart';
 import '../dashboard_controller.dart';
 
 class ImportFromSmsDialog extends ConsumerStatefulWidget {
@@ -764,6 +765,10 @@ class _TransactionItem extends StatelessWidget {
                                   final iconCodePoint =
                                       int.tryParse(icon) ??
                                       Icons.category.codePoint;
+                                  final categoryIconData =
+                                      AppIcons.getCategoryIconData(
+                                        iconCodePoint,
+                                      );
                                   final colorValue = color != null
                                       ? int.tryParse(color)
                                       : null;
@@ -780,10 +785,7 @@ class _TransactionItem extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
-                                        IconData(
-                                          iconCodePoint,
-                                          fontFamily: 'MaterialIcons',
-                                        ),
+                                        categoryIconData,
                                         size: 16,
                                         color: categoryColor,
                                       ),
