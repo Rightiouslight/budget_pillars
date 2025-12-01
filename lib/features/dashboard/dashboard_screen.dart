@@ -8,7 +8,6 @@ import 'widgets/budget_header.dart';
 import 'dialogs/add_account_dialog.dart';
 import 'dialogs/budget_creation_dialog.dart';
 import 'services/auto_payment_service.dart';
-import 'dashboard_controller.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -131,20 +130,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       );
     }
 
-    // Calculate responsive max width for account cards
+    // Calculate responsive viewport fraction for PageView
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final cardWidth = screenWidth > 1200
-        ? 400.0 // Desktop: fixed width cards
-        : screenWidth > 450
-        ? 380.0 // Tablet: fixed width
-        : screenWidth * 0.9; // Mobile: 90% width
 
-    final cardHeight =
-        screenHeight -
-        AppBar().preferredSize.height -
-        MediaQuery.of(context).padding.top -
-        32;
+    // Calculate viewport fraction based on fixed widths for desktop/tablet
+    final viewportFraction = screenWidth > 1200
+        ? 400 /
+              screenWidth // Desktop: 400px fixed width
+        : screenWidth > 450
+        ? 380 /
+              screenWidth // Tablet: 380px fixed width
+        : 0.92; // Mobile: 92% viewport
 
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(
@@ -154,37 +150,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           PointerDeviceKind.trackpad,
         },
       ),
-      child: ReorderableListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: PageView.builder(
         itemCount: budget.accounts.length,
-        onReorder: (oldIndex, newIndex) {
-          ref
-              .read(dashboardControllerProvider.notifier)
-              .reorderAccounts(oldIndex: oldIndex, newIndex: newIndex);
-        },
-        buildDefaultDragHandles: true,
-        proxyDecorator: (child, index, animation) {
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              return Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(12),
-                child: child,
-              );
-            },
-            child: child,
-          );
-        },
+        padEnds: false,
+        controller: PageController(viewportFraction: viewportFraction),
         itemBuilder: (context, i) {
-          return Container(
-            key: ValueKey(budget.accounts[i].id),
-            width: cardWidth,
-            height: cardHeight,
-            margin: EdgeInsets.only(
-              right: i < budget.accounts.length - 1 ? 16 : 0,
-            ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: AccountBoardWidget(
               account: budget.accounts[i],
               accountIndex: i,

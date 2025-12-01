@@ -185,93 +185,101 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
       title: Row(
         children: [
           // Budget Logo/Switcher Dropdown
-          PopupMenuButton<String>(
-            tooltip: 'Switch Budget',
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_drop_down, size: 20),
-                ],
-              ),
-            ),
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                enabled: false,
-                child: Text(
-                  'Switch Budget',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+          Flexible(
+            flex: 0,
+            child: PopupMenuButton<String>(
+              tooltip: 'Switch Budget',
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
                 ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: 'own',
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.person, size: 16),
-                    const SizedBox(width: 8),
-                    Text(user.displayName ?? user.email ?? 'My Budget'),
+                    Icon(
+                      Icons.account_balance_wallet,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.arrow_drop_down, size: 18),
                   ],
                 ),
               ),
-              // TODO: Add shared budgets when collaboration is implemented
-              // Hidden for now - will decide to remove completely later
-              // const PopupMenuDivider(),
-              // const PopupMenuItem<String>(
-              //   value: 'invitations',
-              //   child: Row(
-              //     children: [
-              //       Icon(Icons.mail, size: 16),
-              //       SizedBox(width: 8),
-              //       Text('Invitations'),
-              //       // TODO: Add badge for invitation count
-              //     ],
-              //   ),
-              // ),
-              // if (isOwnBudget)
-              //   const PopupMenuItem<String>(
-              //     value: 'share',
-              //     child: Row(
-              //       children: [
-              //         Icon(Icons.share, size: 16),
-              //         SizedBox(width: 8),
-              //         Text('Share & Manage Access'),
-              //       ],
-              //     ),
-              //   ),
-            ],
-            onSelected: (value) {
-              if (value == 'invitations') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invitations - Coming Soon')),
-                );
-              } else if (value == 'share') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Share Budget - Coming Soon')),
-                );
-              }
-            },
-          ),
-          const SizedBox(width: 8),
-          // Budget Name
-          Expanded(
-            child: Text(
-              isOwnBudget
-                  ? 'Budget Pillars'
-                  : '${user.displayName ?? "Shared Budget"}',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
+              itemBuilder: (context) => [
+                const PopupMenuItem<String>(
+                  enabled: false,
+                  child: Text(
+                    'Switch Budget',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem<String>(
+                  value: 'own',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person, size: 16),
+                      const SizedBox(width: 8),
+                      Text(user.displayName ?? user.email ?? 'My Budget'),
+                    ],
+                  ),
+                ),
+                // TODO: Add shared budgets when collaboration is implemented
+                // Hidden for now - will decide to remove completely later
+                // const PopupMenuDivider(),
+                // const PopupMenuItem<String>(
+                //   value: 'invitations',
+                //   child: Row(
+                //     children: [
+                //       Icon(Icons.mail, size: 16),
+                //       SizedBox(width: 8),
+                //       Text('Invitations'),
+                //       // TODO: Add badge for invitation count
+                //     ],
+                //   ),
+                // ),
+                // if (isOwnBudget)
+                //   const PopupMenuItem<String>(
+                //     value: 'share',
+                //     child: Row(
+                //       children: [
+                //         Icon(Icons.share, size: 16),
+                //         SizedBox(width: 8),
+                //         Text('Share & Manage Access'),
+                //       ],
+                //     ),
+                //   ),
+              ],
+              onSelected: (value) {
+                if (value == 'invitations') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Invitations - Coming Soon')),
+                  );
+                } else if (value == 'share') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Share Budget - Coming Soon')),
+                  );
+                }
+              },
             ),
           ),
+          // Budget Name - Hidden on mobile to save space
+          if (MediaQuery.of(context).size.width > 450) ...[
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                isOwnBudget
+                    ? 'Budget Pillars'
+                    : '${user.displayName ?? "Shared Budget"}',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ],
       ),
       centerTitle: false,
@@ -298,14 +306,16 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
             );
           },
         ),
-        // Month Navigation (center of AppBar)
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            ref.read(activeBudgetInfoProvider.notifier).previousMonth();
-          },
-          tooltip: 'Previous Month',
-        ),
+        // Month Navigation (center of AppBar) - Hidden on mobile to save space
+        if (MediaQuery.of(context).size.width > 450) ...[
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              ref.read(activeBudgetInfoProvider.notifier).previousMonth();
+            },
+            tooltip: 'Previous Month',
+          ),
+        ],
         OutlinedButton(
           onPressed: _showMonthPicker,
           child: Text(
@@ -313,13 +323,15 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: () {
-            ref.read(activeBudgetInfoProvider.notifier).nextMonth();
-          },
-          tooltip: 'Next Month',
-        ),
+        if (MediaQuery.of(context).size.width > 450) ...[
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              ref.read(activeBudgetInfoProvider.notifier).nextMonth();
+            },
+            tooltip: 'Next Month',
+          ),
+        ],
         const SizedBox(width: 8),
         // User Menu Dropdown
         PopupMenuButton<String>(
