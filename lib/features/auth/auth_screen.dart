@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:flutter/foundation.dart' show kIsWeb; // TODO: Uncomment when Google Sign-In is enabled
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'auth_controller.dart';
 import '../../data/firebase/auth_repository.dart';
 
@@ -52,18 +52,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
-  // TODO: Uncomment when Google Sign-In is fully implemented
-  // Future<void> _handleGoogleSignIn() async {
-  //   try {
-  //     await ref.read(authControllerProvider.notifier).signInWithGoogle();
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-  //       );
-  //     }
-  //   }
-  // }
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   Future<void> _showResetPasswordDialog() async {
     final emailController = TextEditingController(
@@ -292,29 +291,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   // Google Sign In Button - Hidden until properly configured
                   // TODO: Uncomment when Google Sign-In is fully implemented
                   // Divider
-                  // Row(
-                  //   children: [
-                  //     const Expanded(child: Divider()),
-                  //     Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //       child: Text(
-                  //         'OR',
-                  //         style: Theme.of(context).textTheme.bodySmall,
-                  //       ),
-                  //     ),
-                  //     const Expanded(child: Divider()),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
                   // if (!kIsWeb)
-                  //   OutlinedButton.icon(
-                  //     onPressed: authState.isLoading
-                  //         ? null
-                  //         : _handleGoogleSignIn,
-                  //     icon: const Icon(Icons.g_mobiledata, size: 28),
-                  //     label: const Text('Continue with Google'),
-                  //   ),
+                  OutlinedButton.icon(
+                    onPressed: authState.isLoading ? null : _handleGoogleSignIn,
+                    icon: const Icon(Icons.g_mobiledata, size: 28),
+                    label: const Text('Continue with Google'),
+                  ),
                   // if (kIsWeb)
                   //   Tooltip(
                   //     message:
