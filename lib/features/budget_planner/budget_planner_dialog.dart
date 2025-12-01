@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/account.dart';
 import '../../data/models/monthly_budget.dart';
 import 'models/planner_category.dart';
+import '../../core/constants/app_icons.dart';
 
 /// Dialog for planning/adjusting category budgets for an account
 class BudgetPlannerDialog extends ConsumerStatefulWidget {
@@ -306,7 +307,19 @@ class _BudgetPlannerDialogState extends ConsumerState<BudgetPlannerDialog> {
       ),
       child: Row(
         children: [
-          Text(category.icon, style: const TextStyle(fontSize: 20)),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              _getValidIcon(category.icon),
+              size: 18,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -394,5 +407,13 @@ class _BudgetPlannerDialogState extends ConsumerState<BudgetPlannerDialog> {
         ),
       ),
     );
+  }
+
+  IconData _getValidIcon(String icon) {
+    final codePoint = int.tryParse(icon);
+    if (codePoint != null && AppIcons.isValidCategoryIcon(codePoint)) {
+      return AppIcons.getCategoryIconData(codePoint);
+    }
+    return AppIcons.defaultCategoryIcon.iconData;
   }
 }

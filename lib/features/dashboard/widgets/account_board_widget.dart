@@ -769,8 +769,10 @@ class AccountBoardWidget extends ConsumerWidget {
         final isCompact = viewPref == 'compact';
 
         if (isCompact) {
-          // 2 columns for mobile (<600), 3 columns for tablets
-          final crossAxisCount = screenWidth < 600 ? 2 : 3;
+          // Always use 3 columns for compact view
+          const crossAxisCount = 3;
+          // Adjust aspect ratio based on screen size
+          final aspectRatio = screenWidth < 600 ? 0.75 : 0.85;
 
           return GridView.builder(
             padding: EdgeInsets.zero,
@@ -778,7 +780,7 @@ class AccountBoardWidget extends ConsumerWidget {
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
-              childAspectRatio: 0.85,
+              childAspectRatio: aspectRatio,
             ),
             itemCount: account.cards.length,
             itemBuilder: (context, index) {
