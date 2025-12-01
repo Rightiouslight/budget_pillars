@@ -20,6 +20,7 @@ class PocketCardWidget extends ConsumerWidget {
   final bool isDefault;
   final List<card_model.Card> cards;
   final bool enableInteraction;
+  final bool forceFullView;
 
   const PocketCardWidget({
     super.key,
@@ -32,6 +33,7 @@ class PocketCardWidget extends ConsumerWidget {
     this.isDefault = false,
     required this.cards,
     this.enableInteraction = true,
+    this.forceFullView = false,
   });
 
   @override
@@ -45,7 +47,7 @@ class PocketCardWidget extends ConsumerWidget {
     final viewPreference = isMobile
         ? (settings?.viewPreferences?.mobile ?? 'full')
         : (settings?.viewPreferences?.desktop ?? 'full');
-    final isCompact = viewPreference == 'compact';
+    final isCompact = forceFullView ? false : viewPreference == 'compact';
 
     // Transfer mode states
     final isTransferActive = transferMode != null;

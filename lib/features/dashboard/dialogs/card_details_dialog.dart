@@ -57,6 +57,7 @@ class CardDetailsDialog extends ConsumerWidget {
                     isDefault: id == account.defaultPocketId,
                     cards: account.cards,
                     enableInteraction: false,
+                    forceFullView: true,
                   );
                 },
                 category:
@@ -84,6 +85,7 @@ class CardDetailsDialog extends ConsumerWidget {
                         dueDate: dueDate,
                         cards: account.cards,
                         enableInteraction: false,
+                        forceFullView: true,
                       );
                     },
               ),

@@ -24,6 +24,7 @@ class CategoryCardWidget extends ConsumerWidget {
   final String? destinationAccountId;
   final List<card_model.Card> cards;
   final bool enableInteraction;
+  final bool forceFullView;
 
   const CategoryCardWidget({
     super.key,
@@ -40,6 +41,7 @@ class CategoryCardWidget extends ConsumerWidget {
     this.destinationAccountId,
     required this.cards,
     this.enableInteraction = true,
+    this.forceFullView = false,
   });
 
   @override
@@ -58,7 +60,7 @@ class CategoryCardWidget extends ConsumerWidget {
     final viewPreference = isMobile
         ? (settings?.viewPreferences?.mobile ?? 'full')
         : (settings?.viewPreferences?.desktop ?? 'full');
-    final isCompact = viewPreference == 'compact';
+    final isCompact = forceFullView ? false : viewPreference == 'compact';
 
     if (isCompact) {
       return _buildCompactView(
