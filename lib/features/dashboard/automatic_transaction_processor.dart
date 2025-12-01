@@ -1,10 +1,10 @@
-import 'package:easy_budget_pillars/data/models/account.dart';
-import 'package:easy_budget_pillars/data/models/budget_notification.dart';
-import 'package:easy_budget_pillars/data/models/card.dart';
-import 'package:easy_budget_pillars/data/models/monthly_budget.dart';
-import 'package:easy_budget_pillars/data/models/recurring_income.dart';
-import 'package:easy_budget_pillars/data/models/transaction.dart';
-import 'package:easy_budget_pillars/utils/date_utils.dart' as budget_date_utils;
+import 'package:budget_pillars/data/models/account.dart';
+import 'package:budget_pillars/data/models/budget_notification.dart';
+import 'package:budget_pillars/data/models/card.dart';
+import 'package:budget_pillars/data/models/monthly_budget.dart';
+import 'package:budget_pillars/data/models/recurring_income.dart';
+import 'package:budget_pillars/data/models/transaction.dart';
+import 'package:budget_pillars/utils/date_utils.dart' as budget_date_utils;
 
 /// Result of automatic transaction processing
 class ProcessingResult {

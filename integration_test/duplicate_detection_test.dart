@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:easy_budget_pillars/main.dart' as app;
+import 'package:budget_pillars/main.dart' as app;
 
 /// Integration tests specifically for SMS paste and duplicate detection
 ///

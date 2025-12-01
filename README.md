@@ -1,4 +1,4 @@
-# easy_budget_pillars
+# budget_pillars
 
 A new Flutter project.
 

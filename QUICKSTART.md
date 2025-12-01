@@ -15,7 +15,7 @@ Before running the app, ensure you have:
 
 ```bash
 # Make sure you're in the project directory
-cd d:\Development\Flutter\easy_budget_pillars
+cd d:\Development\Flutter\budget_pillars
 
 # Configure Firebase for your project
 flutterfire configure

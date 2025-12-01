@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:easy_budget_pillars/app/app.dart';
+import 'package:budget_pillars/app/app.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {

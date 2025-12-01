@@ -36,7 +36,7 @@ This will open a browser window for you to authenticate with your Google account
 In your project directory:
 
 ```powershell
-cd D:\Development\Flutter\easy_budget_pillars
+cd D:\Development\Flutter\budget_pillars
 firebase init hosting
 ```
 

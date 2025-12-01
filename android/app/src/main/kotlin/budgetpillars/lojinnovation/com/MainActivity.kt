@@ -1,4 +1,4 @@
-package budgetpillars.lojinnovation.com.easy_budget_pillars
+package budgetpillars.lojinnovation.com
 
 import io.flutter.embedding.android.FlutterActivity
 

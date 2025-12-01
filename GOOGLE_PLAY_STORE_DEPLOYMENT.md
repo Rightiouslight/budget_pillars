@@ -14,7 +14,7 @@ This document outlines all the steps required to publish Budget Pillars to the G
 
 - [ ] **App Name**: Verify "Budget Pillars" is the final name
 - [ ] **Package Name**: Check `android/app/build.gradle.kts` - `applicationId`
-  - Current: `com.example.easy_budget_pillars` (⚠️ Should be changed from "example")
+  - Current: `budgetpillars.lojinnovation.com` (⚠️ Should be changed from "example")
   - Recommended: `com.budgetpillars.app` or `com.yourcompany.budgetpillars`
 - [ ] **Version Code & Name**: Update in `android/app/build.gradle.kts`
   - `versionCode`: Integer that increments with each release (e.g., 1, 2, 3...)
@@ -39,6 +39,7 @@ This document outlines all the steps required to publish Budget Pillars to the G
 #### App Configuration
 
 - [ ] **Remove Debug Code**:
+
   - Remove hardcoded test credentials from `lib/features/auth/auth_screen.dart`
 
     ```dart
@@ -50,6 +51,7 @@ This document outlines all the steps required to publish Budget Pillars to the G
     final _emailController = TextEditingController();
     final _passwordController = TextEditingController();
     ```
+
 - [ ] **Environment Variables**: Ensure no sensitive data is hardcoded
 - [ ] **Analytics**: Set up Firebase Analytics for production
 - [ ] **Crash Reporting**: Enable Firebase Crashlytics
@@ -69,6 +71,7 @@ This document outlines all the steps required to publish Budget Pillars to the G
   - Email/Password: Enable in Firebase Console → Authentication
   - Google Sign-In: Add SHA-1 and SHA-256 fingerprints
 - [ ] **Firestore Rules**: Update for production
+
   ```javascript
   rules_version = '2';
   service cloud.firestore {
@@ -85,6 +88,7 @@ This document outlines all the steps required to publish Budget Pillars to the G
     }
   }
   ```
+
 - [ ] **Firebase Storage Rules**: If using file storage
 - [ ] **API Keys**: Restrict API keys in Google Cloud Console
 
