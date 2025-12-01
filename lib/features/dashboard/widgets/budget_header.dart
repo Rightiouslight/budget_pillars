@@ -197,10 +197,22 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.account_balance_wallet,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 24,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.asset(
+                        'assets/icon/app_icon.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to icon if image fails to load
+                          return Icon(
+                            Icons.account_balance_wallet,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 24,
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(width: 2),
                     const Icon(Icons.arrow_drop_down, size: 18),
@@ -265,21 +277,7 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
               },
             ),
           ),
-          // Budget Name - Hidden on mobile to save space
-          if (MediaQuery.of(context).size.width > 450) ...[
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                isOwnBudget
-                    ? 'Budget Pillars'
-                    : '${user.displayName ?? "Shared Budget"}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          // Budget Name removed - icon is now self-explanatory
         ],
       ),
       centerTitle: false,

@@ -172,10 +172,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // App Logo/Title
-                  Icon(
-                    Icons.account_balance_wallet,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      width: 100,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback to icon if image fails to load
+                        return Icon(
+                          Icons.account_balance_wallet,
+                          size: 80,
+                          color: Theme.of(context).colorScheme.primary,
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
