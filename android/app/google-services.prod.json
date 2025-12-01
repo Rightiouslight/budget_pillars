@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1065513142302:android:9a98b4fa2e44ef3956860f",
+        "mobilesdk_app_id": "1:1065513142302:android:ee4cf02da0cff1d156860f",
         "android_client_info": {
           "package_name": "budgetpillars.lojinnovation.com"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1065513142302-nfe23i2u04g15ujdjnudbeacsniitecc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "budgetpillars.lojinnovation.com",
+            "certificate_hash": "b5cf06b91197ba390a78322e120540a066d74310"
+          }
+        },
         {
           "client_id": "1065513142302-gbpq61qnbuu4i4hmmehojbcqkuau4q1n.apps.googleusercontent.com",
           "client_type": 3
