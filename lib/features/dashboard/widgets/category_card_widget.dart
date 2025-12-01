@@ -93,13 +93,15 @@ class CategoryCardWidget extends ConsumerWidget {
     bool isTransferMode,
   ) {
     final isOverBudget = currentValue > budgetValue;
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final isVerySmall = screenWidth < 400; // For really small screens
 
     // Larger sizes for 2-column mobile layout
-    final circleSize = isMobile ? 44.0 : 36.0;
-    final innerCircleSize = isMobile ? 34.0 : 28.0;
-    final iconSize = isMobile ? 18.0 : 14.0;
-    final buttonIconSize = isMobile ? 20.0 : 16.0;
+    final circleSize = isVerySmall ? 36.0 : (isMobile ? 44.0 : 36.0);
+    final innerCircleSize = isVerySmall ? 26.0 : (isMobile ? 34.0 : 28.0);
+    final iconSize = isVerySmall ? 14.0 : (isMobile ? 18.0 : 14.0);
+    final buttonIconSize = isVerySmall ? 16.0 : (isMobile ? 20.0 : 16.0);
     final textStyle = isMobile
         ? Theme.of(context).textTheme.bodySmall
         : Theme.of(context).textTheme.labelSmall;
