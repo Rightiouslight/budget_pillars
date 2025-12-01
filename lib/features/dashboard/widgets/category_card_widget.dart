@@ -120,12 +120,7 @@ class CategoryCardWidget extends ConsumerWidget {
           onTap: !enableInteraction
               ? null
               : () => _handleCardTap(context, ref, isTransferMode),
-          onDoubleTap: !enableInteraction
-              ? null
-              : () => _showAddExpenseDialog(context),
-          onLongPress: !enableInteraction
-              ? null
-              : () => _showCompactMenu(context, ref),
+          // Double-tap and long press removed - use tap to view details, buttons for actions, long press for reordering
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
@@ -657,51 +652,6 @@ class CategoryCardWidget extends ConsumerWidget {
           },
         ),
         duration: const Duration(seconds: 10),
-      ),
-    );
-  }
-
-  void _showCompactMenu(BuildContext context, WidgetRef ref) {
-    final remaining = budgetValue - currentValue;
-    final canQuickPay = remaining > 0 && isRecurring;
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (canQuickPay)
-              ListTile(
-                leading: const Icon(Icons.check_circle_outline),
-                title: const Text('Quick Pay'),
-                subtitle: Text(
-                  'Pay remaining \$${remaining.toStringAsFixed(2)}',
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _handleQuickPay(context, ref);
-                },
-              ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Category'),
-              onTap: () {
-                Navigator.pop(context);
-                _showEditDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(context);
-                _showDeleteConfirmation(context);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
       ),
     );
   }

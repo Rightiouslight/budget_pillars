@@ -130,12 +130,7 @@ class PocketCardWidget extends ConsumerWidget {
           onTap: !enableInteraction
               ? null
               : () => _handleCardTap(context, ref, isTransferActive, isSelf),
-          onDoubleTap: !enableInteraction
-              ? null
-              : () => _showAddExpenseDialog(context),
-          onLongPress: !enableInteraction
-              ? null
-              : () => _showCompactMenu(context, ref),
+          // Double-tap and long press removed - use tap to view details, buttons for actions, long press for reordering
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
@@ -597,40 +592,6 @@ class PocketCardWidget extends ConsumerWidget {
           },
         ),
         duration: const Duration(seconds: 10),
-      ),
-    );
-  }
-
-  void _showCompactMenu(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Pocket'),
-              onTap: () {
-                Navigator.pop(context);
-                _showEditDialog(context);
-              },
-            ),
-            if (!isDefault)
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showDeleteConfirmation(context);
-                },
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
       ),
     );
   }

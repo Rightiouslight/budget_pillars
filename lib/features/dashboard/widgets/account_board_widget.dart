@@ -769,11 +769,12 @@ class AccountBoardWidget extends ConsumerWidget {
         final isCompact = viewPref == 'compact';
 
         if (isCompact) {
-          // Always use 3 columns for compact view
+          // Always use 3 columns for compact view with reordering support
           const crossAxisCount = 3;
           // Adjust aspect ratio based on screen size
           final aspectRatio = screenWidth < 600 ? 0.75 : 0.85;
 
+          // Use a custom builder that wraps GridView to enable reordering
           return GridView.builder(
             padding: EdgeInsets.zero,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -785,7 +786,58 @@ class AccountBoardWidget extends ConsumerWidget {
             itemCount: account.cards.length,
             itemBuilder: (context, index) {
               final card = account.cards[index];
-              return card.when(
+
+              // Extract card data for drag feedback
+              final cardName = card.when(
+                pocket: (id, name, _, __, ___) => name,
+                category:
+                    (
+                      id,
+                      name,
+                      _,
+                      __,
+                      ___,
+                      ____,
+                      _____,
+                      ______,
+                      _______,
+                      ________,
+                    ) => name,
+              );
+              final cardIcon = card.when(
+                pocket: (id, _, icon, __, ___) => icon,
+                category:
+                    (
+                      id,
+                      _,
+                      icon,
+                      __,
+                      ___,
+                      ____,
+                      _____,
+                      ______,
+                      _______,
+                      ________,
+                    ) => icon,
+              );
+              final cardColor = card.when(
+                pocket: (id, _, __, ___, color) => color,
+                category:
+                    (
+                      id,
+                      _,
+                      __,
+                      ___,
+                      ____,
+                      color,
+                      _____,
+                      ______,
+                      _______,
+                      ________,
+                    ) => color,
+              );
+
+              Widget cardWidget = card.when(
                 pocket: (id, name, icon, balance, color) {
                   return PocketCardWidget(
                     accountId: account.id,
@@ -826,6 +878,83 @@ class AccountBoardWidget extends ConsumerWidget {
                         cards: account.cards,
                       );
                     },
+              );
+
+              // Wrap with LongPressDraggable for reordering
+              return LongPressDraggable<int>(
+                key: ValueKey('card_${account.id}_$index'),
+                data: index,
+                feedback: Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.surface,
+                  child: Container(
+                    width: 120,
+                    height: 60,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: cardColor != null
+                                ? Color(
+                                    int.parse(
+                                          cardColor.substring(1, 7),
+                                          radix: 16,
+                                        ) +
+                                        0xFF000000,
+                                  )
+                                : Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            IconData(
+                              int.tryParse(cardIcon) ?? 0xe88a,
+                              fontFamily: 'MaterialIcons',
+                            ),
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            cardName,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                childWhenDragging: Opacity(opacity: 0.3, child: cardWidget),
+                child: DragTarget<int>(
+                  onAcceptWithDetails: (details) {
+                    final fromIndex = details.data;
+                    final toIndex = index;
+                    if (fromIndex != toIndex) {
+                      ref
+                          .read(dashboardControllerProvider.notifier)
+                          .reorderCards(
+                            accountIndex: accountIndex,
+                            oldIndex: fromIndex,
+                            newIndex: toIndex,
+                          );
+                    }
+                  },
+                  builder: (context, candidateData, rejectedData) {
+                    return cardWidget;
+                  },
+                ),
               );
             },
           );
