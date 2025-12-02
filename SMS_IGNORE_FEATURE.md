@@ -1,9 +1,11 @@
 # SMS Ignore Feature Implementation
 
 ## Overview
+
 Allow users to ignore specific SMS messages during import, storing ignored message IDs locally with automatic cleanup to prevent unbounded growth.
 
 ## Design Principles
+
 1. **Local Storage Only** - Data stored on device, not synced to cloud
 2. **Budget Month Scoped** - Each budget month has its own ignore list
 3. **Automatic Cleanup** - Old month data automatically removed
@@ -12,12 +14,14 @@ Allow users to ignore specific SMS messages during import, storing ignored messa
 ## Storage Strategy
 
 ### Use SharedPreferences for Local Storage
+
 - Fast, simple key-value storage
 - Perfect for small lists of IDs
 - Survives app restarts
 - Not synced to cloud (what we want)
 
 ### Data Structure
+
 ```dart
 // Key format: "ignored_sms_{year}_{month}"
 // Example: "ignored_sms_2025_12" for December 2025
@@ -30,14 +34,17 @@ Allow users to ignore specific SMS messages during import, storing ignored messa
 ```
 
 ### Cleanup Strategy
+
 **Keep only current month + 1 previous month** (configurable)
 
 **Why?**
+
 - Current month: Needed for active imports
 - Previous month: Safety buffer for users whose budget crosses month boundaries or imports late
 - Anything older: Delete automatically
 
 **Storage Impact:**
+
 - Average SMS ID length: ~10 characters
 - 100 ignored messages/month: ~1KB
 - 2 months retained: ~2KB total
@@ -65,11 +72,11 @@ class SmsIgnoreService {
     final prefs = await SharedPreferences.getInstance();
     final key = _getKey(year, month);
     final jsonString = prefs.getString(key);
-    
+
     if (jsonString == null || jsonString.isEmpty) {
       return {};
     }
-    
+
     try {
       final List<dynamic> decoded = json.decode(jsonString);
       return decoded.cast<String>().toSet();
@@ -86,14 +93,14 @@ class SmsIgnoreService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _getKey(year, month);
-    
+
     final currentSet = await getIgnoredMessagesForMonth(
       year: year,
       month: month,
     );
-    
+
     currentSet.add(messageId);
-    
+
     final jsonString = json.encode(currentSet.toList());
     await prefs.setString(key, jsonString);
   }
@@ -128,13 +135,13 @@ class SmsIgnoreService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final allKeys = prefs.getKeys();
-    
+
     // Get cutoff date (keep current + previous months)
     final cutoffDate = DateTime(currentYear, currentMonth, 1)
         .subtract(Duration(days: 30 * (_monthsToKeep - 1)));
-    
+
     final keysToRemove = <String>[];
-    
+
     for (final key in allKeys) {
       if (key.startsWith(_keyPrefix)) {
         // Extract year and month from key
@@ -142,10 +149,10 @@ class SmsIgnoreService {
         if (parts.length == 2) {
           final year = int.tryParse(parts[0]);
           final month = int.tryParse(parts[1]);
-          
+
           if (year != null && month != null) {
             final keyDate = DateTime(year, month, 1);
-            
+
             // If this key is older than cutoff, mark for removal
             if (keyDate.isBefore(cutoffDate)) {
               keysToRemove.add(key);
@@ -154,7 +161,7 @@ class SmsIgnoreService {
         }
       }
     }
-    
+
     // Remove old keys
     for (final key in keysToRemove) {
       await prefs.remove(key);
@@ -165,7 +172,7 @@ class SmsIgnoreService {
   static Future<int> getTotalIgnoredCount() async {
     final prefs = await SharedPreferences.getInstance();
     final allKeys = prefs.getKeys();
-    
+
     int total = 0;
     for (final key in allKeys) {
       if (key.startsWith(_keyPrefix)) {
@@ -193,12 +200,13 @@ class SmsIgnoreService {
 ### Step 2: Update Dependencies
 
 Add to `pubspec.yaml`:
+
 ```yaml
 dependencies:
-  shared_preferences: ^2.2.2  # Check if already added
+  shared_preferences: ^2.2.2 # Check if already added
 ```
 
-### Step 3: Update _SmsTransaction Model
+### Step 3: Update \_SmsTransaction Model
 
 Update `lib/features/dashboard/dialogs/import_from_sms_dialog.dart`:
 
@@ -287,7 +295,7 @@ Future<void> _fetchSmsMessages() async {
     for (final message in messagesInPeriod) {
       final messageBody = message.body ?? '';
       final messageId = message.id?.toString() ?? '';  // Get SMS ID
-      
+
       if (messageBody.isEmpty || messageId.isEmpty) continue;
 
       // Skip ignored messages
@@ -335,7 +343,7 @@ Widget _buildTransactionItem(_SmsTransaction transaction, int index) {
             icon: Icon(Icons.category),
             onPressed: () => _pickCategory(index),
           ),
-          
+
           // ADD IGNORE BUTTON
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -471,6 +479,7 @@ ListTile(
 ## Cleanup Efficiency Analysis
 
 ### When Cleanup Happens
+
 1. **Every time you fetch SMS messages** - Runs automatically in background
 2. **No user action needed** - Completely automatic
 3. **Fast operation** - Only checks key names, no heavy processing
@@ -478,6 +487,7 @@ ListTile(
 ### Storage Growth Prevention
 
 **Example Timeline:**
+
 ```
 January 2025:   Keep Jan, Dec 2024           (2 months)
 February 2025:  Keep Feb, Jan                (2 months, auto-delete Dec)
@@ -485,20 +495,24 @@ March 2025:     Keep Mar, Feb                (2 months, auto-delete Jan)
 ```
 
 **Maximum storage:**
+
 - 2 months × 100 messages/month × 10 chars/ID = ~2KB
 - Never grows beyond this
 
 ### Edge Cases Handled
 
 1. **App not used for months**
+
    - Next time user imports: Cleanup runs, old data deleted
    - No manual intervention needed
 
 2. **Very heavy users (1000s of messages)**
+
    - Still only 2 months retained
    - ~20KB max (trivial)
 
 3. **Budget month crosses calendar months**
+
    - System uses budget period, not calendar month
    - Works correctly with any month start date
 
@@ -522,6 +536,7 @@ March 2025:     Keep Mar, Feb                (2 months, auto-delete Jan)
 ## Migration Notes
 
 **No migration needed!**
+
 - New feature, no existing data to migrate
 - Service creates data structure on first use
 - Backwards compatible
@@ -529,13 +544,16 @@ March 2025:     Keep Mar, Feb                (2 months, auto-delete Jan)
 ## Future Enhancements (Optional)
 
 1. **Show ignored messages section**
+
    - Collapsible section showing ignored messages
    - Allow un-ignoring from there
 
 2. **Import ignored messages stats**
+
    - "Skipped 5 ignored messages" in summary
 
 3. **Bulk ignore by pattern**
+
    - Ignore all from specific merchant
    - Ignore messages containing certain keywords
 
@@ -545,21 +563,25 @@ March 2025:     Keep Mar, Feb                (2 months, auto-delete Jan)
 ## Summary
 
 ✅ **Efficient Storage:**
+
 - Only 2 months of data kept
 - Automatic cleanup
 - ~2KB storage max
 
 ✅ **Simple UX:**
+
 - One button per message to ignore
 - One button in settings to clear
 - No complex UI needed
 
 ✅ **Local & Fast:**
+
 - SharedPreferences is instant
 - No network calls
 - No cloud sync needed
 
 ✅ **Maintenance-Free:**
+
 - Automatic cleanup
 - No manual intervention
 - No storage bloat

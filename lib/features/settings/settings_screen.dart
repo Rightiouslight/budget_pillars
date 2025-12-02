@@ -524,7 +524,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Clear Ignored Messages Button
                 FutureBuilder<int>(
                   future: SmsIgnoreService.getTotalIgnoredCount(),
@@ -541,52 +541,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.clear),
-                        onPressed: count > 0 ? () async {
-                          final confirmed = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Clear Ignored Messages?'),
-                              content: const Text(
-                                'This will clear the list of ignored SMS messages for the current budget month. '
-                                'These messages will appear in future imports.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Clear'),
-                                ),
-                              ],
-                            ),
-                          );
+                        onPressed: count > 0
+                            ? () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text(
+                                      'Clear Ignored Messages?',
+                                    ),
+                                    content: const Text(
+                                      'This will clear the list of ignored SMS messages for the current budget month. '
+                                      'These messages will appear in future imports.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text('Clear'),
+                                      ),
+                                    ],
+                                  ),
+                                );
 
-                          if (confirmed == true && context.mounted) {
-                            // Get current budget period
-                            final settingsAsync = ref.read(userSettingsProvider);
-                            final settings = settingsAsync.value;
-                            final monthStartDate = settings?.monthStartDate ?? 1;
-                            final budgetPeriod = app_date_utils.DateUtils.getBudgetPeriod(
-                              monthStartDate: monthStartDate,
-                            );
+                                if (confirmed == true && context.mounted) {
+                                  // Get current budget period
+                                  final settingsAsync = ref.read(
+                                    userSettingsProvider,
+                                  );
+                                  final settings = settingsAsync.value;
+                                  final monthStartDate =
+                                      settings?.monthStartDate ?? 1;
+                                  final budgetPeriod =
+                                      app_date_utils.DateUtils.getBudgetPeriod(
+                                        monthStartDate: monthStartDate,
+                                      );
 
-                            await SmsIgnoreService.clearCurrentMonth(
-                              year: budgetPeriod.start.year,
-                              month: budgetPeriod.start.month,
-                            );
+                                  await SmsIgnoreService.clearCurrentMonth(
+                                    year: budgetPeriod.start.year,
+                                    month: budgetPeriod.start.month,
+                                  );
 
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Ignored messages cleared'),
-                                ),
-                              );
-                              setState(() {}); // Refresh the count
-                            }
-                          }
-                        } : null,
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Ignored messages cleared',
+                                        ),
+                                      ),
+                                    );
+                                    setState(() {}); // Refresh the count
+                                  }
+                                }
+                              }
+                            : null,
                       ),
                     );
                   },

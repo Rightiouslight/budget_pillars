@@ -78,8 +78,11 @@ class SmsIgnoreService {
     final allKeys = prefs.getKeys();
 
     // Get cutoff date (keep current + previous months)
-    final cutoffDate = DateTime(currentYear, currentMonth, 1)
-        .subtract(Duration(days: 30 * (_monthsToKeep - 1)));
+    final cutoffDate = DateTime(
+      currentYear,
+      currentMonth,
+      1,
+    ).subtract(Duration(days: 30 * (_monthsToKeep - 1)));
 
     final keysToRemove = <String>[];
 

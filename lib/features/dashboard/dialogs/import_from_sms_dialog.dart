@@ -106,10 +106,11 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
       final budgetMonth = budgetPeriod.start.month;
 
       // Get ignored messages for current budget month
-      final ignoredMessageIds = await SmsIgnoreService.getIgnoredMessagesForMonth(
-        year: budgetYear,
-        month: budgetMonth,
-      );
+      final ignoredMessageIds =
+          await SmsIgnoreService.getIgnoredMessagesForMonth(
+            year: budgetYear,
+            month: budgetMonth,
+          );
 
       // Cleanup old ignored message data (runs in background)
       SmsIgnoreService.cleanupOldMonths(
@@ -127,7 +128,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
       // Determine date range based on toggle
       final now = DateTime.now();
       final DateTime startDate;
-      
+
       if (_showWholeMonth) {
         // Show all messages from current budget month
         startDate = budgetPeriod.start;
@@ -143,9 +144,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
       // Filter messages within the calculated date range
       final messagesInPeriod = allMessages.where((msg) {
         final msgDate = msg.date ?? DateTime.now();
-        return msgDate.isAfter(
-              startDate.subtract(const Duration(days: 1)),
-            ) &&
+        return msgDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
             msgDate.isBefore(budgetPeriod.end.add(const Duration(days: 1)));
       }).toList();
 
@@ -157,7 +156,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
           for (final message in messagesInPeriod) {
             final messageBody = message.body ?? '';
             final messageId = message.id?.toString() ?? '';
-            
+
             if (messageBody.isEmpty || messageId.isEmpty) continue;
 
             // Skip ignored messages
@@ -292,7 +291,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
 
   Future<void> _ignoreMessage(int index) async {
     final transaction = _transactions[index];
-    
+
     // Get current budget period
     final settingsAsync = ref.read(userSettingsProvider);
     final settings = settingsAsync.value;
@@ -317,7 +316,9 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Message ignored. It will not appear in future imports.'),
+          content: Text(
+            'Message ignored. It will not appear in future imports.',
+          ),
           duration: Duration(seconds: 3),
         ),
       );
@@ -627,7 +628,8 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                           _showWholeMonth = value;
                         });
                         // Re-fetch messages with new date range if we have transactions
-                        if (_transactions.isNotEmpty || _phoneNumberController.text.trim().isNotEmpty) {
+                        if (_transactions.isNotEmpty ||
+                            _phoneNumberController.text.trim().isNotEmpty) {
                           _fetchSmsMessages();
                         }
                       },
