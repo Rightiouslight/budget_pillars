@@ -11,6 +11,7 @@ import '../../../utils/date_utils.dart' as app_date_utils;
 import '../../../utils/sms_parser.dart';
 import '../../../core/widgets/category_picker_dialog.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../services/sms_ignore_service.dart';
 import '../dashboard_controller.dart';
 
 class ImportFromSmsDialog extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
   String? _errorMessage;
   bool _hasPermission = false;
   bool _showDuplicates = false; // Default to hidden
+  bool _showWholeMonth = false; // Default to last 3 days
 
   @override
   void initState() {
@@ -100,6 +102,21 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         monthStartDate: monthStartDate,
       );
 
+      final budgetYear = budgetPeriod.start.year;
+      final budgetMonth = budgetPeriod.start.month;
+
+      // Get ignored messages for current budget month
+      final ignoredMessageIds = await SmsIgnoreService.getIgnoredMessagesForMonth(
+        year: budgetYear,
+        month: budgetMonth,
+      );
+
+      // Cleanup old ignored message data (runs in background)
+      SmsIgnoreService.cleanupOldMonths(
+        currentYear: budgetYear,
+        currentMonth: budgetMonth,
+      );
+
       // Fetch SMS messages from inbox
       final allMessages = await smsQuery.querySms(
         address: _phoneNumberController.text.trim(),
@@ -107,11 +124,27 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         sort: true, // Sort by date descending
       );
 
-      // Filter messages within budget period
+      // Determine date range based on toggle
+      final now = DateTime.now();
+      final DateTime startDate;
+      
+      if (_showWholeMonth) {
+        // Show all messages from current budget month
+        startDate = budgetPeriod.start;
+      } else {
+        // Show last 3 days worth of messages within budget month
+        final threeDaysAgo = now.subtract(const Duration(days: 3));
+        // Use the later of: budget start or 3 days ago
+        startDate = threeDaysAgo.isAfter(budgetPeriod.start)
+            ? threeDaysAgo
+            : budgetPeriod.start;
+      }
+
+      // Filter messages within the calculated date range
       final messagesInPeriod = allMessages.where((msg) {
         final msgDate = msg.date ?? DateTime.now();
         return msgDate.isAfter(
-              budgetPeriod.start.subtract(const Duration(days: 1)),
+              startDate.subtract(const Duration(days: 1)),
             ) &&
             msgDate.isBefore(budgetPeriod.end.add(const Duration(days: 1)));
       }).toList();
@@ -123,7 +156,14 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         if (budget != null) {
           for (final message in messagesInPeriod) {
             final messageBody = message.body ?? '';
-            if (messageBody.isEmpty) continue;
+            final messageId = message.id?.toString() ?? '';
+            
+            if (messageBody.isEmpty || messageId.isEmpty) continue;
+
+            // Skip ignored messages
+            if (ignoredMessageIds.contains(messageId)) {
+              continue;
+            }
 
             // Check if message contains the currency code
             if (!messageBody.toUpperCase().contains(
@@ -187,6 +227,7 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
               transactions.add(
                 _SmsTransaction(
                   smsBody: messageBody,
+                  smsId: messageId,
                   date: transactionDate,
                   amount: -amount, // Negative for expenses
                   description: description,
@@ -247,6 +288,40 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
         categoryId: categoryId,
       );
     });
+  }
+
+  Future<void> _ignoreMessage(int index) async {
+    final transaction = _transactions[index];
+    
+    // Get current budget period
+    final settingsAsync = ref.read(userSettingsProvider);
+    final settings = settingsAsync.value;
+    final monthStartDate = settings?.monthStartDate ?? 1;
+    final budgetPeriod = app_date_utils.DateUtils.getBudgetPeriod(
+      monthStartDate: monthStartDate,
+    );
+
+    // Add to ignored list
+    await SmsIgnoreService.addIgnoredMessage(
+      messageId: transaction.smsId,
+      year: budgetPeriod.start.year,
+      month: budgetPeriod.start.month,
+    );
+
+    // Remove from current list
+    setState(() {
+      _transactions.removeAt(index);
+    });
+
+    // Show confirmation
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Message ignored. It will not appear in future imports.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   Future<void> _submitTransactions() async {
@@ -385,10 +460,24 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: _isLoading ? null : _fetchSmsMessages,
-                        icon: const Icon(Icons.search),
-                        label: const Text('Fetch'),
+                      SizedBox(
+                        width: 56, // Icon button width
+                        height: 56, // Icon button height
+                        child: FilledButton(
+                          onPressed: _isLoading ? null : _fetchSmsMessages,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Icon(Icons.search),
+                        ),
                       ),
                     ],
                   ),
@@ -471,13 +560,6 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                 ),
               ),
 
-            // Loading indicator
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(),
-              ),
-
             // Transactions list
             if (_transactions.isNotEmpty) ...[
               // Select all header
@@ -530,6 +612,39 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                 ),
               ),
 
+              // Date range toggle
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Switch(
+                      value: _showWholeMonth,
+                      onChanged: (value) {
+                        setState(() {
+                          _showWholeMonth = value;
+                        });
+                        // Re-fetch messages with new date range if we have transactions
+                        if (_transactions.isNotEmpty || _phoneNumberController.text.trim().isNotEmpty) {
+                          _fetchSmsMessages();
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _showWholeMonth
+                            ? 'Showing entire budget month'
+                            : 'Showing last 3 days only',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               // Transaction list
               Expanded(
                 child: ListView.builder(
@@ -541,21 +656,52 @@ class _ImportFromSmsDialogState extends ConsumerState<ImportFromSmsDialog> {
                         ? _transactions
                         : _transactions.where((t) => !t.isDuplicate).toList();
 
-                    return _TransactionItem(
-                      transaction: visibleTransactions[index],
-                      account: widget.account,
-                      onToggle: () {
-                        final actualIndex = _transactions.indexOf(
-                          visibleTransactions[index],
-                        );
-                        _toggleTransaction(actualIndex);
+                    final actualIndex = _transactions.indexOf(
+                      visibleTransactions[index],
+                    );
+
+                    return Dismissible(
+                      key: ValueKey(visibleTransactions[index].smsId),
+                      direction: DismissDirection.endToStart,
+                      confirmDismiss: (direction) async {
+                        // Ignore without confirmation
+                        return true;
                       },
-                      onCategoryChanged: (categoryId) {
-                        final actualIndex = _transactions.indexOf(
-                          visibleTransactions[index],
-                        );
-                        _updateCategory(actualIndex, categoryId);
+                      onDismissed: (direction) {
+                        _ignoreMessage(actualIndex);
                       },
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 16),
+                        color: Colors.red,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(Icons.block, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              'Ignore',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      child: _TransactionItem(
+                        transaction: visibleTransactions[index],
+                        account: widget.account,
+                        onToggle: () {
+                          _toggleTransaction(actualIndex);
+                        },
+                        onCategoryChanged: (categoryId) {
+                          _updateCategory(actualIndex, categoryId);
+                        },
+                        onIgnore: () {
+                          _ignoreMessage(actualIndex);
+                        },
+                      ),
                     );
                   },
                 ),
@@ -591,12 +737,14 @@ class _TransactionItem extends StatelessWidget {
   final Account account;
   final VoidCallback onToggle;
   final ValueChanged<String?> onCategoryChanged;
+  final VoidCallback onIgnore;
 
   const _TransactionItem({
     required this.transaction,
     required this.account,
     required this.onToggle,
     required this.onCategoryChanged,
+    required this.onIgnore,
   });
 
   @override
@@ -663,6 +811,26 @@ class _TransactionItem extends StatelessWidget {
                     color: Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 20),
+                  onSelected: (value) {
+                    if (value == 'ignore') {
+                      onIgnore();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'ignore',
+                      child: Row(
+                        children: [
+                          Icon(Icons.block, size: 18),
+                          SizedBox(width: 8),
+                          Text('Ignore message'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -827,6 +995,7 @@ class _TransactionItem extends StatelessWidget {
 
 class _SmsTransaction {
   final String smsBody;
+  final String smsId; // Unique message ID
   final DateTime date;
   final double amount;
   final String description;
@@ -836,6 +1005,7 @@ class _SmsTransaction {
 
   _SmsTransaction({
     required this.smsBody,
+    required this.smsId,
     required this.date,
     required this.amount,
     required this.description,
@@ -846,6 +1016,7 @@ class _SmsTransaction {
 
   _SmsTransaction copyWith({
     String? smsBody,
+    String? smsId,
     DateTime? date,
     double? amount,
     String? description,
@@ -855,6 +1026,7 @@ class _SmsTransaction {
   }) {
     return _SmsTransaction(
       smsBody: smsBody ?? this.smsBody,
+      smsId: smsId ?? this.smsId,
       date: date ?? this.date,
       amount: amount ?? this.amount,
       description: description ?? this.description,

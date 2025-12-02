@@ -64,6 +64,7 @@ dependencies:
   # SMS reading (for import from text)
   flutter_sms_inbox: ^1.0.2
   permission_handler: ^11.3.1
+  shared_preferences: ^2.2.2
 
   # Charts
   fl_chart: ^0.69.0

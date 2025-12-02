@@ -7,6 +7,8 @@ import '../../data/models/currency.dart';
 import '../../data/models/theme.dart' as app_theme;
 import '../../data/models/view_preferences.dart';
 import '../../data/firebase/auth_repository.dart';
+import '../../services/sms_ignore_service.dart';
+import '../../utils/date_utils.dart' as app_date_utils;
 import '../dashboard/dashboard_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -520,6 +522,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Clear Ignored Messages Button
+                FutureBuilder<int>(
+                  future: SmsIgnoreService.getTotalIgnoredCount(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data ?? 0;
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.delete_sweep),
+                      title: const Text('Clear Ignored Messages'),
+                      subtitle: Text(
+                        count > 0
+                            ? '$count message${count == 1 ? '' : 's'} currently ignored'
+                            : 'No ignored messages',
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: count > 0 ? () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Clear Ignored Messages?'),
+                              content: const Text(
+                                'This will clear the list of ignored SMS messages for the current budget month. '
+                                'These messages will appear in future imports.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Clear'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirmed == true && context.mounted) {
+                            // Get current budget period
+                            final settingsAsync = ref.read(userSettingsProvider);
+                            final settings = settingsAsync.value;
+                            final monthStartDate = settings?.monthStartDate ?? 1;
+                            final budgetPeriod = app_date_utils.DateUtils.getBudgetPeriod(
+                              monthStartDate: monthStartDate,
+                            );
+
+                            await SmsIgnoreService.clearCurrentMonth(
+                              year: budgetPeriod.start.year,
+                              month: budgetPeriod.start.month,
+                            );
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Ignored messages cleared'),
+                                ),
+                              );
+                              setState(() {}); // Refresh the count
+                            }
+                          }
+                        } : null,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
 
