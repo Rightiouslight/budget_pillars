@@ -45,7 +45,21 @@ app.*.map.json
 /android/app/release
 
 # Firebase flavor-specific configs (should be managed separately per environment)
+android/app/google-services*.json
+!android/app/google-services*.json.template
 android/app/src/dev/google-services.json
 android/app/src/prod/google-services.json
 lib/firebase_options_dev.dart
 lib/firebase_options_prod.dart
+!lib/firebase_options*.dart.template
+
+# Keystore files (NEVER COMMIT)
+*.jks
+*.keystore
+android/key.properties
+
+# Backup directory (contains sensitive configs)
+.backup/
+
+# Local configuration
+android/local.properties

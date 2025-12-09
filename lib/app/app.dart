@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/firebase/auth_repository.dart';
+import '../features/update/providers/version_check_provider.dart';
 import '../providers/profile_picture_cache_provider.dart';
 import '../providers/theme_provider.dart';
 import '../config/flavor_config.dart';
@@ -26,13 +27,15 @@ class BudgetPillarsApp extends ConsumerWidget {
       }
     });
 
-    return MaterialApp.router(
-      title: FlavorConfig.instance.displayName,
-      debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: useBlackTheme ? blackTheme : darkTheme,
-      themeMode: themeMode,
-      routerConfig: router,
+    return VersionCheckObserver(
+      child: MaterialApp.router(
+        title: FlavorConfig.instance.displayName,
+        debugShowCheckedModeBanner: false,
+        theme: lightTheme,
+        darkTheme: useBlackTheme ? blackTheme : darkTheme,
+        themeMode: themeMode,
+        routerConfig: router,
+      ),
     );
   }
 }

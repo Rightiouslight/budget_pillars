@@ -55,6 +55,9 @@ dependencies:
   # Utils
   intl: ^0.19.0
   http: ^1.2.2
+  package_info_plus: ^8.0.0 # Get current app version
+  url_launcher: ^6.3.0 # Launch browser for APK download
+  pub_semver: ^2.1.4 # Version comparison
 
   # File handling (for import/export)
   file_picker: ^8.1.4
