@@ -49,9 +49,14 @@ android/app/google-services*.json
 !android/app/google-services*.json.template
 android/app/src/dev/google-services.json
 android/app/src/prod/google-services.json
+
+# Firebase options files (contain API keys - NEVER COMMIT)
+lib/firebase_options.dart
 lib/firebase_options_dev.dart
 lib/firebase_options_prod.dart
+lib/config/firebase_options_prod.dart
 !lib/firebase_options*.dart.template
+!lib/config/firebase_options*.dart.template
 
 # Keystore files (NEVER COMMIT)
 *.jks

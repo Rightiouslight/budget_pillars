@@ -4,8 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app/app.dart';
 import 'config/flavor_config.dart';
-import 'firebase_options_dev.dart' as firebase_dev;
-import 'firebase_options_prod.dart' as firebase_prod;
+import 'firebase_options.dart' as firebase_dev;
+import 'config/firebase_options_prod.dart' as firebase_prod;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,11 +13,11 @@ void main() async {
   // Initialize Firebase with flavor-specific options
   if (FlavorConfig.isDevelopment) {
     await Firebase.initializeApp(
-      options: firebase_dev.DefaultFirebaseOptions.currentPlatform,
+      options: firebase_dev.DevelopmentFirebaseOptions.currentPlatform,
     );
   } else {
     await Firebase.initializeApp(
-      options: firebase_prod.DefaultFirebaseOptions.currentPlatform,
+      options: firebase_prod.ProductionFirebaseOptions.currentPlatform,
     );
   }
 
