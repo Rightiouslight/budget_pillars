@@ -161,7 +161,7 @@ if (!$SkipRelease) {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "  GitHub Release created successfully!" -ForegroundColor Green
-        $releaseUrl = "https://github.com/YOUR_GITHUB_USERNAME/budget_pillars/releases/tag/$tagName"
+        $releaseUrl = "https://github.com/Rightiouslight/budget_pillars/releases/tag/$tagName"
         Write-Host "  Release URL: $releaseUrl" -ForegroundColor Cyan
     }
     else {
@@ -190,5 +190,5 @@ Write-Host "2. They can download the APK from GitHub Releases"
 Write-Host "3. Monitor download statistics in GitHub Releases"
 Write-Host ""
 Write-Host "Download URL:" -ForegroundColor Yellow
-Write-Host "https://github.com/YOUR_GITHUB_USERNAME/budget_pillars/releases/download/$tagName/$apkFileName"
+Write-Host "https://github.com/Rightiouslight/budget_pillars/releases/download/$tagName/$apkFileName"
 Write-Host ""
