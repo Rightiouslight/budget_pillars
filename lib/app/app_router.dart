@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../data/firebase/auth_repository.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/landing/landing_page.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/import_export/import_export_screen.dart';
@@ -14,24 +15,43 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: '/auth',
+    initialLocation: '/',
     redirect: (context, state) {
       final isAuthenticated = authState.value != null;
-      final isAuthRoute = state.matchedLocation == '/auth';
+      final isAuthRoute =
+          state.matchedLocation == '/sign-in' ||
+          state.matchedLocation == '/auth';
+      final isLandingRoute = state.matchedLocation == '/';
 
-      // If not authenticated and not on auth route, redirect to auth
-      if (!isAuthenticated && !isAuthRoute) {
-        return '/auth';
+      // If authenticated, allow access to all routes except landing and auth
+      if (isAuthenticated) {
+        if (isLandingRoute || isAuthRoute) {
+          return '/dashboard';
+        }
+        return null; // Allow access to other routes
       }
 
-      // If authenticated and on auth route, redirect to dashboard
-      if (isAuthenticated && isAuthRoute) {
-        return '/dashboard';
+      // If not authenticated, only allow landing page and auth routes
+      if (!isAuthenticated) {
+        if (isLandingRoute || isAuthRoute) {
+          return null; // Allow access to landing and auth
+        }
+        return '/'; // Redirect to landing page
       }
 
-      return null; // No redirect needed
+      return null;
     },
     routes: [
+      GoRoute(
+        path: '/',
+        name: 'landing',
+        builder: (context, state) => const LandingPage(),
+      ),
+      GoRoute(
+        path: '/sign-in',
+        name: 'sign-in',
+        builder: (context, state) => const AuthScreen(),
+      ),
       GoRoute(
         path: '/auth',
         name: 'auth',

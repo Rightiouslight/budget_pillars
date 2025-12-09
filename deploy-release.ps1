@@ -65,11 +65,12 @@ if (!$SkipBuild) {
 if (!$SkipBuild) {
     Write-Host "Step 2: Building production APK..." -ForegroundColor Yellow
     Write-Host "  This may take a few minutes..." -ForegroundColor Gray
+    Write-Host "  (Using code shrinking and obfuscation for smaller size)" -ForegroundColor Gray
     Write-Host ""
     
     flutter clean
     flutter pub get
-    flutter build apk --flavor prod -t lib/main_prod.dart --release
+    flutter build apk --flavor prod -t lib/main_prod.dart --release --obfuscate --split-debug-info=build/debug-info
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: APK build failed" -ForegroundColor Red

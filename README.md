@@ -135,6 +135,8 @@ flutter build apk --flavor prod -t lib/main_prod.dart --release
 flutter build appbundle --flavor prod -t lib/main_prod.dart --release
 ```
 
+> **Note:** Production builds use code shrinking, resource shrinking, and obfuscation for smaller app size and improved security. See `SIZE_OPTIMIZATION_SUMMARY.md` for details.
+
 **Output locations:**
 
 - APK: `build/app/outputs/flutter-apk/app-<flavor>-release.apk`
