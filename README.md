@@ -9,6 +9,7 @@ A Flutter-based budget management application with support for multiple environm
 - [Flutter Flavors](#flutter-flavors)
 - [Running the App](#running-the-app)
 - [Building for Release](#building-for-release)
+- [Deployment](#deployment)
 - [Development Workflow](#development-workflow)
 - [Firebase Configuration](#firebase-configuration)
 - [Project Structure](#project-structure)
@@ -154,6 +155,62 @@ flutter build ios --flavor prod -t lib/main_prod.dart --release
 flutter build web -t lib/main_dev.dart   # Development
 flutter build web -t lib/main_prod.dart  # Production
 ```
+
+## Deployment
+
+Budget Pillars uses automated deployment scripts for easy production releases.
+
+### Quick Deployment
+
+**Deploy both Android and Web:**
+
+```powershell
+.\deploy-all.ps1 -Version "1.0.2" -ReleaseNotes "Bug fixes and improvements"
+```
+
+**Deploy Android only:**
+
+```powershell
+.\deploy-android.ps1 -Version "1.0.2" -ReleaseNotes "Hotfix for crash"
+```
+
+**Deploy Web only:**
+
+```powershell
+.\deploy-web.ps1
+```
+
+### Deployment Scripts
+
+| Script               | Deploys To       | Purpose                 |
+| -------------------- | ---------------- | ----------------------- |
+| `deploy-all.ps1`     | Android + Web    | Full production release |
+| `deploy-android.ps1` | GitHub Releases  | Android APK only        |
+| `deploy-web.ps1`     | Firebase Hosting | Web app only            |
+
+### What Happens During Deployment
+
+**Android Deployment:**
+
+1. Updates version in `pubspec.yaml`
+2. Builds optimized APK (code shrinking + obfuscation)
+3. Creates Git tag (`v1.0.2`)
+4. Creates GitHub Release with APK attached
+5. APK available at: `https://github.com/Rightiouslight/budget_pillars/releases`
+
+**Web Deployment:**
+
+1. Builds production web app
+2. Deploys to Firebase Hosting
+3. Available at: `https://pocketflow-tw4kf.web.app`
+
+### Prerequisites for Deployment
+
+- GitHub CLI: `winget install GitHub.cli`
+- Firebase CLI: `npm install -g firebase-tools`
+- Authentication: `gh auth login` and `firebase login`
+
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions and [DEPLOY_QUICK_REF.md](DEPLOY_QUICK_REF.md) for quick reference.
 
 ## Development Workflow
 
