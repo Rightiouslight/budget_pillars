@@ -3,8 +3,8 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "pocketflow-tw4kf",
-          "appId": "1:1065513142302:android:9a98b4fa2e44ef3956860f",
+          "projectId": "budgetpillarsdev",
+          "appId": "1:487033381743:android:ff373fc93b870cea56fe9a",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -26,6 +26,20 @@
             "web": "1:1065513142302:web:773525822d7436e856860f",
             "windows": "1:1065513142302:web:b25b49732d7fda0756860f"
           }
+        },
+        "lib/firebase_options_dev.dart": {
+          "projectId": "budgetpillarsdev",
+          "configurations": {
+            "android": "1:487033381743:android:ff373fc93b870cea56fe9a",
+            "web": "1:487033381743:web:715a4f67cc76c77f56fe9a"
+          }
+        },
+        "lib/firebase_options_prod.dart": {
+          "projectId": "pocketflow-tw4kf",
+          "configurations": {
+            "android": "1:1065513142302:android:ee4cf02da0cff1d156860f",
+            "web": "1:1065513142302:web:773525822d7436e856860f"
+          }
         }
       }
     }
@@ -33,21 +47,11 @@
   "hosting": {
     "public": "build/web",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
     "headers": [
       {
         "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=31536000"
-          }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "max-age=31536000" }]
       }
     ]
   }

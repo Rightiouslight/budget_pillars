@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/firebase/auth_repository.dart';
 import '../providers/profile_picture_cache_provider.dart';
 import '../providers/theme_provider.dart';
-import '../config/environment.dart';
+import '../config/flavor_config.dart';
 import 'app_router.dart';
 
 class BudgetPillarsApp extends ConsumerWidget {
@@ -27,7 +27,7 @@ class BudgetPillarsApp extends ConsumerWidget {
     });
 
     return MaterialApp.router(
-      title: EnvironmentConfig.appName,
+      title: FlavorConfig.instance.displayName,
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: useBlackTheme ? blackTheme : darkTheme,

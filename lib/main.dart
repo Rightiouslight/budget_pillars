@@ -3,27 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app/app.dart';
-import 'config/firebase_config.dart';
-import 'config/environment.dart';
+import 'config/flavor_config.dart';
+import 'firebase_options_dev.dart' as firebase_dev;
+import 'firebase_options_prod.dart' as firebase_prod;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase with environment-specific options
-  await Firebase.initializeApp(options: AppFirebaseOptions.currentPlatform);
+  // Initialize Firebase with flavor-specific options
+  if (FlavorConfig.isDevelopment) {
+    await Firebase.initializeApp(
+      options: firebase_dev.DefaultFirebaseOptions.currentPlatform,
+    );
+  } else {
+    await Firebase.initializeApp(
+      options: firebase_prod.DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   // Configure Firestore emulator if enabled
-  if (EnvironmentConfig.useFirebaseEmulator) {
+  if (FlavorConfig.instance.values.useFirebaseEmulator) {
     FirebaseFirestore.instance.useFirestoreEmulator(
-      EnvironmentConfig.firestoreEmulatorHost,
-      EnvironmentConfig.firestoreEmulatorPort,
+      FlavorConfig.instance.values.firestoreEmulatorHost,
+      FlavorConfig.instance.values.firestoreEmulatorPort,
     );
 
-    if (EnvironmentConfig.enableDebugLogging) {
+    if (FlavorConfig.instance.values.enableLogging) {
       debugPrint(
         '🔧 Using Firestore Emulator: '
-        '${EnvironmentConfig.firestoreEmulatorHost}:'
-        '${EnvironmentConfig.firestoreEmulatorPort}',
+        '${FlavorConfig.instance.values.firestoreEmulatorHost}:'
+        '${FlavorConfig.instance.values.firestoreEmulatorPort}',
       );
     }
   }
@@ -34,10 +43,12 @@ void main() async {
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
 
-  if (EnvironmentConfig.enableDebugLogging) {
-    debugPrint('🚀 Starting ${EnvironmentConfig.appName}');
-    debugPrint('📦 Environment: ${EnvironmentConfig.current.name}');
-    debugPrint('🔥 Firebase Project: ${EnvironmentConfig.firebaseProjectId}');
+  if (FlavorConfig.instance.values.enableLogging) {
+    debugPrint('🚀 Starting ${FlavorConfig.instance.displayName}');
+    debugPrint('📦 Environment: ${FlavorConfig.instance.name}');
+    debugPrint(
+      '🔥 Firebase Project: ${FlavorConfig.instance.values.firebaseProjectId}',
+    );
   }
 
   runApp(const ProviderScope(child: BudgetPillarsApp()));

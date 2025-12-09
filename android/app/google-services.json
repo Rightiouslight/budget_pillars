@@ -1,42 +1,113 @@
 {
   "project_info": {
-    "project_number": "1065513142302",
-    "project_id": "pocketflow-tw4kf",
-    "storage_bucket": "pocketflow-tw4kf.firebasestorage.app"
+    "project_number": "487033381743",
+    "project_id": "budgetpillarsdev",
+    "storage_bucket": "budgetpillarsdev.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1065513142302:android:ee4cf02da0cff1d156860f",
+        "mobilesdk_app_id": "1:487033381743:android:68742cdbf71a1c0556fe9a",
         "android_client_info": {
           "package_name": "budgetpillars.lojinnovation.com"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1065513142302-nfe23i2u04g15ujdjnudbeacsniitecc.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "budgetpillars.lojinnovation.com",
-            "certificate_hash": "b5cf06b91197ba390a78322e120540a066d74310"
-          }
-        },
-        {
-          "client_id": "1065513142302-gbpq61qnbuu4i4hmmehojbcqkuau4q1n.apps.googleusercontent.com",
+          "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDgU4fkN8RExycQhsR5MbZIDNgcHdWDQ1Y"
+          "current_key": "AIzaSyCSSx80_KO-BBxzT7PsFnIY2tJA2Ru6g8I"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1065513142302-gbpq61qnbuu4i4hmmehojbcqkuau4q1n.apps.googleusercontent.com",
+              "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "budgetpillars.lojinnovation.com.easyBudgetPillars"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487033381743:android:ff373fc93b870cea56fe9a",
+        "android_client_info": {
+          "package_name": "budgetpillars.lojinnovation.com.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSSx80_KO-BBxzT7PsFnIY2tJA2Ru6g8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "budgetpillars.lojinnovation.com.easyBudgetPillars"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487033381743:android:084b0794211a73c456fe9a",
+        "android_client_info": {
+          "package_name": "budgetpillars.lojinnovation.com.easy_budget_pillars"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSSx80_KO-BBxzT7PsFnIY2tJA2Ru6g8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "487033381743-kdg1p88eu0nm2koue6l10q18ki2l5dmg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "487033381743-n2v8fqp46i4qa7vtq8cocnlu0r9a982k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "budgetpillars.lojinnovation.com.easyBudgetPillars"
+              }
             }
           ]
         }
