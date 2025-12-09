@@ -296,6 +296,7 @@ class _BudgetHeaderState extends ConsumerState<BudgetHeader> {
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
+                  backgroundColor: Colors.transparent,
                   isScrollControlled: true,
                   builder: (context) => const NotificationsSheet(),
                 );

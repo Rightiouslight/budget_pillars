@@ -47,10 +47,10 @@ This project uses Flutter flavors to support multiple environments (dev and prod
 
 ### Available Flavors
 
-| Flavor   | Firebase Project | Package Name                       | App Name           | Logging  | Purpose                 |
-| -------- | ---------------- | ---------------------------------- | ------------------ | -------- | ----------------------- |
+| Flavor   | Firebase Project | Package Name                        | App Name           | Logging  | Purpose                 |
+| -------- | ---------------- | ----------------------------------- | ------------------ | -------- | ----------------------- |
 | **dev**  | budgetpillarsdev | budgetpillars.lojinnovation.com.dev | Budget Pillars DEV | Enabled  | Development and testing |
-| **prod** | pocketflow-tw4kf | budgetpillars.lojinnovation.com    | Budget Pillars     | Disabled | Production releases     |
+| **prod** | pocketflow-tw4kf | budgetpillars.lojinnovation.com     | Budget Pillars     | Disabled | Production releases     |
 
 ### Benefits of Flavors
 
