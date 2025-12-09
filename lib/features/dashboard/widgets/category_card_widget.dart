@@ -434,7 +434,7 @@ class CategoryCardWidget extends ConsumerWidget {
                             _showEditDialog(context);
                             break;
                           case 'delete':
-                            _showDeleteConfirmation(context);
+                            _showDeleteConfirmation(context, ref);
                             break;
                         }
                       },
@@ -576,7 +576,7 @@ class CategoryCardWidget extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -588,9 +588,11 @@ class CategoryCardWidget extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              // TODO: Implement delete functionality
-              Navigator.of(context).pop();
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close confirmation dialog
+
+              // Attempt to delete the category
+              await _deleteCategory(context, ref);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
@@ -598,6 +600,25 @@ class CategoryCardWidget extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _deleteCategory(BuildContext context, WidgetRef ref) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Call deleteCategory
+    await ref
+        .read(dashboardControllerProvider.notifier)
+        .deleteCategory(accountId: accountId, categoryId: id);
+
+    // Success - show snackbar
+    if (context.mounted) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Category "$name" deleted'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void _showAddExpenseDialog(BuildContext context) {

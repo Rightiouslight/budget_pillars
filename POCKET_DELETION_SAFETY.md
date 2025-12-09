@@ -7,21 +7,27 @@ If a user sets up a category with automatic recurring payments pointing to a des
 ### Critical Scenarios
 
 #### 1. Cross-Month Scenario
+
 The most dangerous scenario occurs when:
+
 1. **Month 1**: User has a recurring income set to deposit into "Savings Pocket"
 2. **Month 1**: Income processes successfully on day 1
-3. **Month 1 (later)**: User deletes "Savings Pocket" 
+3. **Month 1 (later)**: User deletes "Savings Pocket"
 4. **Month 2**: New budget created from template - recurring income still exists but pocket is gone
 5. **Month 2 (day 1)**: App tries to process recurring income → **CRASH** ❌
 
 #### 2. Same-Month, Before-Due-Date Scenario
+
 Another critical scenario:
+
 1. **Dec 1st**: Budget created with recurring income due on the 10th → "Freelance Pocket"
 2. **Dec 5th**: User deletes "Freelance Pocket" (reorganizing budget)
 3. **Dec 10th**: App tries to process recurring income → **CRASH** ❌
 
 #### 3. Sinking Fund Scenario
+
 Also applies to recurring categories:
+
 1. User sets up "Vacation Fund" category (sinking fund) → transfers to "Vacation Savings Pocket"
 2. User deletes "Vacation Savings Pocket"
 3. When category due date arrives → **CRASH** ❌
@@ -173,7 +179,7 @@ Created tests for orphaned reference scenarios (7 tests, all passing ✅):
 # Run validation tests
 flutter test test/pocket_deletion_validation_test.dart
 
-# Run orphaned reference tests  
+# Run orphaned reference tests
 flutter test test/orphaned_reference_test.dart
 
 # Run all unit tests

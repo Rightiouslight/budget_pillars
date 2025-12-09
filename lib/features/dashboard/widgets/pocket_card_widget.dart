@@ -4,6 +4,7 @@ import '../dialogs/add_pocket_dialog.dart';
 import '../dialogs/add_expense_dialog.dart';
 import '../dialogs/transfer_funds_dialog.dart';
 import '../dialogs/card_details_dialog.dart';
+import '../dashboard_controller.dart';
 import '../providers/transfer_mode_provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/card.dart' as card_model;
@@ -434,7 +435,7 @@ class PocketCardWidget extends ConsumerWidget {
                           _showEditDialog(context);
                           break;
                         case 'delete':
-                          _showDeleteConfirmation(context);
+                          _showDeleteConfirmation(context, ref);
                           break;
                       }
                     },
@@ -525,7 +526,7 @@ class PocketCardWidget extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     if (isDefault) return;
 
     showDialog(
@@ -539,9 +540,11 @@ class PocketCardWidget extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              // TODO: Implement delete functionality
-              Navigator.of(context).pop();
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close confirmation dialog
+
+              // Attempt to delete the pocket
+              await _deletePocket(context, ref);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
@@ -549,6 +552,40 @@ class PocketCardWidget extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _deletePocket(BuildContext context, WidgetRef ref) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Call deletePocket which returns error message if there are references
+    final errorMessage = await ref
+        .read(dashboardControllerProvider.notifier)
+        .deletePocket(accountId: accountId, pocketId: id);
+
+    if (errorMessage != null && context.mounted) {
+      // Show error dialog with list of linked items
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Cannot Delete Pocket'),
+          content: SingleChildScrollView(child: Text(errorMessage)),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Success - show snackbar
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Pocket "$name" deleted'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void _showAddExpenseDialog(BuildContext context) {
