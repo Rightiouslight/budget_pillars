@@ -492,15 +492,80 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
   }
 
   /// Delete a pocket
-  Future<void> deletePocket({
+  ///
+  /// Returns an error message if the pocket is referenced by any categories or recurring incomes.
+  /// Returns null if deletion was successful.
+  Future<String?> deletePocket({
     required String accountId,
     required String pocketId,
   }) async {
+    final budget = await _getCurrentBudget();
+    if (budget == null) return 'Budget not found';
+
+    // Check if any categories reference this pocket
+    final linkedCategories = <String>[];
+    for (final account in budget.accounts) {
+      for (final card in account.cards) {
+        card.when(
+          pocket: (_, __, ___, ____, _____) {},
+          category:
+              (
+                id,
+                name,
+                _,
+                __,
+                ___,
+                ____,
+                _____,
+                ______,
+                destPocketId,
+                destAccountId,
+              ) {
+                if (destPocketId == pocketId && destAccountId == accountId) {
+                  linkedCategories.add(name);
+                }
+              },
+        );
+      }
+    }
+
+    // Check if any recurring incomes reference this pocket
+    final linkedIncomes = <String>[];
+    for (final income in budget.recurringIncomes) {
+      if (income.pocketId == pocketId && income.accountId == accountId) {
+        linkedIncomes.add(income.description ?? 'Unnamed Income');
+      }
+    }
+
+    // If there are references, return error message
+    if (linkedCategories.isNotEmpty || linkedIncomes.isNotEmpty) {
+      final buffer = StringBuffer();
+      buffer.write('Cannot delete this pocket. It is linked to:\n\n');
+
+      if (linkedCategories.isNotEmpty) {
+        buffer.write('Categories:\n');
+        for (final category in linkedCategories) {
+          buffer.write('  • $category\n');
+        }
+      }
+
+      if (linkedIncomes.isNotEmpty) {
+        if (linkedCategories.isNotEmpty) buffer.write('\n');
+        buffer.write('Recurring Incomes:\n');
+        for (final income in linkedIncomes) {
+          buffer.write('  • $income\n');
+        }
+      }
+
+      buffer.write(
+        '\nPlease unlink or choose a different pocket for these items before deleting.',
+      );
+      return buffer.toString();
+    }
+
+    // No references found, proceed with deletion
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final budget = await _getCurrentBudget();
-      if (budget == null) return;
-
       final updatedAccounts = budget.accounts.map((account) {
         if (account.id == accountId) {
           final updatedCards = account.cards
@@ -531,6 +596,8 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       final updatedBudget = budget.copyWith(accounts: updatedAccounts);
       await _repository.saveBudget(_userId, _monthKey, updatedBudget);
     });
+
+    return null; // Success
   }
 
   // ===== CATEGORY OPERATIONS =====

@@ -126,14 +126,33 @@ class _AddPocketDialogState extends ConsumerState<AddPocketDialog> {
     );
 
     if (confirmed == true && mounted) {
-      await ref
+      final errorMessage = await ref
           .read(dashboardControllerProvider.notifier)
           .deletePocket(
             accountId: widget.accountId,
             pocketId: widget.pocketId!,
           );
+
       if (mounted) {
-        Navigator.of(context).pop();
+        if (errorMessage != null) {
+          // Show error dialog with list of linked items
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Cannot Delete Pocket'),
+              content: SingleChildScrollView(child: Text(errorMessage)),
+              actions: [
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Success - close the dialog
+          Navigator.of(context).pop();
+        }
       }
     }
   }

@@ -134,8 +134,9 @@ class AutomaticTransactionProcessor {
         notifications.add(result.notification);
         incomesProcessed++;
       } catch (e) {
-        final errorMsg =
-            'Failed to process ${income.description ?? "income"}: $e';
+        final errorMsg = e.toString().contains('Pocket not found')
+            ? '${income.description ?? "Income"}: Destination pocket was deleted. Please edit this recurring income and select a valid pocket.'
+            : 'Failed to process ${income.description ?? "income"}: $e';
         errors.add(errorMsg);
         notifications.add(
           BudgetNotification(
@@ -176,11 +177,15 @@ class AutomaticTransactionProcessor {
     // Find default pocket
     final defaultPocket = account.cards.whereType<PocketCard>().firstWhere(
       (p) => p.id == account.defaultPocketId,
+      orElse: () => throw Exception(
+        'Default pocket not found for account ${account.name}',
+      ),
     );
 
     // Check if sinking fund
     if (category.destinationPocketId != null &&
         category.destinationAccountId != null) {
+      // Validate destination exists before processing
       return _processSinkingFundTransfer(
         budget: budget,
         account: account,
@@ -250,12 +255,20 @@ class AutomaticTransactionProcessor {
     required PocketCard defaultPocket,
     required double amount,
   }) {
-    // Find destination
+    // Find destination account
     final destAccount = budget.accounts.firstWhere(
       (a) => a.id == category.destinationAccountId,
+      orElse: () => throw Exception(
+        'Destination account not found for category ${category.name}',
+      ),
     );
+
+    // Find destination pocket with error handling
     final destPocket = destAccount.cards.whereType<PocketCard>().firstWhere(
       (p) => p.id == category.destinationPocketId,
+      orElse: () => throw Exception(
+        'Destination pocket not found for category ${category.name}',
+      ),
     );
 
     // Update source account cards
@@ -330,10 +343,19 @@ class AutomaticTransactionProcessor {
     required MonthlyBudget budget,
     required RecurringIncome income,
   }) {
-    // Find account and pocket
-    final account = budget.accounts.firstWhere((a) => a.id == income.accountId);
+    // Find account and pocket with error handling
+    final account = budget.accounts.firstWhere(
+      (a) => a.id == income.accountId,
+      orElse: () => throw Exception(
+        'Account not found for recurring income ${income.description}',
+      ),
+    );
+
     final pocket = account.cards.whereType<PocketCard>().firstWhere(
       (p) => p.id == income.pocketId,
+      orElse: () => throw Exception(
+        'Pocket not found for recurring income ${income.description}',
+      ),
     );
 
     // Update pocket
