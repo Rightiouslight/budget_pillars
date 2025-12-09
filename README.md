@@ -112,6 +112,9 @@ flutter run --flavor dev -t lib/main_dev.dart
 
 # Production
 flutter run --flavor prod -t lib/main_prod.dart
+
+# Production Release mode
+flutter run --flavor prod -t lib/main_prod.dart --release
 ```
 
 ## Building for Release
