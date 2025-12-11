@@ -35,6 +35,8 @@ class AccountBoardWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.watch(activeBudgetProvider);
+
     // Calculate account summary
     double totalInPockets = 0;
     double currentBudget = 0;
@@ -65,7 +67,29 @@ class AccountBoardWidget extends ConsumerWidget {
       );
     }
 
-    final totalFunds = totalInPockets;
+    // Calculate pending recurring incomes for this account
+    double pendingRecurringIncomes = 0;
+    int pendingCount = 0;
+    budgetAsync.whenData((budget) {
+      if (budget != null) {
+        for (final income in budget.recurringIncomes) {
+          // Check if this income belongs to this account
+          if (income.accountId == account.id) {
+            // Check if it hasn't been processed yet this month
+            final isProcessed =
+                budget.processedRecurringIncomes[income.id] ?? false;
+            if (!isProcessed) {
+              pendingRecurringIncomes += income.amount;
+              pendingCount++;
+            }
+          }
+        }
+      }
+    });
+
+    // Total funds includes pending recurring incomes
+    final totalFunds = totalInPockets + pendingRecurringIncomes;
+    final hasPendingIncomes = pendingCount > 0;
     final availableToBudget = totalFunds - currentBudget;
 
     return Column(
@@ -322,10 +346,33 @@ class AccountBoardWidget extends ConsumerWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Total Funds',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Total Funds',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    if (hasPendingIncomes) ...[
+                                      const SizedBox(width: 4),
+                                      Tooltip(
+                                        message:
+                                            'Includes \$${pendingRecurringIncomes.toStringAsFixed(2)} from $pendingCount pending recurring income${pendingCount == 1 ? '' : 's'}',
+                                        child: Icon(
+                                          Icons.info_outline,
+                                          size: 14,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                                 Text(
                                   'Available',
